@@ -1,0 +1,1 @@
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=drone.platform.components.dal.common.DalCommonAutoConfigure
