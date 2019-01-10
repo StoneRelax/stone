@@ -71,6 +71,8 @@ public class StringUtils {
     return src.substring(0, src.indexOf(ch));
   }
 
+
+
   /**
    * Get Object.toString, if null return ""  else return object.toString()
    *
@@ -716,6 +718,8 @@ public class StringUtils {
     input.close();
     return new String(byt, "utf-8");
   }
+
+
 }
 
 

@@ -50,4 +50,25 @@ public class CGLibUtils {
   public static Class getUserClass(Object obj) {
     return ClassUtils.getUserClass(obj);
   }
+  public static Object buildProxyClass(
+      Class clazz,
+      MethodInterceptor methodInterceptor,
+      CallbackFilter callBackFilter)
+      throws IllegalAccessException, InstantiationException {
+    String key =
+        clazz.getName() + "." + methodInterceptor.getClass().getName() + "." + callBackFilter.getClass()
+            .getName();
+    Class enhancedClass = proxyClazzPool.computeIfAbsent(key, s -> {
+      try {
+        return buildProxy(clazz, methodInterceptor, callBackFilter);
+      } catch (Exception e) {
+        LogUtils.error(logger, e);
+      }
+      return null;
+    });
+    if (enhancedClass == null) {
+      throw new IllegalAccessException("Initial class fails,[" + clazz.getName() + "]");
+    }
+    return enhancedClass.newInstance();
+  }
 }
