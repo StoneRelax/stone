@@ -1,0 +1,4 @@
+dependencies {
+    compile project(':dal-common-api')
+    compile 'org.slf4j:slf4j-api'
+}
