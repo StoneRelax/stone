@@ -1,5 +1,7 @@
 dependencies {
     compile project(':dal-sequence-api')
+    compile project(':dal-sequence-impl')
+    compile project(':dal-sequence-spi')
     compile 'org.springframework:spring-beans'
     compile 'org.springframework:spring-context'
     testCompile 'org.springframework.boot:spring-boot-starter-test'

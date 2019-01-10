@@ -51,7 +51,7 @@ allprojects {
     ext['rxjava2.version'] = '2.1.3'
     ext['snakeyaml.version'] = '1.19'
 
-    group = 'strone'
+    group = 'stone'
     version = ext['stone.version']
     sourceCompatibility = '1.8'
 
