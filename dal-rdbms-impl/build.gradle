@@ -1,11 +1,11 @@
 dependencies {
-    compile project(':dal-kernel')
+    compile project(':kernel')
     compile project(':dal-rdbms-api')
     compile project(':dal-rdbms-spi')
     compile project(':dal-common-api')
     compile project(':dal-common-spi')
     compile project(':dal-common-lib')
-    compile project(':dal-metadata')
+    compile project(':metadata')
     compile 'org.springframework:spring-beans'
     compile 'org.springframework:spring-context'
     compile 'org.springframework:spring-jdbc'

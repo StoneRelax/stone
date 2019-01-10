@@ -1,5 +1,5 @@
 dependencies {
-    compile project(':dal-kernel')
+    compile project(':kernel')
     compile project(':dal-sequence-api')
     compile 'org.springframework:spring-beans'
     compile 'org.springframework:spring-context'

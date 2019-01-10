@@ -1,5 +1,5 @@
 dependencies {
     compile project(':dal-common-api')
-    compile project(':dal-metadata')
+    compile project(':metadata')
     testCompile 'org.springframework.boot:spring-boot-starter-test'
 }

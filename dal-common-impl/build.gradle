@@ -12,8 +12,8 @@ repositories {
 
 dependencies {
     compile project(':dal-common-api')
-    compile project(':dal-kernel')
-    compile project(':dal-metadata')
+    compile project(':kernel')
+    compile project(':metadata')
     testCompile 'org.springframework.boot:spring-boot-starter-test'
     testCompile 'junit:junit'
     testCompile group: 'junit', name: 'junit', version: '4.12'

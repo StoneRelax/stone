@@ -13,6 +13,6 @@ repositories {
 
 dependencies {
     compile project(':dal-common-api')
-    compile project(':dal-kernel')
+    compile project(':kernel')
     testCompile group: 'junit', name: 'junit', version: '4.12'
 }

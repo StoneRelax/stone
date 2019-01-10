@@ -9,6 +9,6 @@ dependencies {
     compile 'org.springframework:spring-beans'
     compile 'org.springframework:spring-context'
     compile 'org.aspectj:aspectjweaver'
-    compile project(':dal-metadata')
+    compile project(':metadata')
     testCompile 'org.springframework.boot:spring-boot-starter-test'
 }

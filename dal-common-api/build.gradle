@@ -1,6 +1,6 @@
 dependencies {
     compile project(':dal-common-api')
-    compile project(':dal-kernel')
+    compile project(':kernel')
     compile 'org.slf4j:slf4j-api'
     compile 'javax.persistence:persistence-api'
 }

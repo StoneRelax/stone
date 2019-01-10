@@ -18,7 +18,8 @@ include 'services:webservice'
 
 rootProject.name = 'stone'
 
-include 'dal-kernel'
+include 'kernel'
+include 'metadata'
 include 'dal-common-api'
 include 'dal-common-autoconfigure'
 include 'dal-common-impl'
@@ -31,7 +32,12 @@ include 'dal-sequence-spi'
 include 'dal-mongo-api'
 include 'dal-mongo-autoconfigure'
 include 'dal-mongo-impl'
-include 'dal-metadata'
+include 'dal-rdbms-api'
+include 'dal-rdbms-autoconfigure'
+include 'dal-rdbms-impl'
+include 'dal-rdbms-spi'
+
+
 
 //include 'dal-sequence-spi'
 //include 'dal-sequence-spi'
