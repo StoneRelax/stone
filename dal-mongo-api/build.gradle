@@ -1,6 +1,0 @@
-dependencies {
-    compile project(':dal-common-api')
-    compile project(':metadata')
-    compile 'org.mongodb:mongo-java-driver'
-    testCompile 'org.springframework.boot:spring-boot-starter-test'
-}

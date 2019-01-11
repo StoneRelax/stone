@@ -1,1 +1,0 @@
-org.springframework.boot.autoconfigure.EnableAutoConfiguration=drone.components.dal.spi.adapter.DalSpiAdapterAutoConfigure

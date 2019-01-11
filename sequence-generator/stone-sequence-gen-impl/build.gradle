@@ -1,0 +1,7 @@
+dependencies {
+    compile project(':kernel:stone-dal-utils')
+    compile project(':sequence-generator:stone-sequence-gen-api')
+    compile 'org.springframework:spring-beans'
+    compile 'org.springframework:spring-context'
+    testCompile 'org.springframework.boot:spring-boot-starter-test'
+}

@@ -18,61 +18,20 @@ include 'services:webservice'
 
 rootProject.name = 'stone'
 
-include 'kernel'
-include 'metadata'
-include 'dal-common-api'
-include 'dal-common-autoconfigure'
-include 'dal-common-impl'
-include 'dal-common-lib'
-include 'dal-common-spi'
-include 'dal-sequence-api'
-include 'dal-sequence-autoconfigure'
-include 'dal-sequence-impl'
-include 'dal-sequence-spi'
-include 'dal-mongo-api'
-include 'dal-mongo-autoconfigure'
-include 'dal-mongo-impl'
-include 'dal-rdbms-api'
-include 'dal-rdbms-autoconfigure'
-include 'dal-rdbms-impl'
-include 'dal-rdbms-spi'
+include 'kernel:stone-dal-utils'
+include 'kernel:stone-dal-models'
+include 'sequence-generator:stone-sequence-gen-api'
+include 'sequence-generator:stone-sequence-gen-spi'
+include 'sequence-generator:stone-sequence-gen-impl'
+include 'sequence-generator:stone-sequence-gen-autoconfigure'
+include 'jdbc:stone-dal-jdbc-api'
+include 'jdbc:stone-dal-jdbc-spi'
+include 'jdbc:stone-dal-jdbc-impl'
+include 'jdbc:stone-dal-jdbc-autoconfigure'
 
+include 'adaptor:stone-spring-jdbc-adaptor'
 
-
-//include 'dal-sequence-spi'
-//include 'dal-sequence-spi'
-/*//include 'platform-core:drone-metrics-lib'
-////include 'platform-core:drone-kernel', 'platform-core:drone-metadata', 'platform-core:drone-jersey2-lib'
-////include 'platform-core:drone-cache-api', 'platform-core:drone-cache-caffeine-impl', 'platform-core:drone-cache-caffeine-autoconfigure'
-////include 'platform-core:drone-config-api', 'platform-core:drone-config-jmx-impl', 'platform-core:drone-config-jmx-autoconfigure'
-////include 'platform-core:kernel-benchmark'
-////
-////include 'platform-components:drone-dal-common-api', 'platform-components:drone-dal-common-autoconfigure', 'platform-components:drone-dal-common-impl',
-////        'platform-components:drone-dal-common-lib','platform-components:drone-dal-common-spi'
-////include 'platform-components:drone-dal-rdbms-api', 'platform-components:drone-dal-rdbms-spi',
-////        'platform-components:drone-dal-rdbms-impl', 'platform-components:drone-dal-rdbms-autoconfigure'
-////include 'platform-components:drone-sequence-api','platform-components:drone-sequence-impl','platform-components:drone-sequence-autoconfigure','platform-components:drone-sequence-spi'
-////include 'platform-components:drone-dal-mongo-api', 'platform-components:drone-dal-mongo-impl', 'platform-components:drone-dal-mongo-autoconfigure'
-////include 'platform-components:drone-dal-spi-adapter'
-////include 'platform-components:drone-i18n-api','platform-components:drone-i18n-impl','platform-components:drone-i18n-autoconfigure'
-////include 'platform-components:drone-assets-api','platform-components:drone-assets-impl','platform-components:drone-assets-autoconfigure','platform-components:drone-assets-spi'
-////
-////include 'platform-web:drone-restful-portal','platform-web:drone-web-assets'
-////include 'ecommon-biz:drone-corp-api','ecommon-biz:drone-corp-impl','ecommon-biz:drone-corp-autoconfigure'
-////include 'web-legacy:platform-web-legacy','web-legacy:ecommon-web-legacy','web-legacy:test-web-legacy'
-*/
-//include 'platform'
-
-//include 'platform-services:drone-workflow:service', 'platform-services:drone-workflow:spi'
-
-//include 'app-samples'
-//include 'app-samples:service-sample'
-
-
-//include 'platform-core:drone-tracing-api', 'platform-core:drone-tracing-impl', 'platform-core:drone-tracing-autoconfigure', 'platform-core:drone-tracing-spi'
-//include 'platform-components:drone-kafaka-lib'
-include 'dal-common-autoconfigure'
-include 'dal-common-impl'
-include 'dal-common-lib'
-include 'dal-common-spi'
-
+//include 'mongo:stone-dal-mongo-api'
+//include 'mongo:stone-dal-mongo-impl'
+//include 'mongo:stone-dal-mongo-autoconfigure'
+//include 'adaptor:stone-dal-mongo-autoconfigure'

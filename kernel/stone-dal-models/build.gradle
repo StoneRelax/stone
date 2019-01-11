@@ -1,0 +1,5 @@
+dependencies {
+    compile project(':kernel:stone-dal-utils')
+    compile 'org.slf4j:slf4j-api'
+    compile 'javax.persistence:persistence-api'
+}

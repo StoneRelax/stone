@@ -1,0 +1,4 @@
+dependencies {
+    compile project(':kernel:stone-dal-models')
+    testCompile 'org.springframework.boot:spring-boot-starter-test'
+}

@@ -1,0 +1,10 @@
+dependencies {
+    compile project(':jdbc:stone-dal-jdbc-api')
+    compile project(':jdbc:stone-dal-jdbc-spi')
+    compile 'org.springframework:spring-beans'
+    compile 'org.springframework:spring-context'
+    compile 'org.springframework:spring-jdbc'
+    compile 'org.springframework:spring-core'
+    compile 'org.springframework.boot:spring-boot-autoconfigure'
+    testCompile 'org.springframework.boot:spring-boot-starter-test'
+}
