@@ -2,7 +2,7 @@ package stone.dal.jdbc.impl;
 
 import java.util.HashMap;
 import java.util.Map;
-import stone.dal.jdbc.DalRdbmsResultHandlerSpi;
+import stone.dal.jdbc.JdbcResultHandlerSpi;
 import stone.dal.jdbc.api.meta.SqlQueryMeta;
 import stone.dal.jdbc.impl.aop.DalMethodFilter;
 import stone.dal.jdbc.impl.aop.DalMethodInterceptor;
@@ -15,14 +15,14 @@ import stone.dal.kernel.utils.KernelRuntimeException;
 /**
  * @author fengxie
  */
-public class DalRdbmsResultHandlerSpiImpl implements DalRdbmsResultHandlerSpi {
+public class JdbcResultHandlerSpiImpl implements JdbcResultHandlerSpi {
 
 	private DalUpdatableMethodFilter updatableMethodFilter;
 	private DalMethodFilter methodFilter;
 	private DalMethodInterceptor methodInterceptor;
 	private DalUpdatableMethodInterceptor updatableMethodInterceptor;
 
-	public DalRdbmsResultHandlerSpiImpl(LazyLoadQueryMetaBuilder loader) {
+	public JdbcResultHandlerSpiImpl(LazyLoadQueryMetaBuilder loader) {
 		this.updatableMethodFilter = new DalUpdatableMethodFilter();
 		this.methodFilter = new DalMethodFilter();
 		this.methodInterceptor = new DalMethodInterceptor(loader);

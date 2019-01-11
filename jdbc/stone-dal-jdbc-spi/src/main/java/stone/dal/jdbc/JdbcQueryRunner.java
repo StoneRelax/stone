@@ -8,7 +8,7 @@ import stone.dal.models.data.Page;
 /**
  * @author fengxie
  */
-public interface DalRdbmsQueryRunner<T> {
+public interface JdbcQueryRunner<T> {
 
   List<T> run(SqlQueryMeta queryMeta);
 

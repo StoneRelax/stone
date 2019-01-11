@@ -7,8 +7,8 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 import org.springframework.stereotype.Component;
-import stone.dal.jdbc.DalRdbmsDmlRunner;
-import stone.dal.jdbc.DalRdbmsQueryRunner;
+import stone.dal.jdbc.JdbcDmlRunner;
+import stone.dal.jdbc.JdbcQueryRunner;
 import stone.dal.jdbc.JdbcDclRunner;
 import stone.dal.jdbc.api.JdbcTemplate;
 import stone.dal.jdbc.api.meta.ExecResult;
@@ -26,13 +26,13 @@ import static stone.dal.kernel.utils.KernelUtils.str_2_arr;
 @Component
 public class JdbcTemplateImpl implements JdbcTemplate {
 
-	private DalRdbmsQueryRunner queryRunner;
-	private DalRdbmsDmlRunner dmlRunner;
+	private JdbcQueryRunner queryRunner;
+	private JdbcDmlRunner dmlRunner;
 
 	private JdbcDclRunner dclRunner;
 
-	public JdbcTemplateImpl(DalRdbmsQueryRunner queryRunner,
-							  DalRdbmsDmlRunner dmlRunner,
+	public JdbcTemplateImpl(JdbcQueryRunner queryRunner,
+							  JdbcDmlRunner dmlRunner,
 			JdbcDclRunner dclRunner) {
 		this.queryRunner = queryRunner;
 		this.dmlRunner = dmlRunner;

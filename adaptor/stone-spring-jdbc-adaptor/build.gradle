@@ -1,4 +1,7 @@
 dependencies {
     compile project(':jdbc:stone-dal-jdbc-spi')
+    compile 'org.springframework.boot:spring-boot-starter-jdbc'
+    compile 'org.apache.tomcat:tomcat-jdbc'
+    compile 'org.springframework:spring-jdbc'
     testCompile 'org.springframework.boot:spring-boot-starter-test'
 }

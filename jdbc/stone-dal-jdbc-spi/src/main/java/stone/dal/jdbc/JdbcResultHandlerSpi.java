@@ -5,7 +5,7 @@ import stone.dal.jdbc.api.meta.SqlQueryMeta;
 /**
  * @author fengxie
  */
-public interface DalRdbmsResultHandlerSpi {
+public interface JdbcResultHandlerSpi {
 
 	Object buildRowObj(SqlQueryMeta queryMeta);
 }

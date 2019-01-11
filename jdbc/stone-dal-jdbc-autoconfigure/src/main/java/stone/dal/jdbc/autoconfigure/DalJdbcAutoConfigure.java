@@ -11,7 +11,7 @@ public class DalJdbcAutoConfigure {
 //	@Autowired
 //	private EntityMetaManager entityMetaManager;
 //	@Autowired(required = false)
-//	private DalRdbmsResultHandlerSpiImpl resultSetHandler;
+//	private JdbcResultHandlerSpiImpl resultSetHandler;
 //	@Autowired(required = false)
 //	private DalSequenceSpi dalSequenceSpi;
 //
@@ -27,7 +27,7 @@ public class DalJdbcAutoConfigure {
 //
 //	@PostConstruct
 //	public void init() {
-//		DalRdbmsQueryRunner.Factory queryFactory = DalRdbmsQueryRunner.factory();
+//		JdbcQueryRunner.Factory queryFactory = JdbcQueryRunner.factory();
 //		deferredDataLoader = new LazyLoadQueryMetaBuilder(entityMetaManager);
 //		if (resultSetHandler == null) {
 //			queryFactory.rdbmsResultSetHandler(getDefaultResultSetHandler(queryFactory.getRunner()));
@@ -35,7 +35,7 @@ public class DalJdbcAutoConfigure {
 //			queryFactory.rdbmsResultSetHandler(resultSetHandler);
 //		}
 //		queryFactory.entityMetaManager(entityMetaManager);
-//		DalRdbmsDmlRunner.Factory dmlFactory = DalRdbmsDmlRunner.factory();
+//		JdbcDmlRunner.Factory dmlFactory = JdbcDmlRunner.factory();
 //		dmlFactory.entityMetaManager(entityMetaManager);
 //		dmlFactory.dalSequence(dalSequenceSpi);
 //
@@ -61,7 +61,7 @@ public class DalJdbcAutoConfigure {
 ////	}
 //
 //
-//	DalRdbmsResultHandlerSpi getDefaultResultSetHandler(DalRdbmsQueryRunner queryRunner) {
-//		return new DalRdbmsResultHandlerSpiImpl(deferredDataLoader);
+//	JdbcResultHandlerSpi getDefaultResultSetHandler(JdbcQueryRunner queryRunner) {
+//		return new JdbcResultHandlerSpiImpl(deferredDataLoader);
 //	}
 }

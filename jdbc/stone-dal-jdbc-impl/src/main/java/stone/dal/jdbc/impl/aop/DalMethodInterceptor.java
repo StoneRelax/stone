@@ -27,7 +27,7 @@ public class DalMethodInterceptor implements MethodInterceptor {
 //					);
 //			if (!((BaseDo) obj).isLoaded(propertyName)) {
 //				SqlQueryMeta queryMeta = lazyLoadQueryMetaBuilder.buildMetaFactory(obj, propertyName).supportFetchMore(true).build();
-//				List resultSet = DalRdbmsQueryRunner.factory().getRunner().run(queryMeta);
+//				List resultSet = JdbcQueryRunner.factory().getRunner().run(queryMeta);
 //				if (!list_emp(resultSet)) {
 //					if (method.getReturnType().isAssignableFrom(List.class)) {
 //						result = resultSet;
