@@ -1,13 +1,13 @@
 package stone.dal.mongo.api;
 
-import stone.dal.common.api.DalObj;
+import stone.dal.common.api.BaseDo;
 import stone.dal.metadata.meta.Page;
 import stone.dal.mongo.api.meta.MongoQueryMeta;
 
 /**
  * Created by on 5/23/2017.
  */
-public interface DalMongoCrudTemplate<T extends DalObj> {
+public interface DalMongoCrudTemplate<T extends BaseDo> {
 
 	String create(T obj);
 

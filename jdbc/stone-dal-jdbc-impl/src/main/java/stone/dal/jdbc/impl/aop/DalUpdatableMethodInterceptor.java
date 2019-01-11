@@ -2,7 +2,7 @@ package stone.dal.jdbc.impl.aop;
 
 import java.lang.reflect.Method;
 import org.springframework.cglib.proxy.MethodProxy;
-import stone.dal.jdbc.impl.utils.DalLazyLoadQueryMetaBuilder;
+import stone.dal.jdbc.impl.utils.LazyLoadQueryMetaBuilder;
 import stone.dal.kernel.utils.StringUtils;
 import stone.dal.models.data.BaseDo;
 
@@ -11,8 +11,8 @@ import stone.dal.models.data.BaseDo;
  */
 public class DalUpdatableMethodInterceptor extends DalMethodInterceptor {
 
-	public DalUpdatableMethodInterceptor(DalLazyLoadQueryMetaBuilder dalLazyLoadQueryMetaBuilder) {
-		super(dalLazyLoadQueryMetaBuilder);
+	public DalUpdatableMethodInterceptor(LazyLoadQueryMetaBuilder lazyLoadQueryMetaBuilder) {
+		super(lazyLoadQueryMetaBuilder);
 	}
 
 	@Override

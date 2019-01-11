@@ -6,7 +6,7 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
 import stone.dal.common.api.DalEntityMetaManager;
-import stone.dal.common.api.DalObj;
+import stone.dal.common.api.BaseDo;
 import stone.dal.common.api.meta.EntityMeta;
 import stone.dal.common.api.meta.UniqueIndexMeta;
 import stone.dal.kernel.ConvertUtils;
@@ -33,7 +33,7 @@ import static stone.dal.kernel.KernelUtils.set_v;
 /**
  * Created by on 5/23/2017.
  */
-public class DalMongoCrudTemplateImpl<T extends DalObj> implements DalMongoCrudTemplate<T> {
+public class DalMongoCrudTemplateImpl<T extends BaseDo> implements DalMongoCrudTemplate<T> {
 	private DalSequenceSpi dalSequenceSpi;
 	private DalEntityMetaManager dalEntityMetaManager;
 

@@ -43,12 +43,12 @@ import static stone.dal.kernel.utils.KernelUtils.arr_emp;
 /**
  * @author fengxie
  */
-public class DalEntityMetaManager {
+public class EntityMetaManager {
 
-  private static Logger logger = LoggerFactory.getLogger(DalEntityMetaManager.class);
+	private static Logger logger = LoggerFactory.getLogger(EntityMetaManager.class);
 	protected Map<String, EntityMeta> entityMapper = new HashMap<>();
 
-  public DalEntityMetaManager(String[] scanPackages) throws DoParseException {
+	public EntityMetaManager(String[] scanPackages) throws DoParseException {
 		try {
       for (String packageName : scanPackages) {
         Set<Class> classes = UrlUtils.findClassesByPackage(packageName);

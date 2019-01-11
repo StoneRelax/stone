@@ -6,18 +6,18 @@ import org.springframework.context.annotation.Configuration;
  * @author fengxie
  */
 @Configuration
-public class DalRdbmsAutoConfigure {
+public class DalJdbcAutoConfigure {
 
 //	@Autowired
-//	private DalEntityMetaManager dalEntityMetaManager;
+//	private EntityMetaManager entityMetaManager;
 //	@Autowired(required = false)
 //	private DalRdbmsResultHandlerSpiImpl resultSetHandler;
 //	@Autowired(required = false)
 //	private DalSequenceSpi dalSequenceSpi;
 //
-//	private DalRdbmsCrudTemplate dalCrudTemplate;
-//	private DalRdbmsRunner dalRdbmsRunner;
-//	private DalLazyLoadQueryMetaBuilder deferredDataLoader;
+//	private JdbcRepository dalCrudTemplate;
+//	private JdbcTemplate jdbcTemplate;
+//	private LazyLoadQueryMetaBuilder deferredDataLoader;
 //
 //	@Bean(name = "dummyDataSource")
 //	@ConfigurationProperties(prefix = "datasource.dummy")
@@ -28,36 +28,36 @@ public class DalRdbmsAutoConfigure {
 //	@PostConstruct
 //	public void init() {
 //		DalRdbmsQueryRunner.Factory queryFactory = DalRdbmsQueryRunner.factory();
-//		deferredDataLoader = new DalLazyLoadQueryMetaBuilder(dalEntityMetaManager);
+//		deferredDataLoader = new LazyLoadQueryMetaBuilder(entityMetaManager);
 //		if (resultSetHandler == null) {
 //			queryFactory.rdbmsResultSetHandler(getDefaultResultSetHandler(queryFactory.getRunner()));
 //		} else {
 //			queryFactory.rdbmsResultSetHandler(resultSetHandler);
 //		}
-//		queryFactory.dalEntityMetaManager(dalEntityMetaManager);
+//		queryFactory.entityMetaManager(entityMetaManager);
 //		DalRdbmsDmlRunner.Factory dmlFactory = DalRdbmsDmlRunner.factory();
-//		dmlFactory.dalEntityMetaManager(dalEntityMetaManager);
+//		dmlFactory.entityMetaManager(entityMetaManager);
 //		dmlFactory.dalSequence(dalSequenceSpi);
 //
-//		dalRdbmsRunner = new DalRdbmsRunnerImpl(queryFactory.build(), dmlFactory.build(),
+//		jdbcTemplate = new JdbcTemplateImpl(queryFactory.build(), dmlFactory.build(),
 //				JdbcDclRunner.factory().build());
-//		dalCrudTemplate = new DalRdbmsCrudTemplateImpl(dalRdbmsRunner, dalEntityMetaManager, deferredDataLoader);
+//		dalCrudTemplate = new JdbcRepositoryImpl(jdbcTemplate, entityMetaManager, deferredDataLoader);
 //	}
 //
 //	@Bean
-//	public DalRdbmsRunner getDalRdbmsRunner() {
-//		return dalRdbmsRunner;
+//	public JdbcTemplate getDalRdbmsRunner() {
+//		return jdbcTemplate;
 //	}
 //
 //	@Bean
-//	public DalRdbmsCrudTemplate getDalCrudTemplate() {
+//	public JdbcRepository getDalCrudTemplate() {
 //		return dalCrudTemplate;
 //	}
 //
 //	//todo by xzang, not found this class
 ////	@Bean
 ////	public DalRdbmsObjFactory getRdbmsObjFactory() {
-////		return new DalRdbmsObjFactory(dalEntityMetaManager);
+////		return new DalRdbmsObjFactory(entityMetaManager);
 ////	}
 //
 //

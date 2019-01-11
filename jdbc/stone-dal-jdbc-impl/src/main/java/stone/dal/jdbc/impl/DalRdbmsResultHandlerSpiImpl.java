@@ -8,7 +8,7 @@ import stone.dal.jdbc.impl.aop.DalMethodFilter;
 import stone.dal.jdbc.impl.aop.DalMethodInterceptor;
 import stone.dal.jdbc.impl.aop.DalUpdatableMethodFilter;
 import stone.dal.jdbc.impl.aop.DalUpdatableMethodInterceptor;
-import stone.dal.jdbc.impl.utils.DalLazyLoadQueryMetaBuilder;
+import stone.dal.jdbc.impl.utils.LazyLoadQueryMetaBuilder;
 import stone.dal.kernel.utils.CGLibUtils;
 import stone.dal.kernel.utils.KernelRuntimeException;
 
@@ -22,7 +22,7 @@ public class DalRdbmsResultHandlerSpiImpl implements DalRdbmsResultHandlerSpi {
 	private DalMethodInterceptor methodInterceptor;
 	private DalUpdatableMethodInterceptor updatableMethodInterceptor;
 
-	public DalRdbmsResultHandlerSpiImpl(DalLazyLoadQueryMetaBuilder loader) {
+	public DalRdbmsResultHandlerSpiImpl(LazyLoadQueryMetaBuilder loader) {
 		this.updatableMethodFilter = new DalUpdatableMethodFilter();
 		this.methodFilter = new DalMethodFilter();
 		this.methodInterceptor = new DalMethodInterceptor(loader);

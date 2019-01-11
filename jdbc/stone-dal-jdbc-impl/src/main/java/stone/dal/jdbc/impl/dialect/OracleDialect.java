@@ -9,7 +9,7 @@ import org.apache.commons.lang.StringUtils;
 import stone.dal.jdbc.DBDialectSpi;
 import stone.dal.jdbc.api.meta.DBField;
 
-import static stone.dal.kernel.KernelUtils.str_emp;
+import static stone.dal.kernel.utils.KernelUtils.str_emp;
 
 /**
  * @author fengxie

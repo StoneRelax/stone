@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import stone.dal.jdbc.api.DalRdbmsConstants;
 import stone.dal.models.DalQueryPostHandler;
 
 /**
@@ -25,11 +24,6 @@ public abstract class SqlQueryMeta {
 	 */
 	Class mappingClazz = Map.class;
 	/**
-	 * DB Schema
-	 */
-	String schema = DalRdbmsConstants.PRIMARY_SCHEMA;
-
-	/**
 	 * Callback list
 	 */
 	DalQueryPostHandler[] postHandlers;
@@ -40,7 +34,7 @@ public abstract class SqlQueryMeta {
 	/**
 	 * Page size
 	 */
-	int pageSize = DalRdbmsConstants.DEFAULT_PAGE_SIZE;
+	int pageSize = 50;
 	/**
 	 * Boolean flag of aop
 	 */
@@ -114,10 +108,6 @@ public abstract class SqlQueryMeta {
 		return mappingClazz;
 	}
 
-	public String getSchema() {
-		return schema;
-	}
-
 	public static Factory factory() {
 		return new Factory();
 	}
@@ -144,13 +134,6 @@ public abstract class SqlQueryMeta {
 
 		public Factory updatable(boolean updatable) {
 			meta.updatable = updatable;
-			return this;
-		}
-
-		public Factory schema(String schema) {
-			if (schema != null) {
-				meta.schema = schema;
-			}
 			return this;
 		}
 

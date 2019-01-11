@@ -14,7 +14,6 @@
 package stone.dal.jdbc.api.meta;
 
 import java.util.Map;
-import stone.dal.jdbc.api.DalRdbmsConstants;
 
 /**
  * The class <code>SqlDmlDclMeta</code> is responsible for storing sql statement and parameters
@@ -36,10 +35,6 @@ public abstract class SqlDmlDclMeta {
 	 * Bean class whose instance might be imported with result value
 	 */
 	protected Class mappingClazz = Map.class;
-	/**
-	 * DB Schema
-	 */
-	private String schema = DalRdbmsConstants.PRIMARY_SCHEMA;
 
 	public String getSql() {
 		return sql;
@@ -53,10 +48,6 @@ public abstract class SqlDmlDclMeta {
 		return mappingClazz;
 	}
 
-	public String getSchema() {
-		return schema;
-	}
-
 	public static Factory factory() {
 		return new Factory();
 	}
@@ -68,13 +59,6 @@ public abstract class SqlDmlDclMeta {
 
 		public Factory sql(String sql) {
 			meta.sql = sql;
-			return this;
-		}
-
-		public Factory schema(String schema) {
-			if (schema != null) {
-				meta.schema = schema;
-			}
 			return this;
 		}
 

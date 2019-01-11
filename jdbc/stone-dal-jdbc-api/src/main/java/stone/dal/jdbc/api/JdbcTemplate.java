@@ -11,7 +11,7 @@ import stone.dal.models.data.Page;
 /**
  * @author fengxie
  */
-public interface DalRdbmsRunner {
+public interface JdbcTemplate {
 	/**
 	 * Execute runQuery with a specified <code>com.rab.publication.persistence.SqlQueryMeta</code>
 	 *
@@ -42,39 +42,15 @@ public interface DalRdbmsRunner {
 	 *
 	 * @param sql Sql
 	 */
-	int runDcl(String schema, String sql);
+	int runDcl(String sql);
 
 	/**
 	 * Execute sql file
 	 *
-	 * @param schema      Data source schema
 	 * @param inputStream Inputstream of sqlfile
 	 * @return Execute code
 	 */
-	List<ExecResult> runSqlStream(InputStream inputStream, String schema);
-
-	/**
-	 * Execute sql file
-	 *
-	 * @param inputStream Inputstream of sql file
-	 */
 	List<ExecResult> runSqlStream(InputStream inputStream);
-
-	/**
-	 * Fetch fields
-	 *
-	 * @param queryMeta Query meta
-	 * @return Fields information
-	 */
-//	List<FieldInfo> fetchFields(SqlQueryMeta queryMeta) ;
-
-	/**
-	 * Fetch fields
-	 *
-	 * @param queryMeta Query meta
-	 * @return Fields information
-	 */
-//	List<FieldInfo> fetchFields(SqlQueryMeta queryMeta, DBConnectionMeta connectionMeta) ;
 
 	/**
 	 * Execute sql script
@@ -82,7 +58,7 @@ public interface DalRdbmsRunner {
 	 * @param sqlScripts sql scripts which splitted by ;
 	 * @return Sql errors
 	 */
-	List<ExecResult> runSqlScript(String sqlScripts, String dsSchema);
+	List<ExecResult> runSqlScript(String sqlScripts);
 
 	/**
 	 * Run insert operation
