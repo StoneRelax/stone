@@ -1,0 +1,7 @@
+dependencies {
+    compile project(':kernel:stone-dal-models')
+    compile project(':kernel:stone-dal-utils')
+    compile 'org.apache.poi:poi'
+    compile "org.apache.poi:poi-ooxml:3.17"
+    testCompile 'org.springframework.boot:spring-boot-starter-test'
+}
