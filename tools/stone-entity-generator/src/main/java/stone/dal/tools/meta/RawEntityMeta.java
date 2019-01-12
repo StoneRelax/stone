@@ -1,17 +1,30 @@
 package stone.dal.tools.meta;
 
-import stone.dal.models.meta.EntityMeta;
-
 import java.util.ArrayList;
 import java.util.List;
+import stone.dal.models.meta.EntityMeta;
 
 public class RawEntityMeta extends EntityMeta {
   private String name;
   private String label;
-  private String dbName;
-  private Boolean nosql;
   private String delFlag;
   private String fileFieldTags;
+
+  //  protected Collection<FieldMeta> fields;
+  protected List<RawRelationMeta> rawRelations = new ArrayList<>();
+//  protected Collection<UniqueIndexMeta> uniqueIndices;
+
+  public List<RawRelationMeta> getRawRelations() {
+    return rawRelations;
+  }
+
+  public void setRawRelations(List<RawRelationMeta> rawRelations) {
+    this.rawRelations = rawRelations;
+  }
+
+  public void setNosql(boolean nosql) {
+    this.nosql = nosql;
+  }
 
   public String getName() {
     return name;
@@ -27,22 +40,6 @@ public class RawEntityMeta extends EntityMeta {
 
   public void setLabel(String label) {
     this.label = label;
-  }
-
-  public String getDbName() {
-    return dbName;
-  }
-
-  public void setDbName(String dbName) {
-    this.dbName = dbName;
-  }
-
-  public Boolean getNosql() {
-    return nosql;
-  }
-
-  public void setNosql(Boolean nosql) {
-    this.nosql = nosql;
   }
 
   public String getDelFlag() {

@@ -9,11 +9,15 @@ import java.util.HashSet;
  * @author fengxie
  */
 public abstract class RelationMeta {
-	private RelationTypes relationType;
-	private String joinProperty;
-	private String joinPropertyType;
-	private String mapperBy;
-	private String joinTable;
+	protected RelationTypes relationType;
+
+	protected String joinProperty;
+
+	protected String joinPropertyType;
+
+	protected String mappedBy;
+
+	protected String joinTable;
 	private Collection<JoinColumn> joinColumns = new HashSet<>();
 	//only used by many 2 many
 	private Collection<JoinColumn> inverseJoinColumns = new HashSet<>();
@@ -35,8 +39,8 @@ public abstract class RelationMeta {
 		return joinPropertyType;
 	}
 
-	public String getMapperBy() {
-		return mapperBy;
+	public String getMappedBy() {
+		return mappedBy;
 	}
 
 	public String getJoinTable() {
@@ -75,8 +79,8 @@ public abstract class RelationMeta {
 			return this;
 		}
 
-		public Factory mapperBy(String mapperBy) {
-			meta.mapperBy = mapperBy;
+		public Factory mappedBy(String mappedBy) {
+			meta.mappedBy = mappedBy;
 			return this;
 		}
 

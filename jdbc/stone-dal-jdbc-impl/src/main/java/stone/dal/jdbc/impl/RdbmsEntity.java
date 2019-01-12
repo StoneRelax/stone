@@ -297,7 +297,7 @@ public class RdbmsEntity {
 
 	private String buildJoins(String propertyName, RdbmsEntity relEntity) {
 		RelationMeta relationMeta = relationMapper.get(propertyName);
-		String mappedBy = relationMeta.getMapperBy();
+		String mappedBy = relationMeta.getMappedBy();
 		StringBuilder sb = new StringBuilder();
 		if (isStrEmpty(mappedBy)) {
 			sb.append(meta.getTableName());

@@ -45,7 +45,8 @@ import static stone.dal.kernel.utils.KernelUtils.isArrayEmpty;
 public class EntityMetaManager {
 
 	private static Logger logger = LoggerFactory.getLogger(EntityMetaManager.class);
-	protected Map<String, EntityMeta> entityMapper = new HashMap<>();
+
+	private Map<String, EntityMeta> entityMapper = new HashMap<>();
 
 	public EntityMetaManager(String[] scanPackages) throws DoParseException {
 		try {
@@ -142,7 +143,7 @@ public class EntityMetaManager {
 			RelationMeta.Factory factory = new RelationMeta.Factory();
 			if (readMethod.isAnnotationPresent(OneToMany.class)) {
 				OneToMany one2Many = readMethod.getAnnotation(OneToMany.class);
-				factory.mapperBy(one2Many.mappedBy()).relationType(RelationTypes.ONE_2_MANY);
+				factory.mappedBy(one2Many.mappedBy()).relationType(RelationTypes.ONE_2_MANY);
 				factory.joinProperty(propertyDesc.getName());
 				parseOrder(factory, readMethod);
 				factory.joinPropertyType(getRelationClazz(readMethod, clazz).getName());

@@ -9,11 +9,20 @@ import java.util.List;
  * @author fengxie
  */
 public abstract class EntityMeta {
-	String tableName;
+	protected String tableName;
+
+	protected boolean nosql;
 	transient Class clazz;
-	Collection<FieldMeta> fields;
-	Collection<RelationMeta> relations;
-	Collection<UniqueIndexMeta> uniqueIndices;
+
+	protected Collection<FieldMeta> fields;
+
+	protected Collection<RelationMeta> relations;
+
+	protected Collection<UniqueIndexMeta> uniqueIndices;
+
+	public boolean isNosql() {
+		return nosql;
+	}
 
 	public String getTableName() {
 		return tableName;
@@ -50,6 +59,11 @@ public abstract class EntityMeta {
 
 		public Factory tableName(String tableName) {
 			meta.tableName = tableName;
+			return this;
+		}
+
+		public Factory nosql(boolean nosql) {
+			meta.nosql = nosql;
 			return this;
 		}
 

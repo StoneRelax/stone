@@ -1,12 +1,18 @@
 package stone.dal.jdbc.autoconfigure;
 
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import stone.dal.jdbc.api.JdbcTemplate;
+import stone.dal.jdbc.api.JpaRepository;
+import stone.dal.models.EntityMetaManager;
 
 /**
  * @author fengxie
  */
 @Configuration
 public class DalJdbcAutoConfigure {
+
+  private EntityMetaManager entityMetaManager;
 
 //	@Autowired
 //	private EntityMetaManager entityMetaManager;
@@ -15,15 +21,10 @@ public class DalJdbcAutoConfigure {
 //	@Autowired(required = false)
 //	private DalSequenceSpi dalSequenceSpi;
 //
-//	private JdbcRepository dalCrudTemplate;
-//	private JdbcTemplate jdbcTemplate;
+private JpaRepository jpaRepository;
+
+  private JdbcTemplate jdbcTemplate;
 //	private LazyLoadQueryMetaBuilder deferredDataLoader;
-//
-//	@Bean(name = "dummyDataSource")
-//	@ConfigurationProperties(prefix = "datasource.dummy")
-//	public DataSource dummyDataSource() {
-//		return DataSourceBuilder.create().build();
-//	}
 //
 //	@PostConstruct
 //	public void init() {
@@ -41,25 +42,19 @@ public class DalJdbcAutoConfigure {
 //
 //		jdbcTemplate = new JdbcTemplateImpl(queryFactory.build(), dmlFactory.build(),
 //				JdbcDclRunner.factory().build());
-//		dalCrudTemplate = new JdbcRepositoryImpl(jdbcTemplate, entityMetaManager, deferredDataLoader);
+//		dalCrudTemplate = new JpaRepositoryImpl(jdbcTemplate, entityMetaManager, deferredDataLoader);
 //	}
-//
-//	@Bean
-//	public JdbcTemplate getDalRdbmsRunner() {
-//		return jdbcTemplate;
-//	}
-//
-//	@Bean
-//	public JdbcRepository getDalCrudTemplate() {
-//		return dalCrudTemplate;
-//	}
-//
-//	//todo by xzang, not found this class
-////	@Bean
-////	public DalRdbmsObjFactory getRdbmsObjFactory() {
-////		return new DalRdbmsObjFactory(entityMetaManager);
-////	}
-//
+
+  @Bean
+  public JpaRepository getJpaRepository() {
+    return jpaRepository;
+  }
+
+  @Bean
+  public JdbcTemplate getJdbcTemplate() {
+    return jdbcTemplate;
+  }
+
 //
 //	JdbcResultHandlerSpi getDefaultResultSetHandler(JdbcQueryRunner queryRunner) {
 //		return new JdbcResultHandlerSpiImpl(deferredDataLoader);

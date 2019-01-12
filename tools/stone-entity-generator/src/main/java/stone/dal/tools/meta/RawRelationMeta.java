@@ -1,22 +1,34 @@
 package stone.dal.tools.meta;
 
-import stone.dal.models.meta.RelationMeta;
+import stone.dal.models.meta.RelationTypes;
 
-public class RawRelationMeta extends RelationMeta {
-  private String relationType;
+public class RawRelationMeta {
   private String joinDomain;
-  private String joinProperty;
-  private String joinPropertyType;
   private String joinColumnName;
   private String refColumn;
   private Boolean nullable;
   private Boolean updatable = true;
-  private String mapperBy;
+
+  protected String joinProperty;
+
+  protected String joinPropertyType;
   private String joinTable;
-  private Boolean adhoc;
 
+  private RelationTypes relationType;
 
-  public void setRelationType(String relationType) {
+  public String getJoinProperty() {
+    return joinProperty;
+  }
+
+  public String getJoinPropertyType() {
+    return joinPropertyType;
+  }
+
+  public String getJoinTable() {
+    return joinTable;
+  }
+
+  public void setRelationType(RelationTypes relationType) {
     this.relationType = relationType;
   }
 
@@ -28,18 +40,8 @@ public class RawRelationMeta extends RelationMeta {
     this.joinDomain = joinDomain;
   }
 
-  @Override
-  public String getJoinProperty() {
-    return joinProperty;
-  }
-
   public void setJoinProperty(String joinProperty) {
     this.joinProperty = joinProperty;
-  }
-
-  @Override
-  public String getJoinPropertyType() {
-    return joinPropertyType;
   }
 
   public void setJoinPropertyType(String joinPropertyType) {
@@ -78,29 +80,8 @@ public class RawRelationMeta extends RelationMeta {
     this.updatable = updatable;
   }
 
-  @Override
-  public String getMapperBy() {
-    return mapperBy;
-  }
-
-  public void setMapperBy(String mapperBy) {
-    this.mapperBy = mapperBy;
-  }
-
-  @Override
-  public String getJoinTable() {
-    return joinTable;
-  }
 
   public void setJoinTable(String joinTable) {
     this.joinTable = joinTable;
-  }
-
-  public Boolean getAdhoc() {
-    return adhoc;
-  }
-
-  public void setAdhoc(Boolean adhoc) {
-    this.adhoc = adhoc;
   }
 }

@@ -4,38 +4,55 @@ package stone.dal.models.meta;
  * @author fengxie
  */
 public abstract class FieldMeta {
-	String seqKey;
-	String seqType;
-	String dbName;
-	Boolean nullable = true;
-	String name;
-	Class type;
-	Boolean pk;
-	String widget;
-	Integer maxLength;
-	Integer scale;
-	Integer precision;
-	String mapper;
-	String mappedBy;
-	String widgetArgs;
-	String order;
-	Boolean groupByAllowed;
-	Boolean notPersist;
-	String comboId;
-	String comboFilter;
-	Boolean hideWhenQuery;
-	String index;
-	String tags;
-	String codes;
-	String codeTag;
-	Boolean writeWhenNotEmpty; //used by seq only
-	String dataAccess;
-	Boolean file;
-	String constraints;
-	Boolean clob;
-	Boolean i18n;
-	Boolean insertable;
-	Boolean updatable;
+	protected String seqKey;
+
+	protected String seqType;
+
+	protected int seqStartNum;
+
+	protected String dbName;
+
+	protected Boolean nullable = true;
+
+	protected Boolean insertable = true;
+
+	protected String name;
+
+	transient Class type;
+
+	protected Boolean pk;
+
+	protected Integer maxLength;
+
+	protected Integer scale;
+
+	protected Integer precision;
+
+	protected String mapper;
+
+	protected String mappedBy;
+
+	protected String order;
+
+	protected Boolean groupByAllowed;
+
+	protected Boolean notPersist;
+
+	protected String index;
+
+	protected Boolean writeWhenNotEmpty; //used by seq only
+
+	protected Boolean file;
+
+	protected String constraints;
+
+	protected Boolean clob;
+
+	protected Boolean updatable;
+
+	public void setMaxLength(Integer maxLength) {
+		this.maxLength = maxLength;
+	}
 
 	public String getSeqKey() {
 		return seqKey;
@@ -45,12 +62,24 @@ public abstract class FieldMeta {
 		return seqType;
 	}
 
+	public int getSeqStartNum() {
+		return seqStartNum;
+	}
+
 	public String getDbName() {
 		return dbName;
 	}
 
 	public Boolean getNullable() {
 		return nullable;
+	}
+
+	public Boolean getInsertable() {
+		return insertable;
+	}
+
+	public Boolean getUpdatable() {
+		return updatable;
 	}
 
 	public String getName() {
@@ -63,10 +92,6 @@ public abstract class FieldMeta {
 
 	public Boolean getPk() {
 		return pk;
-	}
-
-	public String getWidget() {
-		return widget;
 	}
 
 	public Integer getMaxLength() {
@@ -89,10 +114,6 @@ public abstract class FieldMeta {
 		return mappedBy;
 	}
 
-	public String getWidgetArgs() {
-		return widgetArgs;
-	}
-
 	public String getOrder() {
 		return order;
 	}
@@ -105,40 +126,12 @@ public abstract class FieldMeta {
 		return notPersist;
 	}
 
-	public String getComboId() {
-		return comboId;
-	}
-
-	public String getComboFilter() {
-		return comboFilter;
-	}
-
-	public Boolean getHideWhenQuery() {
-		return hideWhenQuery;
-	}
-
 	public String getIndex() {
 		return index;
 	}
 
-	public String getTags() {
-		return tags;
-	}
-
-	public String getCodes() {
-		return codes;
-	}
-
-	public String getCodeTag() {
-		return codeTag;
-	}
-
 	public Boolean getWriteWhenNotEmpty() {
 		return writeWhenNotEmpty;
-	}
-
-	public String getDataAccess() {
-		return dataAccess;
 	}
 
 	public Boolean getFile() {
@@ -167,30 +160,18 @@ public abstract class FieldMeta {
 				", seqType='" + seqType + '\'' +
 				", nullable=" + nullable +
 				", pk=" + pk +
-				", widget='" + widget + '\'' +
 				", maxLength=" + maxLength +
 				", scale=" + scale +
 				", precision=" + precision +
 				", mapper='" + mapper + '\'' +
 				", mappedBy='" + mappedBy + '\'' +
-				", widgetArgs='" + widgetArgs + '\'' +
 				", order='" + order + '\'' +
 				", groupByAllowed=" + groupByAllowed +
-				", notPersist=" + notPersist +
-				", comboId='" + comboId + '\'' +
-				", comboFilter='" + comboFilter + '\'' +
-				", hideWhenQuery=" + hideWhenQuery +
 				", index='" + index + '\'' +
-				", tags='" + tags + '\'' +
-				", codes='" + codes + '\'' +
-				", codeTag='" + codeTag + '\'' +
 				", writeWhenNotEmpty=" + writeWhenNotEmpty +
-				", dataAccess='" + dataAccess + '\'' +
 				", file=" + file +
 				", constraints='" + constraints + '\'' +
 				", clob=" + clob +
-				", i18n=" + i18n +
-				", insertable=" + insertable +
 				", updatable=" + updatable +
 				'}';
 	}
@@ -199,6 +180,11 @@ public abstract class FieldMeta {
 
 		private FieldMeta meta = new FieldMeta() {
 		};
+
+		public Factory insertable(Boolean insertable) {
+			meta.insertable = insertable;
+			return this;
+		}
 
 		public Factory seqKey(String seqKey) {
 			meta.seqKey = seqKey;
@@ -235,11 +221,6 @@ public abstract class FieldMeta {
 			return this;
 		}
 
-		public Factory widget(String widget) {
-			meta.widget = widget;
-			return this;
-		}
-
 		public Factory maxLength(Integer maxLength) {
 			meta.maxLength = maxLength;
 			return this;
@@ -265,11 +246,6 @@ public abstract class FieldMeta {
 			return this;
 		}
 
-		public Factory widgetArgs(String widgetArgs) {
-			meta.widgetArgs = widgetArgs;
-			return this;
-		}
-
 		public Factory order(String order) {
 			meta.order = order;
 			return this;
@@ -285,38 +261,8 @@ public abstract class FieldMeta {
 			return this;
 		}
 
-		public Factory comboId(String comboId) {
-			meta.comboId = comboId;
-			return this;
-		}
-
-		public Factory comboFilter(String comboFilter) {
-			meta.comboFilter = comboFilter;
-			return this;
-		}
-
-		public Factory hideWhenQuery(Boolean hideWhenQuery) {
-			meta.hideWhenQuery = hideWhenQuery;
-			return this;
-		}
-
 		public Factory index(String index) {
 			meta.index = index;
-			return this;
-		}
-
-		public Factory tags(String tags) {
-			meta.tags = tags;
-			return this;
-		}
-
-		public Factory codes(String codes) {
-			meta.codes = codes;
-			return this;
-		}
-
-		public Factory codeTag(String codeTag) {
-			meta.codeTag = codeTag;
 			return this;
 		}
 
@@ -325,13 +271,13 @@ public abstract class FieldMeta {
 			return this;
 		}
 
-		public Factory dataAccess(String dataAccess) {
-			meta.dataAccess = dataAccess;
+		public Factory file(Boolean file) {
+			meta.file = file;
 			return this;
 		}
 
-		public Factory file(Boolean file) {
-			meta.file = file;
+		public Factory defaultStartSeq(int defaultStartSeq) {
+			meta.seqStartNum = defaultStartSeq;
 			return this;
 		}
 
@@ -345,18 +291,8 @@ public abstract class FieldMeta {
 			return this;
 		}
 
-		public Factory insertable(Boolean insertable) {
-			meta.insertable = insertable;
-			return this;
-		}
-
 		public Factory updatable(Boolean updatable) {
 			meta.updatable = updatable;
-			return this;
-		}
-
-		public Factory i18n(Boolean i18n) {
-			meta.i18n = i18n;
 			return this;
 		}
 

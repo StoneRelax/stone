@@ -4,8 +4,8 @@ import java.util.Collection;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import stone.dal.jdbc.api.JdbcRepository;
 import stone.dal.jdbc.api.JdbcTemplate;
+import stone.dal.jdbc.api.JpaRepository;
 import stone.dal.jdbc.api.meta.SqlDmlDclMeta;
 import stone.dal.jdbc.api.meta.SqlQueryMeta;
 import stone.dal.jdbc.impl.utils.LazyLoadQueryMetaBuilder;
@@ -21,8 +21,8 @@ import static stone.dal.kernel.utils.KernelUtils.setPropVal;
 /**
  * @author fengxie
  */
-public class JdbcRepositoryImpl<T extends BaseDo, K>
-    implements JdbcRepository<T, K> {
+public class JpaRepositoryImpl<T extends BaseDo, K>
+    implements JpaRepository<T, K> {
 
   protected JdbcTemplate jdbcTemplate;
 
@@ -30,9 +30,9 @@ public class JdbcRepositoryImpl<T extends BaseDo, K>
 
   private LazyLoadQueryMetaBuilder lazyLoadQueryMetaBuilder;
 
-  private static Logger logger = LoggerFactory.getLogger(JdbcRepositoryImpl.class);
+  private static Logger logger = LoggerFactory.getLogger(JpaRepositoryImpl.class);
 
-  public JdbcRepositoryImpl(JdbcTemplate jdbcTemplate,
+  public JpaRepositoryImpl(JdbcTemplate jdbcTemplate,
       EntityMetaManager entityMetaManager,
       LazyLoadQueryMetaBuilder lazyLoadQueryMetaBuilder) {
     this.jdbcTemplate = jdbcTemplate;
@@ -132,8 +132,8 @@ public class JdbcRepositoryImpl<T extends BaseDo, K>
         rel.getRelationType() == RelationTypes.ONE_2_MANY).forEach(rel -> {
       Collection<BaseDo> records = getPropVal(mainObj, rel.getJoinProperty());
       records.forEach(record -> {
-        String mapper = rel.getMapperBy();
-        setPropVal(record, mapper, mainObj);
+        String mappedBy = rel.getMappedBy();
+        setPropVal(record, mappedBy, mainObj);
         runCreate(record);
       });
     });
@@ -148,16 +148,16 @@ public class JdbcRepositoryImpl<T extends BaseDo, K>
             &&
             (relation.getRelationType() == RelationTypes.ONE_2_MANY
                 || relation.getRelationType() == RelationTypes.ONE_2_ONE_REF))).forEach(relation -> {
-      String mapper = relation.getMapperBy();
+      String mappedBy = relation.getMappedBy();
       if (entity.isCollection(relation.getJoinProperty())) {
         List<BaseDo> relObjs = getPropVal(mainObj, relation.getJoinProperty());
         relObjs.forEach(relObj -> {
-          setPropVal(relObj, mapper, mainObj);
+          setPropVal(relObj, mappedBy, mainObj);
           runUpdate(relObj);
         });
       } else {
         BaseDo relObj = getPropVal(mainObj, relation.getJoinProperty());
-        setPropVal(relObj, mapper, mainObj);
+        setPropVal(relObj, mappedBy, mainObj);
         runUpdate(relObj);
       }
     });
