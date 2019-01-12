@@ -3,6 +3,7 @@ package stone.dal.jdbc.impl;
 import java.util.HashMap;
 import java.util.Map;
 import stone.dal.jdbc.JdbcResultHandlerSpi;
+import stone.dal.jdbc.api.ex.CreateRowObjectException;
 import stone.dal.jdbc.api.meta.SqlQueryMeta;
 import stone.dal.jdbc.impl.aop.DalMethodFilter;
 import stone.dal.jdbc.impl.aop.DalMethodInterceptor;
@@ -10,7 +11,6 @@ import stone.dal.jdbc.impl.aop.DalUpdatableMethodFilter;
 import stone.dal.jdbc.impl.aop.DalUpdatableMethodInterceptor;
 import stone.dal.jdbc.impl.utils.LazyLoadQueryMetaBuilder;
 import stone.dal.kernel.utils.CGLibUtils;
-import stone.dal.kernel.utils.KernelRuntimeException;
 
 /**
  * @author fengxie
@@ -30,7 +30,7 @@ public class JdbcResultHandlerSpiImpl implements JdbcResultHandlerSpi {
 	}
 
 	@Override
-	public Object buildRowObj(SqlQueryMeta queryMeta) throws KernelRuntimeException {
+	public Object buildRowObj(SqlQueryMeta queryMeta) throws CreateRowObjectException {
 		Object rowObj;
 		Class clazz = queryMeta.getMappingClazz();
 		if (clazz != null && clazz != Map.class) {
@@ -43,7 +43,7 @@ public class JdbcResultHandlerSpiImpl implements JdbcResultHandlerSpi {
 					rowObj = clazz.newInstance();
 				}
 			} catch (Exception e) {
-				throw new KernelRuntimeException(e);
+				throw new CreateRowObjectException(e);
 			}
 		} else {
 			rowObj = new HashMap();

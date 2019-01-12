@@ -2,8 +2,8 @@ package stone.dal.jdbc.impl.utils;
 
 import org.springframework.util.ClassUtils;
 import stone.dal.jdbc.api.meta.SqlQueryMeta;
-import stone.dal.jdbc.impl.DalRdbmsEntity;
 import stone.dal.jdbc.impl.DalRdbmsEntityManager;
+import stone.dal.jdbc.impl.RdbmsEntity;
 import stone.dal.models.EntityMetaManager;
 import stone.dal.models.meta.EntityMeta;
 
@@ -20,15 +20,15 @@ public class LazyLoadQueryMetaBuilder {
 
 	public SqlQueryMeta.Factory buildMetaFactory(Object mainObj, String propertyName) {
 		EntityMeta meta = entityMetaManager.getEntity(ClassUtils.getUserClass(mainObj.getClass()));
-		DalRdbmsEntity entity = DalRdbmsEntityManager.getInstance().build(meta);
+		RdbmsEntity entity = DalRdbmsEntityManager.getInstance().build(meta);
 
 		return buildMetaFactory(entity, mainObj, propertyName);
 	}
 
-	public SqlQueryMeta.Factory buildMetaFactory(DalRdbmsEntity entity, Object mainObj, String propertyName) {
+	public SqlQueryMeta.Factory buildMetaFactory(RdbmsEntity entity, Object mainObj, String propertyName) {
 		String relClazz = entity.readRelType(propertyName);
 		EntityMeta relMeta = entityMetaManager.getEntityByClazzName(relClazz);
-		DalRdbmsEntity relEntity = DalRdbmsEntityManager.getInstance().build(relMeta);
+		RdbmsEntity relEntity = DalRdbmsEntityManager.getInstance().build(relMeta);
 
 		String sql = entity.buildRelFindSql(propertyName, relEntity);
 		return SqlQueryMeta.factory().

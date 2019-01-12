@@ -11,6 +11,8 @@ import stone.dal.jdbc.DBDialectSpi;
 import stone.dal.kernel.utils.LogUtils;
 import stone.dal.kernel.utils.StringUtils;
 
+import static stone.dal.kernel.utils.KernelUtils.replace;
+
 /**
  * @author fengxie
  */
@@ -26,7 +28,7 @@ public class DBDialectManager {
 		try {
 			properties.load(errorInputStream);
 			for (String dbType : DB_TYPES) {
-				String className = "drone.platform.components.dal.rdbms.impl.dialect." +
+				String className = "stone.dal.jdbc.impl.dialect." +
 						StringUtils.firstChar2UpperCase(dbType) + "Dialect";
 				Map<String, String> errors = filter(properties, dbType);
 				DBDialectSpi dbDialect = (DBDialectSpi) Class.forName(className).getConstructor(Map.class).newInstance(errors);
@@ -52,7 +54,7 @@ public class DBDialectManager {
 		keySet.forEach(key -> {
 			String strKey = (String) key;
 			if (strKey.startsWith(type)) {
-				errors.put(org.apache.commons.lang.StringUtils.replace(strKey, type + ".", ""), properties.getProperty(strKey));
+				errors.put(replace(strKey, type + ".", ""), properties.getProperty(strKey));
 			}
 		});
 		return errors;

@@ -7,18 +7,20 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 import org.springframework.stereotype.Component;
+import stone.dal.jdbc.JdbcDclRunner;
 import stone.dal.jdbc.JdbcDmlRunner;
 import stone.dal.jdbc.JdbcQueryRunner;
-import stone.dal.jdbc.JdbcDclRunner;
 import stone.dal.jdbc.api.JdbcTemplate;
 import stone.dal.jdbc.api.meta.ExecResult;
+import stone.dal.jdbc.api.meta.SqlCondition;
 import stone.dal.jdbc.api.meta.SqlDmlDclMeta;
 import stone.dal.jdbc.api.meta.SqlQueryMeta;
 import stone.dal.kernel.utils.KernelRuntimeException;
 import stone.dal.models.data.BaseDo;
 import stone.dal.models.data.Page;
 
-import static stone.dal.kernel.utils.KernelUtils.str_2_arr;
+import static stone.dal.kernel.utils.KernelUtils.isCollectionEmpty;
+import static stone.dal.kernel.utils.KernelUtils.str2Arr;
 
 /**
  * @author fengxie
@@ -81,7 +83,7 @@ public class JdbcTemplateImpl implements JdbcTemplate {
 	@Override
 	public List<ExecResult> runSqlScript(String sqlScripts) {
 		List<ExecResult> results = new ArrayList<>();
-		String[] sqls = str_2_arr(sqlScripts, ";");
+    String[] sqls = str2Arr(sqlScripts, ";");
 		for (String sql : sqls) {
 			try {
 				int rows = runDcl(sql);
@@ -108,4 +110,24 @@ public class JdbcTemplateImpl implements JdbcTemplate {
 		return (T) queryRunner.runFind(pk);
 	}
 
+  @Override
+  public <T extends BaseDo> T runFind(SqlCondition condition) {
+    List list = runFindMany(condition);
+    if (!isCollectionEmpty(list)) {
+      return (T) list.iterator().next();
+    }
+    return null;
+  }
+
+  public <T> List<T> runFindMany(SqlCondition condition) {
+//		SqlQueryMeta queryMeta = condition.build();
+//		EntityMeta meta = dalEntityMetaManager.getEntity(queryMeta.getMappingClazz());
+//		RdbmsEntity entity = DalRdbmsEntityManager.getInstance().build(meta);
+//		String sql = entity.getFindSqlNoCondition() + " where ";
+//		SqlQueryMeta _queryMeta = SqlQueryMeta.factory()
+//				.mappingClazz(queryMeta.getMappingClazz())
+//				.sql(sql).join(queryMeta).build();
+//		return run(_queryMeta);
+    return null;
+  }
 }

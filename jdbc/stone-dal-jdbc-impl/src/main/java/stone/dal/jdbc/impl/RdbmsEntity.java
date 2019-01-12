@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 import stone.dal.jdbc.api.meta.SqlDmlDclMeta;
 import stone.dal.jdbc.api.meta.SqlQueryMeta;
 import stone.dal.kernel.utils.KernelRuntimeException;
+import stone.dal.kernel.utils.KernelUtils;
 import stone.dal.kernel.utils.ObjectUtils;
 import stone.dal.models.data.BaseDo;
 import stone.dal.models.meta.EntityMeta;
@@ -20,16 +21,15 @@ import stone.dal.models.meta.JoinColumn;
 import stone.dal.models.meta.RelationMeta;
 import stone.dal.models.meta.RelationTypes;
 
-import static stone.dal.kernel.utils.KernelUtils.bool_v;
-import static stone.dal.kernel.utils.KernelUtils.get_v;
-import static stone.dal.kernel.utils.KernelUtils.list_2_str;
+import static stone.dal.kernel.utils.KernelUtils.getPropVal;
+import static stone.dal.kernel.utils.KernelUtils.isStrEmpty;
+import static stone.dal.kernel.utils.KernelUtils.list2Str;
 import static stone.dal.kernel.utils.KernelUtils.replace;
-import static stone.dal.kernel.utils.KernelUtils.str_emp;
 
 /**
  * @author fengxie
  */
-public class DalRdbmsEntity {
+public class RdbmsEntity {
 
 	private String insertDml;
 	private String deleteDml;
@@ -54,7 +54,7 @@ public class DalRdbmsEntity {
 	private ConcurrentHashMap<String, String> delRelSqls;
 	private ConcurrentHashMap<String, String> findRelSqls;
 
-	public DalRdbmsEntity(EntityMeta meta) {
+	public RdbmsEntity(EntityMeta meta) {
 		readEntityMeta(meta);
 	}
 
@@ -68,9 +68,6 @@ public class DalRdbmsEntity {
 		findSqlNoCondition = buildSelectSql(meta.getTableName(), false);
 	}
 
-	protected void readFieldInfo(FieldMeta fieldMeta) {
-		dbFieldNameMapper.put(fieldMeta.getDbName(), fieldMeta);
-	}
 
 	private void readRelation(RelationMeta relation) {
 		relationMapper.put(relation.getJoinProperty(), relation);
@@ -105,15 +102,15 @@ public class DalRdbmsEntity {
 
 	public SqlDmlDclMeta getInsertMeta(BaseDo obj) {
 		List<Object> params = new ArrayList<>();
-		meta.getFields().stream().filter(field -> !bool_v(field.getNotPersist())).forEach(field -> {
+		meta.getFields().stream().filter(field -> !KernelUtils.boolValue(field.getNotPersist())).forEach(field -> {
 			bindDmlParams(obj, field, params);
 		});
 		meta.getRelations().stream().filter(
 				relation -> (relation.getRelationType() == RelationTypes.MANY_2_ONE
 						|| relation.getRelationType() == RelationTypes.ONE_2_ONE_REF)).forEach(relation -> {
-			BaseDo mapper = get_v(obj, relation.getJoinProperty());
+			BaseDo mapper = getPropVal(obj, relation.getJoinProperty());
 			relation.getJoinColumns().forEach(joinColumn -> {
-				Object v = get_v(mapper, joinColumn.getReferencedColumnName());
+				Object v = getPropVal(mapper, joinColumn.getReferencedColumnName());
 				if (!joinColumn.isNullable() && v == null) {
 					throw new KernelRuntimeException(relation.getJoinProperty() + "." + joinColumn.getReferencedColumnName()
 							+ " can not be null!");
@@ -141,12 +138,12 @@ public class DalRdbmsEntity {
 		List<FieldMeta> changedFields = this.meta.getFields().stream()
 				.filter(fieldMeta -> !pks.contains(fieldMeta.getName())
 						&& changes.contains(fieldMeta.getName())).collect(Collectors.toList());
-		changedFields.stream().filter(fieldMeta -> !bool_v(fieldMeta.getNotPersist())).forEach(fieldMeta -> {
+		changedFields.stream().filter(fieldMeta -> !KernelUtils.boolValue(fieldMeta.getNotPersist())).forEach(fieldMeta -> {
 			changeFieldsName.add(fieldMeta.getDbName() + "=?");
 			bindDmlParams(obj, fieldMeta, params);
 		});
 		bindPkParams(params, obj);
-		String sql = replace(updateDml, UPDATE_SET_HOLDER, list_2_str(changeFieldsName, ","));
+		String sql = replace(updateDml, UPDATE_SET_HOLDER, list2Str(changeFieldsName, ","));
 		SqlDmlDclMeta.Factory factory = SqlDmlDclMeta.factory().sql(sql)
 				.params(params.toArray(new Object[0]));
 		return factory.build();
@@ -157,7 +154,7 @@ public class DalRdbmsEntity {
 		SqlDmlDclMeta.Factory factory = SqlDmlDclMeta.factory().sql(deleteDml);
 		List<String> pks = getPks();
 		pks.forEach(pk -> {
-			Object value = get_v(obj, pk);
+			Object value = getPropVal(obj, pk);
 			if (value == null) {
 				throw new KernelRuntimeException(String.format("%s's %s can not be null", meta.getTableName(), pk));
 			}
@@ -175,7 +172,7 @@ public class DalRdbmsEntity {
 		RelationMeta relation = relationMapper.get(joinProperty);
 		List<Object> params = new ArrayList<>();
 		relation.getJoinColumns().forEach(joinColumn -> {
-			params.add(get_v(obj, joinColumn.getReferencedColumnName()));
+			params.add(getPropVal(obj, joinColumn.getReferencedColumnName()));
 		});
 		String delSql = delRelSqls.get(relation.getJoinProperty() + DEL_REL_WHEN_DEL_SUFFIX);
 		return SqlDmlDclMeta.factory().sql(delSql).params(params.toArray()).build();
@@ -185,11 +182,11 @@ public class DalRdbmsEntity {
 	private void bindDmlParams(BaseDo obj, FieldMeta field, List params) {
 		List<String> pks = getPks();
 		String propertyName = field.getName();
-		boolean nullable = bool_v(field.getNullable());
-		Object value = get_v(obj, propertyName);
+		boolean nullable = KernelUtils.boolValue(field.getNullable());
+		Object value = getPropVal(obj, propertyName);
 		if (value == null) {
 			if ((boolean.class == field.getType()
-					|| Boolean.class == field.getType()) && !bool_v(field.getNullable())) {
+					|| Boolean.class == field.getType()) && !KernelUtils.boolValue(field.getNullable())) {
 				value = false;
 			}
 		}
@@ -214,7 +211,7 @@ public class DalRdbmsEntity {
 	private String buildInsertSql() {
 		List<String> fields = new ArrayList<>();
 		List<String> values = new ArrayList<>();
-		meta.getFields().stream().filter(field -> !bool_v(field.getNotPersist())).forEach(field -> {
+		meta.getFields().stream().filter(field -> !KernelUtils.boolValue(field.getNotPersist())).forEach(field -> {
 			fields.add(field.getDbName());
 			values.add("?");
 		});
@@ -228,9 +225,9 @@ public class DalRdbmsEntity {
 		});
 		return "insert into " + meta.getTableName() +
 				" (" +
-				list_2_str(fields, ",") +
+				list2Str(fields, ",") +
 				") values(" +
-				list_2_str(values, ",") +
+				list2Str(values, ",") +
 				")";
 	}
 
@@ -251,7 +248,7 @@ public class DalRdbmsEntity {
 	private String buildSelectSql(String joinSql, boolean addPkValues) {
 		StringBuilder sb = new StringBuilder("select ");
 		List<String> fields = new ArrayList<>();
-		meta.getFields().stream().filter(field -> !bool_v(field.getNotPersist())).forEach(field -> {
+		meta.getFields().stream().filter(field -> !KernelUtils.boolValue(field.getNotPersist())).forEach(field -> {
 			String fieldName = field.getDbName();
 			fields.add(meta.getTableName() + "." + fieldName);
 		});
@@ -263,7 +260,7 @@ public class DalRdbmsEntity {
 			});
 		});
 
-		sb.append(list_2_str(fields, ","));
+		sb.append(list2Str(fields, ","));
 		sb.append(" from ");
 		sb.append(joinSql);
 		if (addPkValues) {
@@ -278,16 +275,16 @@ public class DalRdbmsEntity {
 		pks.forEach(pk -> {
 			values.add(meta.getTableName() + "." + pk.getDbName() + "=?");
 		});
-		return " where " + list_2_str(values, " and ");
+		return " where " + list2Str(values, " and ");
 	}
 
-	public String buildRelFindSql(String property, DalRdbmsEntity relEntity) {
+	public String buildRelFindSql(String property, RdbmsEntity relEntity) {
 		RelationMeta relationMeta = relationMapper.get(property);
 		String res = findRelSqls.get(relationMeta.getJoinProperty());
 		if (res == null) {
 			String joinSql = buildJoins(property, relEntity);
 			String orderByStr = "";
-			if (!str_emp(relationMeta.getFetchOrder())) {
+			if (!isStrEmpty(relationMeta.getFetchOrder())) {
 				orderByStr += " order by " + relationMeta.getFetchOrder();
 			}
 			res = relEntity.buildSelectSql(joinSql, false) + buildPkCriteriaSql() + " " + orderByStr;
@@ -296,11 +293,11 @@ public class DalRdbmsEntity {
 		return res;
 	}
 
-	private String buildJoins(String propertyName, DalRdbmsEntity relEntity) {
+	private String buildJoins(String propertyName, RdbmsEntity relEntity) {
 		RelationMeta relationMeta = relationMapper.get(propertyName);
 		String mappedBy = relationMeta.getMapperBy();
 		StringBuilder sb = new StringBuilder();
-		if (str_emp(mappedBy)) {
+		if (isStrEmpty(mappedBy)) {
 			sb.append(meta.getTableName());
 			StringBuilder innerJoinSql = new StringBuilder();
 			if (RelationTypes.MANY_2_MANY == relationMeta.getRelationType()) {
@@ -311,7 +308,7 @@ public class DalRdbmsEntity {
 				relationMeta.getJoinColumns().forEach(joinColumn -> {
 					innerJoinSqls.add(buildMany2ManyInnerJoinSql(joinColumn, relationMeta.getJoinTable()));
 				});
-				sb.append(list_2_str(innerJoinSqls, " and "));
+				sb.append(list2Str(innerJoinSqls, " and "));
 				sb.append(" inner join ");
 				sb.append(relEntity.getMeta().getTableName());
 				sb.append(" on ");
@@ -320,7 +317,7 @@ public class DalRdbmsEntity {
 					inverseInnerJoinSqls.add(buildMany2ManyInverseInnerJoinSql(joinColumn,
 							relationMeta.getJoinTable(), relEntity));
 				});
-				sb.append(list_2_str(inverseInnerJoinSqls, " and "));
+				sb.append(list2Str(inverseInnerJoinSqls, " and "));
 			} else {
 				relationMeta.getJoinColumns().forEach(joinColumn -> {
 					innerJoinSql.append(buildInnerJoinSql(joinColumn, relEntity));
@@ -350,7 +347,7 @@ public class DalRdbmsEntity {
 	}
 
 	private String buildMany2ManyInverseInnerJoinSql(JoinColumn joinColumn,
-													 String joinTable, DalRdbmsEntity relEntity) {
+			String joinTable, RdbmsEntity relEntity) {
 		StringBuilder innerJoinExp = new StringBuilder();
 		String fieldName = joinColumn.getName();
 		innerJoinExp.append(joinTable);
@@ -368,7 +365,7 @@ public class DalRdbmsEntity {
 	}
 
 	private String buildInnerJoinSql(
-			JoinColumn joinColumn, DalRdbmsEntity relEntity) {
+			JoinColumn joinColumn, RdbmsEntity relEntity) {
 		StringBuilder innerJoinExp = new StringBuilder();
 		String fieldName = joinColumn.getName();
 		innerJoinExp.append(meta.getTableName());
@@ -385,16 +382,16 @@ public class DalRdbmsEntity {
 			BaseDo obj, String joinProperty) {
 		List<SqlDmlDclMeta> insertSqlMetaList = new ArrayList<>();
 		List<SqlDmlDclMeta> delSqlMetaList = new ArrayList<>();
-		Collection<BaseDo> records = get_v(obj, joinProperty);
+		Collection<BaseDo> records = getPropVal(obj, joinProperty);
 		RelationMeta relationMeta = relationMapper.get(joinProperty);
 		if (records != null) {
 			records.forEach(record -> {
 				List<Object> params = new ArrayList<>();
 				relationMeta.getJoinColumns().forEach(joinColumn -> {
-					params.add(get_v(obj, joinColumn.getReferencedColumnName()));
+					params.add(getPropVal(obj, joinColumn.getReferencedColumnName()));
 				});
 				relationMeta.getInverseJoinColumns().forEach(joinColumn -> {
-					params.add(get_v(record, joinColumn.getReferencedColumnName()));
+					params.add(getPropVal(record, joinColumn.getReferencedColumnName()));
 				});
 				if (BaseDo.States.DELETED == record.get_state()) {
 					SqlDmlDclMeta meta = SqlDmlDclMeta.factory().sql(delRelSqls.get(joinProperty + DEL_REL_WHEN_SAVE_SUFFIX))
@@ -428,9 +425,9 @@ public class DalRdbmsEntity {
 			names.add(joinColumn.getName());
 			params.add("?");
 		});
-		sb.append(list_2_str(names, ","));
+		sb.append(list2Str(names, ","));
 		sb.append(") values (");
-		sb.append(list_2_str(params, ","));
+		sb.append(list2Str(params, ","));
 		sb.append(")");
 		return sb.toString();
 	}
@@ -449,7 +446,7 @@ public class DalRdbmsEntity {
 				names.add(joinColumn.getName() + "=?");
 			});
 		}
-		sb.append(list_2_str(names, " and "));
+		sb.append(list2Str(names, " and "));
 		return sb.toString();
 	}
 
@@ -464,7 +461,7 @@ public class DalRdbmsEntity {
 	private void bindPkParams(List<Object> params, BaseDo obj) {
 		List<String> pks = getPks();
 		pks.forEach(pk -> {
-			Object value = get_v(obj, pk);
+			Object value = getPropVal(obj, pk);
 			if (value == null) {
 				throw new KernelRuntimeException(String.format("%s's %s can not be null", meta.getTableName(), pk));
 			}

@@ -9,13 +9,13 @@ import stone.dal.models.meta.EntityMeta;
  */
 public class DalRdbmsEntityManager {
 
-	protected ConcurrentHashMap<Class, DalRdbmsEntity> entityMapper = new ConcurrentHashMap<>();
+	protected ConcurrentHashMap<Class, RdbmsEntity> entityMapper = new ConcurrentHashMap<>();
 
 	DalRdbmsEntityManager() {
 	}
 
-	public DalRdbmsEntity build(EntityMeta meta) {
-		return entityMapper.computeIfAbsent(meta.getClazz(), s -> new DalRdbmsEntity(meta));
+	public RdbmsEntity build(EntityMeta meta) {
+		return entityMapper.computeIfAbsent(meta.getClazz(), s -> new RdbmsEntity(meta));
 	}
 
 	public static DalRdbmsEntityManager getInstance() {

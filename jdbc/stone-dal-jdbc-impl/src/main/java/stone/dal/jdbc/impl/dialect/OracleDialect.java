@@ -9,7 +9,7 @@ import org.apache.commons.lang.StringUtils;
 import stone.dal.jdbc.DBDialectSpi;
 import stone.dal.jdbc.api.meta.DBField;
 
-import static stone.dal.kernel.utils.KernelUtils.str_emp;
+import static stone.dal.kernel.utils.KernelUtils.isStrEmpty;
 
 /**
  * @author fengxie
@@ -117,12 +117,12 @@ public class OracleDialect implements DBDialectSpi {
 				precisionScale += dataField.getPrecision();
 			}
 			if (dataField.getScale() > 0) {
-				if (!str_emp(precisionScale)) {
+        if (!isStrEmpty(precisionScale)) {
 					precisionScale += ",";
 				}
 				precisionScale += dataField.getScale();
 			}
-			if (!str_emp(precisionScale)) {
+      if (!isStrEmpty(precisionScale)) {
 				sb.append("(").append(precisionScale).append(")");
 			}
 		} else if (type.contains("Boolean") || type.contains("boolean")) {

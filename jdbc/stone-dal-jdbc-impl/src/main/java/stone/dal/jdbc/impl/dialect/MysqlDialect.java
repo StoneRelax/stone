@@ -8,8 +8,8 @@ import org.apache.commons.lang.StringUtils;
 import stone.dal.jdbc.DBDialectSpi;
 import stone.dal.jdbc.api.meta.DBField;
 
-import static stone.dal.kernel.utils.KernelUtils.bool_v;
-import static stone.dal.kernel.utils.KernelUtils.str_emp;
+import static stone.dal.kernel.utils.KernelUtils.boolValue;
+import static stone.dal.kernel.utils.KernelUtils.isStrEmpty;
 
 /**
  * @author fengxie
@@ -27,7 +27,7 @@ public class MysqlDialect implements DBDialectSpi {
 		column.put(COLUMN_SIZE, resultSet.getObject("COLUMN_SIZE"));
 		column.put(DECIMAL_DIGITS, resultSet.getObject("DECIMAL_DIGITS"));
 		column.put(NUM_PREC_RADIX, resultSet.getObject("NUM_PREC_RADIX"));
-		column.put(NULLABLE, bool_v((Integer) resultSet.getObject("NULLABLE")));
+    column.put(NULLABLE, boolValue((Integer) resultSet.getObject("NULLABLE")));
 		column.put(SQL_DATA_TYPE, resultSet.getObject("SQL_DATA_TYPE"));
 	}
 
@@ -109,12 +109,12 @@ public class MysqlDialect implements DBDialectSpi {
 				precisionScale += dataField.getPrecision();
 			}
 			if (dataField.getScale() > 0) {
-				if (!str_emp(precisionScale)) {
+        if (!isStrEmpty(precisionScale)) {
 					precisionScale += ",";
 				}
 				precisionScale += dataField.getScale();
 			}
-			if (!str_emp(precisionScale)) {
+      if (!isStrEmpty(precisionScale)) {
 				sb.append("(").append(precisionScale).append(")");
 			}
 		} else if (type.contains("boolean")) {
