@@ -3,9 +3,11 @@ package stone.dal.tools;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
+import java.math.BigDecimal;
+import java.sql.Timestamp;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.poi.hssf.usermodel.HSSFCell;
 import org.apache.poi.hssf.usermodel.HSSFRow;
@@ -19,12 +21,42 @@ import stone.dal.tools.meta.RawFieldMeta;
 import stone.dal.tools.meta.RawRelationMeta;
 import stone.dal.tools.utils.ExcelUtils;
 
+import javax.xml.datatype.XMLGregorianCalendar;
+
 import static stone.dal.kernel.utils.KernelUtils.boolValue;
 import static stone.dal.kernel.utils.KernelUtils.isStrEmpty;
 import static stone.dal.kernel.utils.KernelUtils.replaceNull;
 import static stone.dal.kernel.utils.KernelUtils.str2Arr;
 
 public class DoGenerator {
+  private static Map<String, Class> classTypeMap = new ConcurrentHashMap<>();
+
+  static {
+    classTypeMap.put(String.class.getName(), String.class);
+    classTypeMap.put(BigDecimal.class.getName(), BigDecimal.class);
+    classTypeMap.put(Double.class.getName(), Double.class);
+    classTypeMap.put(Date.class.getName(), Date.class);
+    classTypeMap.put(Integer.class.getName(), Integer.class);
+    classTypeMap.put(Timestamp.class.getName(), Timestamp.class);
+    classTypeMap.put(int.class.getName(), int.class);
+    classTypeMap.put(long.class.getName(), long.class);
+    classTypeMap.put(Long.class.getName(), Long.class);
+    classTypeMap.put(boolean.class.getName(), boolean.class);
+    classTypeMap.put(Boolean.class.getName(), Boolean.class);
+    classTypeMap.put(Class.class.getName(), Class.class);
+    classTypeMap.put(XMLGregorianCalendar.class.getName(), XMLGregorianCalendar.class);
+    classTypeMap.put("java.lang.Object", Object.class);
+    classTypeMap.put(Byte.class.getName(), Byte.class);
+    classTypeMap.put(byte.class.getName(), byte.class);
+    classTypeMap.put("string", String.class);
+    classTypeMap.put("date", Date.class);
+    classTypeMap.put("datetime", Timestamp.class);
+    classTypeMap.put("int", Integer.class);
+    classTypeMap.put("long", Long.class);
+    classTypeMap.put("double", BigDecimal.class);
+    classTypeMap.put("boolean", Boolean.class);
+    classTypeMap.put("time", String.class);
+  }
 
   public void build(File file) throws Exception {
     InputStream is = new FileInputStream(file);
@@ -109,7 +141,7 @@ public class DoGenerator {
     meta.setName(fieldName);
     meta.setTypeName(typeName.toLowerCase());
     String property = sfRow.getCell(2).toString();
-    if (!isStrEmpty(property)) {
+     if (!isStrEmpty(property)) {
       if (meta.getTypeName().equalsIgnoreCase("double")
           || meta.getTypeName().equalsIgnoreCase("long")
           || meta.getTypeName().equalsIgnoreCase("int")) {
@@ -234,7 +266,8 @@ public class DoGenerator {
     if (isStrEmpty(meta.getTypeName())) {
       throw new Exception("Entity:" + entityName + " Field:" + meta.getName() + "'type can not be null!");
     }
-    if (ClassUtils.isPrimitive(Class.forName(meta.getTypeName()))) {
+
+    if (!classTypeMap.containsKey(meta.getTypeName())) {
       throw new Exception("Entity:" + entityName + " Field:" + meta.getName() + "'type is invalid!\n" +
           "Please use one of the following type" +
           "string,date,datetime,int,long,double,boolean,time");

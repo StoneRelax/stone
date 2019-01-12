@@ -1,18 +1,24 @@
 package stone.dal.tools.meta;
 
+import stone.dal.models.meta.EntityMeta;
+import stone.dal.models.meta.FieldMeta;
+
 import java.util.ArrayList;
 import java.util.List;
-import stone.dal.models.meta.EntityMeta;
 
 public class RawEntityMeta extends EntityMeta {
+
   private String name;
+
   private String label;
+
   private String delFlag;
+
   private String fileFieldTags;
 
-  //  protected Collection<FieldMeta> fields;
+  private List<FieldMeta> fields = new ArrayList<>();
+
   protected List<RawRelationMeta> rawRelations = new ArrayList<>();
-//  protected Collection<UniqueIndexMeta> uniqueIndices;
 
   public List<RawRelationMeta> getRawRelations() {
     return rawRelations;
@@ -58,4 +64,12 @@ public class RawEntityMeta extends EntityMeta {
     this.fileFieldTags = fileFieldTags;
   }
 
+  @Override
+  public List<FieldMeta> getFields() {
+    return fields;
+  }
+
+  public void setFields(List<FieldMeta> fields) {
+    this.fields = fields;
+  }
 }
