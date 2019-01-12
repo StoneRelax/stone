@@ -39,9 +39,11 @@ public class RdbmsEntity {
 
 	private EntityMeta meta;
 
-	private HashMap<String, FieldMeta> dbFieldNameMapper;
-	private HashMap<String, String> dbFieldRelationRefMapper;
-	private Map<String, RelationMeta> relationMapper;
+  private HashMap<String, FieldMeta> dbFieldNameMapper = new HashMap<>();
+
+  private HashMap<String, String> dbFieldRelationRefMapper = new HashMap<>();
+
+  private Map<String, RelationMeta> relationMapper = new HashMap<>();
 
 	private static final String UPDATE_SET_HOLDER = "$CHANGED_FIELDS$";
 	private static final String DEL_REL_WHEN_SAVE_SUFFIX = ".SAVE";
@@ -60,7 +62,8 @@ public class RdbmsEntity {
 
 	protected void readEntityMeta(EntityMeta meta) {
 		this.meta = meta;
-		meta.getRelations().forEach(this::readRelation);
+    meta.getFields().forEach(fieldMeta -> dbFieldNameMapper.put(fieldMeta.getDbName(), fieldMeta));
+    meta.getRelations().forEach(this::parseReleation);
 		insertDml = buildInsertSql();
 		deleteDml = buildDeleteSql();
 		updateDml = buildUpdateSql();
@@ -68,8 +71,7 @@ public class RdbmsEntity {
 		findSqlNoCondition = buildSelectSql(meta.getTableName(), false);
 	}
 
-
-	private void readRelation(RelationMeta relation) {
+  private void parseReleation(RelationMeta relation) {
 		relationMapper.put(relation.getJoinProperty(), relation);
 		RelationTypes relationType = relation.getRelationType();
 		if (RelationTypes.MANY_2_MANY == relationType) {
@@ -378,7 +380,7 @@ public class RdbmsEntity {
 		return innerJoinExp.toString();
 	}
 
-	public Collection<SqlDmlDclMeta> buildMany2ManySaveMeta(
+  Collection<SqlDmlDclMeta> buildMany2ManySaveMeta(
 			BaseDo obj, String joinProperty) {
 		List<SqlDmlDclMeta> insertSqlMetaList = new ArrayList<>();
 		List<SqlDmlDclMeta> delSqlMetaList = new ArrayList<>();
@@ -473,6 +475,6 @@ public class RdbmsEntity {
 		List<Object> params = new ArrayList<>();
 		List<String> pks = getPks();
 		pks.forEach(pk -> params.add(ObjectUtils.getPropertyValue(object, pk)));
-		return params.toArray(new Object[params.size()]);
+    return params.toArray(new Object[0]);
 	}
 }
