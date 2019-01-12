@@ -21,6 +21,7 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import stone.dal.ex.DoParseException;
 import stone.dal.kernel.utils.ClassUtils;
 import stone.dal.kernel.utils.LogUtils;
 import stone.dal.kernel.utils.StringUtils;

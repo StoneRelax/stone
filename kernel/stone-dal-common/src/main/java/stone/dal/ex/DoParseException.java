@@ -1,4 +1,4 @@
-package stone.dal.models;
+package stone.dal.ex;
 
 public class DoParseException extends Exception {
   public DoParseException() {

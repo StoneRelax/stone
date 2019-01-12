@@ -14,6 +14,8 @@ public abstract class EntityMeta {
 	protected boolean nosql;
 	transient Class clazz;
 
+	transient Class pkClazz;
+
 	protected Collection<FieldMeta> fields;
 
 	protected Collection<RelationMeta> relations;
@@ -30,6 +32,10 @@ public abstract class EntityMeta {
 
 	public Class getClazz() {
 		return clazz;
+	}
+
+	public Class getPkClazz() {
+		return pkClazz;
 	}
 
 	public Collection<FieldMeta> getFields() {

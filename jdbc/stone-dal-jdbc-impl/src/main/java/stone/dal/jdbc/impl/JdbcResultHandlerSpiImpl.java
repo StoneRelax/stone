@@ -2,8 +2,8 @@ package stone.dal.jdbc.impl;
 
 import java.util.HashMap;
 import java.util.Map;
+import stone.dal.ex.CreateRowObjectException;
 import stone.dal.jdbc.JdbcResultHandlerSpi;
-import stone.dal.jdbc.api.ex.CreateRowObjectException;
 import stone.dal.jdbc.api.meta.SqlQueryMeta;
 import stone.dal.jdbc.impl.aop.DalMethodFilter;
 import stone.dal.jdbc.impl.aop.DalMethodInterceptor;

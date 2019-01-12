@@ -1,6 +1,6 @@
 package stone.dal.jdbc;
 
-import stone.dal.jdbc.api.ex.CreateRowObjectException;
+import stone.dal.ex.CreateRowObjectException;
 import stone.dal.jdbc.api.meta.SqlQueryMeta;
 
 /**

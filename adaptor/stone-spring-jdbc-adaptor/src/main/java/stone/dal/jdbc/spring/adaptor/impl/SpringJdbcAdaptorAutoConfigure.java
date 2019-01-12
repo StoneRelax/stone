@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import stone.dal.jdbc.JdbcDclRunner;
 import stone.dal.jdbc.JdbcDmlRunner;
@@ -71,7 +72,7 @@ public class SpringJdbcAdaptorAutoConfigure {
   }
 
   @Bean
-  public JdbcDclRunner getDclRunner(@Autowired NamedParameterJdbcTemplate jdbcTemplate) {
+  public JdbcDclRunner getDclRunner(@Autowired JdbcTemplate jdbcTemplate) {
     return new JdbcDclRunnerImpl(jdbcTemplate);
   }
 

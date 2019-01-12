@@ -19,7 +19,7 @@ include 'services:webservice'
 rootProject.name = 'stone'
 
 include 'kernel:stone-dal-utils'
-include 'kernel:stone-dal-models'
+include 'kernel:stone-dal-common'
 include 'sequence-generator:stone-sequence-gen-api'
 include 'sequence-generator:stone-sequence-gen-spi'
 include 'sequence-generator:stone-sequence-gen-impl'

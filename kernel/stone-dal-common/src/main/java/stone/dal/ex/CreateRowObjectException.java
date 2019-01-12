@@ -1,4 +1,4 @@
-package stone.dal.jdbc.api.ex;
+package stone.dal.ex;
 
 public class CreateRowObjectException extends Exception {
 

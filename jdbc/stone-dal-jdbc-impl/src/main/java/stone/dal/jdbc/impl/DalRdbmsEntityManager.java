@@ -2,6 +2,7 @@ package stone.dal.jdbc.impl;
 
 
 import java.util.concurrent.ConcurrentHashMap;
+import stone.dal.models.EntityMetaManager;
 import stone.dal.models.meta.EntityMeta;
 
 /**
@@ -9,6 +10,7 @@ import stone.dal.models.meta.EntityMeta;
  */
 public class DalRdbmsEntityManager {
 
+	private EntityMetaManager entityMetaManager;
 	protected ConcurrentHashMap<Class, RdbmsEntity> entityMapper = new ConcurrentHashMap<>();
 
 	DalRdbmsEntityManager() {

@@ -9,6 +9,8 @@ import stone.dal.jdbc.api.JpaRepository;
 import stone.dal.jdbc.api.meta.SqlDmlDclMeta;
 import stone.dal.jdbc.api.meta.SqlQueryMeta;
 import stone.dal.jdbc.impl.utils.LazyLoadQueryMetaBuilder;
+import stone.dal.kernel.utils.KernelRuntimeException;
+import stone.dal.kernel.utils.LogUtils;
 import stone.dal.models.EntityMetaManager;
 import stone.dal.models.data.BaseDo;
 import stone.dal.models.meta.EntityMeta;
@@ -50,19 +52,19 @@ public class JpaRepositoryImpl<T extends BaseDo, K>
     if (pks.size() == 1) {
       return getPropVal(obj, pks.iterator().next());
     } else {
-//			Class pkClazz = entity.getMeta().getPkClass();
-//			if (pkClazz != null) {
-//				try {
-//					K pk = (K) pkClazz.newInstance();
-//					pks.forEach(_pkName -> {
-//						setPropVal(pk, _pkName, getPropVal(obj, _pkName));
-//					});
-//					return pk;
-//				} catch (Exception e) {
-//					LogUtils.error(logger, e);
-//					throw new KernelRuntimeException(e);
-//				}
-//			}
+      Class pkClazz = entity.getMeta().getPkClazz();
+      if (pkClazz != null) {
+        try {
+          K pk = (K) pkClazz.newInstance();
+          pks.forEach(_pkName -> {
+            setPropVal(pk, _pkName, getPropVal(obj, _pkName));
+          });
+          return pk;
+        } catch (Exception e) {
+          LogUtils.error(logger, e);
+          throw new KernelRuntimeException(e);
+        }
+      }
     }
     return null;
   }
