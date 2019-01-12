@@ -19,11 +19,11 @@ import stone.dal.seq.api.ex.InvalidInputException;
 import stone.dal.seq.api.ex.UndefinedSeqException;
 import stone.dal.seq.api.meta.SequenceMeta;
 
-import static stone.dal.kernel.utils.KernelUtils.date_2_str_pattern;
-import static stone.dal.kernel.utils.KernelUtils.get_v_recursive;
-import static stone.dal.kernel.utils.KernelUtils.repl_emp;
+import static stone.dal.kernel.utils.KernelUtils.date2Str;
+import static stone.dal.kernel.utils.KernelUtils.getPropVal;
+import static stone.dal.kernel.utils.KernelUtils.isStrEmpty;
 import static stone.dal.kernel.utils.KernelUtils.replace;
-import static stone.dal.kernel.utils.KernelUtils.str_emp;
+import static stone.dal.kernel.utils.KernelUtils.replaceNull;
 
 /**
  * @author fengxie
@@ -44,7 +44,7 @@ public class SequenceMixGeneratorImpl implements SequenceGenerator<String> {
 		SequenceSeed locker = registry.get(seqId);
 		if (locker != null) {
 			SequenceMeta def = locker.getMeta();
-			if (!str_emp(def.getFormat())) {
+			if (!isStrEmpty(def.getFormat())) {
 				Map<String, String> values = readFormat(def, context);
 				long newNum = locker.acquire(def.getStart());
 				String v = def.getFormat();
@@ -53,7 +53,7 @@ public class SequenceMixGeneratorImpl implements SequenceGenerator<String> {
 						String seqStr = StringUtils.leftPad(Long.toString(newNum), def.getLength(), '0');
 						v = replace(v, key, seqStr);
 					} else {
-						v = replace(v, key, repl_emp(values.get(key)));
+						v = replace(v, key, replaceNull(values.get(key)));
 					}
 				}
 				return v;
@@ -78,16 +78,16 @@ public class SequenceMixGeneratorImpl implements SequenceGenerator<String> {
 		for (String key : keys) {
 			String v = "";
 			if (key.equals("${date}")) {
-				v = date_2_str_pattern(new Date(), seq.getDatePattern());
+				v = date2Str(new Date(), seq.getDatePattern());
 				res.put(key, v);
 			} else if (key.equals("${sequence}")) {
 				res.put(key, key);
 			} else if (key.contains("$F{")) {
 				String field = replace(key, "$F{", "");
 				field = replace(field, "}", "");
-				Object objV = get_v_recursive(context, field);
+				Object objV = getPropVal(context, field);
 				if (objV instanceof Date) {
-					v = date_2_str_pattern((Date) objV, seq.getDatePattern());
+					v = date2Str((Date) objV, seq.getDatePattern());
 				} else {
 					v = objV.toString();
 				}

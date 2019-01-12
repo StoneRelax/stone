@@ -1,5 +1,6 @@
 package stone.dal.jdbc;
 
+import stone.dal.jdbc.api.ex.CreateRowObjectException;
 import stone.dal.jdbc.api.meta.SqlQueryMeta;
 
 /**
@@ -7,5 +8,5 @@ import stone.dal.jdbc.api.meta.SqlQueryMeta;
  */
 public interface JdbcResultHandlerSpi {
 
-	Object buildRowObj(SqlQueryMeta queryMeta);
+	Object buildRowObj(SqlQueryMeta queryMeta) throws CreateRowObjectException;
 }

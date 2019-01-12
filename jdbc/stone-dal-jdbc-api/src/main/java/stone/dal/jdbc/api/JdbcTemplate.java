@@ -3,6 +3,7 @@ package stone.dal.jdbc.api;
 import java.io.InputStream;
 import java.util.List;
 import stone.dal.jdbc.api.meta.ExecResult;
+import stone.dal.jdbc.api.meta.SqlCondition;
 import stone.dal.jdbc.api.meta.SqlDmlDclMeta;
 import stone.dal.jdbc.api.meta.SqlQueryMeta;
 import stone.dal.models.data.BaseDo;
@@ -81,4 +82,6 @@ public interface JdbcTemplate {
 	 * @return BaseDoect
 	 */
 	<T extends BaseDo> T runFindOne(BaseDo pk);
+
+  <T extends BaseDo> T runFind(SqlCondition condition);
 }

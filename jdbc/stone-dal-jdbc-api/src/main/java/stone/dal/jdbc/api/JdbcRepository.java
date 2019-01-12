@@ -1,7 +1,5 @@
 package stone.dal.jdbc.api;
 
-import java.util.List;
-import stone.dal.jdbc.api.meta.SqlCondition;
 import stone.dal.models.data.BaseDo;
 
 /**
@@ -35,19 +33,4 @@ public interface JdbcRepository<T extends BaseDo, K> {
    */
   T get(T pk);
 
-//	/**
-//	 * Find one by one obj
-//	 *
-//	 * @param condition Condition object
-//	 * @return Returns dal object
-//	 */
-//	T findOne(SqlCondition condition);
-
-  /**
-   * Find many objects by condition
-   *
-   * @param condition Condition object
-   * @return Returns dal objects
-   */
-  List<T> findMany(SqlCondition condition);
 }

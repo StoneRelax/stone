@@ -25,7 +25,6 @@ import stone.dal.kernel.utils.ClassUtils;
 import stone.dal.kernel.utils.LogUtils;
 import stone.dal.kernel.utils.StringUtils;
 import stone.dal.kernel.utils.UrlUtils;
-import stone.dal.models.annotation.Cache;
 import stone.dal.models.annotation.Clob;
 import stone.dal.models.annotation.FileField;
 import stone.dal.models.annotation.GroupByAllowed;
@@ -38,7 +37,7 @@ import stone.dal.models.meta.RelationMeta;
 import stone.dal.models.meta.RelationTypes;
 import stone.dal.models.meta.UniqueIndexMeta;
 
-import static stone.dal.kernel.utils.KernelUtils.arr_emp;
+import static stone.dal.kernel.utils.KernelUtils.isArrayEmpty;
 
 /**
  * @author fengxie
@@ -84,17 +83,11 @@ public class EntityMetaManager {
 			if (clazz.isAnnotationPresent(UniqueIndices.class)) {
 				UniqueIndices uniqueIndices = (UniqueIndices) dalClazz.getAnnotation(UniqueIndices.class);
 				UniqueIndex[] indices = uniqueIndices.indices();
-				if (!arr_emp(indices)) {
+        if (!isArrayEmpty(indices)) {
 					for (UniqueIndex index : indices) {
 						UniqueIndexMeta indexMeta = new UniqueIndexMeta(index.columnNames(), index.name());
 						entityFactory.addUniqueMeta(indexMeta);
 					}
-				}
-			}
-			if (clazz.isAnnotationPresent(Cache.class)) {
-				String[] keys = ((Cache) dalClazz.getAnnotation(Cache.class)).keys();
-				for (String key : keys) {
-					entityFactory.addCacheKey(key);
 				}
 			}
 			parseRelation(dalClazz, entityFactory);

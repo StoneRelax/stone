@@ -1,5 +1,8 @@
 package stone.dal.jdbc.spring.adaptor.AutoConfigure;
 
+import java.lang.management.ManagementFactory;
+import javax.management.MBeanServer;
+import javax.management.ObjectName;
 import org.apache.tomcat.jdbc.pool.DataSource;
 import org.apache.tomcat.jdbc.pool.PoolProperties;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,12 +18,8 @@ import stone.dal.jdbc.spring.adaptor.impl.JdbcDclRunnerImpl;
 import stone.dal.jdbc.spring.adaptor.impl.JdbcDmlRunnerImpl;
 import stone.dal.jdbc.spring.adaptor.impl.JdbcQueryRunnerImpl;
 
-import javax.management.MBeanServer;
-import javax.management.ObjectName;
-import java.lang.management.ManagementFactory;
-
 @Configuration
-public class StoneSpringJdbcAdaptorAutoConfigure {
+public class SpringJdbcAdaptorAutoConfigure {
 
   @Value("${spring.datasource.db.url}")
   private String DB_URL;

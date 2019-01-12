@@ -14,7 +14,6 @@ public abstract class EntityMeta {
 	Collection<FieldMeta> fields;
 	Collection<RelationMeta> relations;
 	Collection<UniqueIndexMeta> uniqueIndices;
-	Collection<String> cacheKeys;
 
 	public String getTableName() {
 		return tableName;
@@ -36,10 +35,6 @@ public abstract class EntityMeta {
 		return uniqueIndices;
 	}
 
-	public Collection<String> getCacheKeys() {
-		return cacheKeys;
-	}
-
 	public static Factory factory() {
 		return new Factory();
 	}
@@ -49,7 +44,6 @@ public abstract class EntityMeta {
 		private List<FieldMeta> fields = new ArrayList<>();
 		private List<RelationMeta> relations = new ArrayList<>();
 		private List<UniqueIndexMeta> uniqueIndices = new ArrayList<>();
-		private List<String> cacheKeys = new ArrayList<>();
 
 		private EntityMeta meta = new EntityMeta() {
 		};
@@ -79,16 +73,10 @@ public abstract class EntityMeta {
 			return this;
 		}
 
-		public Factory addCacheKey(String cacheKey) {
-			cacheKeys.add(cacheKey);
-			return this;
-		}
-
 		public EntityMeta build() {
 			meta.fields = Collections.unmodifiableCollection(fields);
 			meta.relations = Collections.unmodifiableCollection(relations);
 			meta.uniqueIndices = Collections.unmodifiableCollection(uniqueIndices);
-			meta.cacheKeys = Collections.unmodifiableCollection(cacheKeys);
 			return meta;
 		}
 	}
