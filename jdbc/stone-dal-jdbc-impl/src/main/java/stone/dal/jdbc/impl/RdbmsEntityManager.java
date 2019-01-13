@@ -12,6 +12,7 @@ public class RdbmsEntityManager {
 
   protected Map<Class, RdbmsEntity> entityMapper;
 
+
 	public RdbmsEntityManager(EntityMetaManager entityMetaManager) {
 		this.entityMapper = entityMetaManager.getAllEntities().stream().collect(Collectors.toMap(
 				EntityMeta::getClazz, RdbmsEntity::new));
@@ -19,6 +20,10 @@ public class RdbmsEntityManager {
 
 	public RdbmsEntity getEntity(Class clazz) {
 		return entityMapper.get(clazz);
+	}
+
+	public RdbmsEntity build(EntityMeta meta) {
+		return entityMapper.computeIfAbsent(meta.getClazz(), s -> new RdbmsEntity(meta));
 	}
 
 }

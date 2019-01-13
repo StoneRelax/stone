@@ -28,7 +28,7 @@ public class DBDialectManager {
 		try {
 			properties.load(errorInputStream);
 			for (String dbType : DB_TYPES) {
-				String className = "stone.dal.jdbc.impl.dialect." +
+				String className = "stone.dal.jdbc.autoconfigure.dialect." +
 						StringUtils.firstChar2UpperCase(dbType) + "Dialect";
 				Map<String, String> errors = filter(properties, dbType);
 				DBDialectSpi dbDialect = (DBDialectSpi) Class.forName(className).getConstructor(Map.class).newInstance(errors);

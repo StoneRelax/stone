@@ -12,7 +12,7 @@ repositories {
 }
 
 dependencies {
-    compile project(':mongo:stone-dal-mongo-impl')
+    compile project(':mongo:stone-dal-mongo-autoconfigure')
     compile 'org.springframework.boot:spring-boot-autoconfigure'
     compile 'org.springframework:spring-core'
     testCompile 'org.springframework.boot:spring-boot-starter-test'
