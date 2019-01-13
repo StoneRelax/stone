@@ -5,6 +5,24 @@ import freemarker.template.Configuration;
 import freemarker.template.DefaultObjectWrapper;
 import freemarker.template.SimpleHash;
 import freemarker.template.Template;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
+import java.math.BigDecimal;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import javax.xml.datatype.XMLGregorianCalendar;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.poi.hssf.usermodel.HSSFCell;
@@ -15,28 +33,20 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import stone.dal.models.meta.FieldMeta;
 import stone.dal.models.meta.RelationTypes;
-import stone.dal.tools.meta.DataDictionary;
 import stone.dal.tools.meta.RawEntityMeta;
 import stone.dal.tools.meta.RawFieldMeta;
 import stone.dal.tools.meta.RawRelationMeta;
 import stone.dal.tools.utils.ExcelUtils;
 
-import javax.xml.datatype.XMLGregorianCalendar;
-import java.io.*;
-import java.math.BigDecimal;
-import java.net.URL;
-import java.sql.Timestamp;
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-
-import static stone.dal.kernel.utils.KernelUtils.*;
+import static stone.dal.kernel.utils.KernelUtils.boolValue;
+import static stone.dal.kernel.utils.KernelUtils.isStrEmpty;
+import static stone.dal.kernel.utils.KernelUtils.replaceNull;
+import static stone.dal.kernel.utils.KernelUtils.str2Arr;
 
 public class DoGenerator {
   private static Map<String, Class> classTypeMap = new ConcurrentHashMap<>();
 
   private static Logger s_logger = LoggerFactory.getLogger(DoGenerator.class);
-
-  private DataDictionary dataDictionary;
 
   static {
     classTypeMap.put(String.class.getName(), String.class);
@@ -143,7 +153,7 @@ public class DoGenerator {
   }
 
   public List<String> createJavaSource(List<RawEntityMeta> entities, String packageName) throws Exception {
-    List<String> javaContents = new ArrayList<String>();
+    List<String> javaContents = new ArrayList<>();
     for (RawEntityMeta entityMeta : entities) {
       String javaContent = genJavaClass(entityMeta, packageName);
       javaContents.add(javaContent);
@@ -166,12 +176,7 @@ public class DoGenerator {
       for (RawRelationMeta relation : relations) {
         if (StringUtils.isEmpty(relation.getJoinPropertyType())) {
           String propertyDomain = relation.getJoinDomain();
-          RawEntityMeta _entityMeta = (RawEntityMeta) dataDictionary.getEntityMeta(propertyDomain);
-          if (_entityMeta != null && !StringUtils.isEmpty(_entityMeta.getClazzName())) {
-            relation.setJoinPropertyType(_entityMeta.getClazzName());
-          } else {
-            relation.setJoinPropertyType(packageName + "." + propertyDomain);
-          }
+          relation.setJoinPropertyType(packageName + "." + propertyDomain);
         }
       }
     }
@@ -181,7 +186,7 @@ public class DoGenerator {
           protected URL getURL(String name) {
             Locale locale = Locale.getDefault();
             String urlName =
-                "stone/tools/stone-entity-generator/ftl/" + StringUtils.replace(name, "_" + locale.toString(), "");
+                "stone/tools/template/" + StringUtils.replace(name, "_" + locale.toString(), "");
             return Thread.currentThread().getContextClassLoader().getResource(urlName);
           }
         });
@@ -197,7 +202,7 @@ public class DoGenerator {
       params.put("gen", this);
       temp.process(params, out);
       out.flush();
-      return new String(bos.toByteArray(), "utf-8");
+      return new String(bos.toByteArray(), StandardCharsets.UTF_8);
     } catch (Exception e) {
       s_logger.error(e.getMessage());
       throw new Exception(e);

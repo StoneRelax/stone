@@ -11,7 +11,6 @@ import stone.dal.jdbc.api.meta.SqlQueryMeta;
 import stone.dal.jdbc.impl.utils.LazyLoadQueryMetaBuilder;
 import stone.dal.kernel.utils.KernelRuntimeException;
 import stone.dal.kernel.utils.LogUtils;
-import stone.dal.models.EntityMetaManager;
 import stone.dal.models.data.BaseDo;
 import stone.dal.models.meta.EntityMeta;
 import stone.dal.models.meta.RelationMeta;
@@ -28,14 +27,14 @@ public class JpaRepositoryImpl<T extends BaseDo, K>
 
   protected JdbcTemplate jdbcTemplate;
 
-  protected EntityMetaManager entityMetaManager;
+  protected RdbmsEntityManager entityMetaManager;
 
   private LazyLoadQueryMetaBuilder lazyLoadQueryMetaBuilder;
 
   private static Logger logger = LoggerFactory.getLogger(JpaRepositoryImpl.class);
 
   public JpaRepositoryImpl(JdbcTemplate jdbcTemplate,
-      EntityMetaManager entityMetaManager,
+      RdbmsEntityManager entityMetaManager,
       LazyLoadQueryMetaBuilder lazyLoadQueryMetaBuilder) {
     this.jdbcTemplate = jdbcTemplate;
     this.entityMetaManager = entityMetaManager;
@@ -45,8 +44,7 @@ public class JpaRepositoryImpl<T extends BaseDo, K>
   @Override
   @SuppressWarnings("unchecked")
   public K create(T obj) {
-    EntityMeta meta = entityMetaManager.getEntity(obj.getClass());
-    RdbmsEntity entity = DalRdbmsEntityManager.getInstance().build(meta);
+    RdbmsEntity entity = entityMetaManager.getEntity(obj.getClass());
     runCreate(obj);
     Collection<String> pks = entity.getPks();
     if (pks.size() == 1) {
@@ -83,8 +81,7 @@ public class JpaRepositoryImpl<T extends BaseDo, K>
 
   @Override
   public T get(T pk) {
-    EntityMeta meta = entityMetaManager.getEntity(pk.getClass());
-    RdbmsEntity entity = DalRdbmsEntityManager.getInstance().build(meta);
+    RdbmsEntity entity = entityMetaManager.getEntity(pk.getClass());
     BaseDo res = jdbcTemplate.runFindOne(pk);
     if (res != null) {
       cascadeFind(entity, res, true);
@@ -94,16 +91,14 @@ public class JpaRepositoryImpl<T extends BaseDo, K>
 
   @SuppressWarnings("unchecked")
   private void runCreate(BaseDo obj) {
-    EntityMeta meta = entityMetaManager.getEntity(obj.getClass());
-    RdbmsEntity entity = DalRdbmsEntityManager.getInstance().build(meta);
+    RdbmsEntity entity = entityMetaManager.getEntity(obj.getClass());
     jdbcTemplate.runInsert(obj);
     cascadeInsert(entity, obj);
   }
 
   private void runUpdate(BaseDo obj) {
     if (BaseDo.States.UPDATED == obj.get_state()) {
-      EntityMeta meta = entityMetaManager.getEntity(obj.getClass());
-      RdbmsEntity entity = DalRdbmsEntityManager.getInstance().build(meta);
+      RdbmsEntity entity = entityMetaManager.getEntity(obj.getClass());
       SqlDmlDclMeta updateSqlMeta = entity.getUpdateMeta(obj);
       jdbcTemplate.runDml(updateSqlMeta);
       cascadeUpdate(entity, obj);
@@ -115,15 +110,14 @@ public class JpaRepositoryImpl<T extends BaseDo, K>
   }
 
   private void runDel(BaseDo pkObj) {
-    EntityMeta meta = entityMetaManager.getEntity(pkObj.getClass());
-    RdbmsEntity entity = DalRdbmsEntityManager.getInstance().build(meta);
+    RdbmsEntity entity = entityMetaManager.getEntity(pkObj.getClass());
     cascadeDel(entity, pkObj);
     SqlDmlDclMeta sqlMeta = entity.getDeleteMeta(pkObj);
     jdbcTemplate.runDml(sqlMeta);
   }
 
-  private void saveJoinTable(BaseDo obj, EntityMeta meta, RelationMeta many2many) {
-    RdbmsEntity entity = DalRdbmsEntityManager.getInstance().build(meta);
+  private void saveJoinTable(BaseDo obj, RelationMeta many2many) {
+    RdbmsEntity entity = entityMetaManager.getEntity(obj.getClass());
     Collection<SqlDmlDclMeta> saveMetaList = entity.buildMany2ManySaveMeta(obj, many2many.getJoinProperty());
     saveMetaList.forEach(insertMeta -> jdbcTemplate.runDml(insertMeta));
   }
@@ -140,7 +134,7 @@ public class JpaRepositoryImpl<T extends BaseDo, K>
       });
     });
     meta.getRelations().stream().filter(rel ->
-        rel.getRelationType() == RelationTypes.MANY_2_MANY).forEach(rel -> saveJoinTable(mainObj, meta, rel));
+        rel.getRelationType() == RelationTypes.MANY_2_MANY).forEach(rel -> saveJoinTable(mainObj, rel));
   }
 
   private void cascadeUpdate(RdbmsEntity entity, BaseDo mainObj) {
@@ -180,8 +174,7 @@ public class JpaRepositoryImpl<T extends BaseDo, K>
         .forEach(relation -> {
           SqlQueryMeta queryMeta = lazyLoadQueryMetaBuilder.buildMetaFactory(entity,
               mainObj, relation.getJoinProperty()).build();
-          EntityMeta relMeta = entityMetaManager.getEntityByClazzName(relation.getJoinPropertyType());
-          RdbmsEntity relEntity = DalRdbmsEntityManager.getInstance().build(relMeta);
+          RdbmsEntity relEntity = entityMetaManager.getEntity(relation.getJoinPropertyType());
           List<BaseDo> relObjs = jdbcTemplate.runQuery(queryMeta);
           relObjs.forEach(relObj -> {
             cascadeDel(relEntity, relObj);
@@ -202,9 +195,7 @@ public class JpaRepositoryImpl<T extends BaseDo, K>
             || relation.getRelationType() == RelationTypes.ONE_2_ONE_REF).forEach(relation -> {
       SqlQueryMeta queryMeta = lazyLoadQueryMetaBuilder.buildMetaFactory(entity,
           mainObj, relation.getJoinProperty()).build();
-      EntityMeta relMeta = entityMetaManager.getEntityByClazzName(relation.getJoinPropertyType());
-      RdbmsEntity relEntity = DalRdbmsEntityManager.getInstance().build(relMeta);
-
+      RdbmsEntity relEntity = entityMetaManager.getEntity(relation.getJoinPropertyType());
       List<BaseDo> relObjs = jdbcTemplate.runQuery(queryMeta);
       if (relation.getRelationType() == RelationTypes.MANY_2_ONE
           || relation.getRelationType() == RelationTypes.ONE_2_ONE_VAL) {

@@ -13,7 +13,7 @@ public abstract class RelationMeta {
 
 	protected String joinProperty;
 
-	protected String joinPropertyType;
+	protected Class joinPropertyType;
 
 	protected String mappedBy;
 
@@ -35,7 +35,7 @@ public abstract class RelationMeta {
 		return joinProperty;
 	}
 
-	public String getJoinPropertyType() {
+	public Class getJoinPropertyType() {
 		return joinPropertyType;
 	}
 
@@ -74,7 +74,7 @@ public abstract class RelationMeta {
 			return this;
 		}
 
-		public Factory joinPropertyType(String joinPropertyType) {
+		public Factory joinPropertyType(Class joinPropertyType) {
 			meta.joinPropertyType = joinPropertyType;
 			return this;
 		}

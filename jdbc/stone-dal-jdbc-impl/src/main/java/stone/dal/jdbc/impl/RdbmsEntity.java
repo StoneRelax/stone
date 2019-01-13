@@ -85,7 +85,7 @@ public class RdbmsEntity {
 		}
 	}
 
-	public String readRelType(String propertyName) {
+	public Class readRelType(String propertyName) {
 		return relationMapper.get(propertyName).getJoinPropertyType();
 	}
 

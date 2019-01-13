@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -69,6 +70,10 @@ public class EntityMetaManager {
 
 	public EntityMeta getEntity(Class clazz) {
 		return entityMapper.get(org.springframework.util.ClassUtils.getUserClass(clazz).getName());
+	}
+
+	public Set<EntityMeta> getAllEntities() {
+		return entityMapper.keySet().stream().map(key -> entityMapper.get(key)).collect(Collectors.toSet());
 	}
 
 	@SuppressWarnings("unchecked")
@@ -147,7 +152,7 @@ public class EntityMetaManager {
 				factory.mappedBy(one2Many.mappedBy()).relationType(RelationTypes.ONE_2_MANY);
 				factory.joinProperty(propertyDesc.getName());
 				parseOrder(factory, readMethod);
-				factory.joinPropertyType(getRelationClazz(readMethod, clazz).getName());
+				factory.joinPropertyType(getRelationClazz(readMethod, clazz));
 				entityFactory.addRelation(factory.build());
 			} else if (readMethod.isAnnotationPresent(ManyToMany.class)) {
 				JoinTable joinTable = readMethod.getAnnotation(JoinTable.class);
@@ -162,7 +167,7 @@ public class EntityMetaManager {
 				}
 				parseOrder(factory, readMethod);
 				factory.joinProperty(propertyDesc.getName());
-				factory.joinPropertyType(getRelationClazz(readMethod, clazz).getName());
+				factory.joinPropertyType(getRelationClazz(readMethod, clazz));
 				entityFactory.addRelation(factory.build());
 			} else if (readMethod.isAnnotationPresent(ManyToOne.class)) {
 				if (readMethod.isAnnotationPresent(ManyToOne.class)) {
@@ -178,7 +183,7 @@ public class EntityMetaManager {
 					}
 				}
 				factory.joinProperty(propertyDesc.getName());
-				factory.joinPropertyType(getRelationClazz(readMethod, clazz).getName());
+				factory.joinPropertyType(getRelationClazz(readMethod, clazz));
 				parseOrder(factory, readMethod);
 				entityFactory.addRelation(factory.build());
 			} else if (readMethod.isAnnotationPresent(OneToOne.class)) {
@@ -197,7 +202,7 @@ public class EntityMetaManager {
 					}
 					factory.relationType(RelationTypes.ONE_2_ONE_VAL);
 				}
-				factory.joinPropertyType(getRelationClazz(readMethod, clazz).getName());
+				factory.joinPropertyType(getRelationClazz(readMethod, clazz));
 				parseOrder(factory, readMethod);
 				entityFactory.addRelation(factory.build());
 			}

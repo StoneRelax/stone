@@ -122,7 +122,7 @@ public class JdbcTemplateImpl implements JdbcTemplate {
   public <T> List<T> runFindMany(SqlCondition condition) {
 //		SqlQueryMeta queryMeta = condition.build();
 //		EntityMeta meta = dalEntityMetaManager.getEntity(queryMeta.getMappingClazz());
-//		RdbmsEntity entity = DalRdbmsEntityManager.getInstance().build(meta);
+//		RdbmsEntity entity = RdbmsEntityManager.getInstance().build(meta);
 //		String sql = entity.getFindSqlNoCondition() + " where ";
 //		SqlQueryMeta _queryMeta = SqlQueryMeta.factory()
 //				.mappingClazz(queryMeta.getMappingClazz())
