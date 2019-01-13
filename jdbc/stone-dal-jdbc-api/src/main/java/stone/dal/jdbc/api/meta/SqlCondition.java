@@ -2,7 +2,9 @@ package stone.dal.jdbc.api.meta;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author fengxie
@@ -10,7 +12,7 @@ import java.util.List;
 public class SqlCondition {
 
 	private Class clazz;
-	private List<Object> params = new ArrayList<>();
+	private Map<String,Object> params = new HashMap<>();
 	private List<String> operators = new ArrayList<>();
 
 	public SqlCondition(Class clazz) {
@@ -18,32 +20,32 @@ public class SqlCondition {
 	}
 
 	public SqlCondition eq(String field, Object value) {
-		params.add(value);
-		operators.add(field + "=?");
+		params.put(field,value);
+		operators.add(field + "=:");
 		return this;
 	}
 
 	public SqlCondition gt(String field, Object value) {
-		params.add(value);
-		operators.add(field + ">?");
+		params.put(field,value);
+		operators.add(field + ">:");
 		return this;
 	}
 
 	public SqlCondition gtAndEq(String field, Object value) {
-		params.add(value);
-		operators.add(field + ">=?");
+		params.put(field,value);
+		operators.add(field + ">=:");
 		return this;
 	}
 
 	public SqlCondition ls(String field, Object value) {
-		params.add(value);
-		operators.add(field + "<?");
+		params.put(field,value);
+		operators.add(field + "<:");
 		return this;
 	}
 
 	public SqlCondition lsAndeq(String field, Object value) {
-		params.add(value);
-		operators.add(field + "<=?");
+		params.put(field,value);
+		operators.add(field + "<=:");
 		return this;
 	}
 
@@ -60,7 +62,7 @@ public class SqlCondition {
 	public SqlCondition join(SqlCondition condition) {
 		SqlQueryMeta joinMeta = condition.build();
 		operators.add("(" + joinMeta.getSql() + ")");
-		params.addAll(Arrays.asList(joinMeta.getParameters()));
+		params.putAll(joinMeta.getParameters());
 		return this;
 	}
 
@@ -72,8 +74,7 @@ public class SqlCondition {
 			sb.append(" ");
 		});
 		return SqlQueryMeta.factory().mappingClazz(clazz)
-				.sql(sb.toString()).params(params.toArray(new Object[params.size()])).build();
+				.sql(sb.toString()).params(params).build();
 	}
-
 
 }

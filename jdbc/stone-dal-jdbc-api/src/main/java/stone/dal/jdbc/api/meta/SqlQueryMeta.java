@@ -2,6 +2,7 @@ package stone.dal.jdbc.api.meta;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import stone.dal.models.DalQueryPostHandler;
@@ -18,7 +19,7 @@ public abstract class SqlQueryMeta {
 	/**
 	 * parameters
 	 */
-	Object[] parameters = new Object[0];
+	Map<String,Object> parameters = new HashMap<>();
 	/**
 	 * Bean class whose instance might be imported with result value
 	 */
@@ -100,7 +101,7 @@ public abstract class SqlQueryMeta {
 		return sql;
 	}
 
-	public Object[] getParameters() {
+	public Map<String,Object> getParameters() {
 		return parameters;
 	}
 
@@ -158,7 +159,7 @@ public abstract class SqlQueryMeta {
 			return this;
 		}
 
-		public Factory params(Object[] params) {
+		public Factory params(Map<String,Object> params) {
 			meta.parameters = params;
 			return this;
 		}
@@ -181,10 +182,10 @@ public abstract class SqlQueryMeta {
 			String sql = meta.getSql();
 			sql += queryMeta.sql;
 			meta.sql = sql;
-			List<Object> parameters = new ArrayList<>();
-			parameters.addAll(Arrays.asList(meta.parameters));
-			parameters.addAll(Arrays.asList(queryMeta.parameters));
-			meta.parameters = parameters.toArray(new Object[parameters.size()]);
+			Map<String,Object>parameters = new HashMap<>();
+			parameters.putAll(queryMeta.parameters);
+			parameters.putAll(meta.parameters);
+			meta.parameters = parameters;
 			return this;
 		}
 	}
