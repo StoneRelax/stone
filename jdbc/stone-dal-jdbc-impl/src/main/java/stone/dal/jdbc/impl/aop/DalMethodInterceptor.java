@@ -3,17 +3,17 @@ package stone.dal.jdbc.impl.aop;
 import java.lang.reflect.Method;
 import org.springframework.cglib.proxy.MethodInterceptor;
 import org.springframework.cglib.proxy.MethodProxy;
-import stone.dal.jdbc.impl.utils.LazyLoadQueryMetaBuilder;
+import stone.dal.jdbc.impl.utils.RelationQueryBuilder;
 
 /**
  * @author fengxie
  */
 public class DalMethodInterceptor implements MethodInterceptor {
 
-  private LazyLoadQueryMetaBuilder lazyLoadQueryMetaBuilder;
+  private RelationQueryBuilder relationQueryBuilder;
 
-  public DalMethodInterceptor(LazyLoadQueryMetaBuilder lazyLoadQueryMetaBuilder) {
-    this.lazyLoadQueryMetaBuilder = lazyLoadQueryMetaBuilder;
+  public DalMethodInterceptor(RelationQueryBuilder relationQueryBuilder) {
+    this.relationQueryBuilder = relationQueryBuilder;
   }
 
   public Object intercept(
@@ -26,8 +26,8 @@ public class DalMethodInterceptor implements MethodInterceptor {
 //							org.apache.commons.lang.StringUtils.replace(method.getName(), "get", "")
 //					);
 //			if (!((BaseDo) obj).isLoaded(propertyName)) {
-//				SqlQueryMeta queryMeta = lazyLoadQueryMetaBuilder.buildMetaFactory(obj, propertyName).supportFetchMore(true).build();
-//				List resultSet = JdbcQueryRunner.factory().getRunner().run(queryMeta);
+//				SqlQueryMeta queryMeta = relationQueryBuilder.buildMetaFactory(obj, propertyName).supportFetchMore(true).build();
+//				List resultSet = JdbcQuerySpi.factory().getRunner().exec(queryMeta);
 //				if (!isCollectionEmpty(resultSet)) {
 //					if (method.getReturnType().isAssignableFrom(List.class)) {
 //						result = resultSet;

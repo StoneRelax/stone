@@ -7,58 +7,46 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 import org.springframework.stereotype.Component;
-import stone.dal.jdbc.JdbcDclRunner;
-import stone.dal.jdbc.JdbcDmlRunner;
-import stone.dal.jdbc.JdbcQueryRunner;
-import stone.dal.jdbc.api.JdbcTemplate;
+import stone.dal.jdbc.JdbcTemplateSpi;
+import stone.dal.jdbc.api.StJdbcTemplate;
 import stone.dal.jdbc.api.meta.ExecResult;
-import stone.dal.jdbc.api.meta.SqlCondition;
 import stone.dal.jdbc.api.meta.SqlDmlDclMeta;
 import stone.dal.jdbc.api.meta.SqlQueryMeta;
 import stone.dal.kernel.utils.KernelRuntimeException;
-import stone.dal.models.data.BaseDo;
 import stone.dal.models.data.Page;
 
-import static stone.dal.kernel.utils.KernelUtils.isCollectionEmpty;
 import static stone.dal.kernel.utils.KernelUtils.str2Arr;
 
 /**
  * @author fengxie
  */
 @Component
-public class JdbcTemplateImpl implements JdbcTemplate {
+public class StJdbcTemplateImpl implements StJdbcTemplate {
 
-	private JdbcQueryRunner queryRunner;
-	private JdbcDmlRunner dmlRunner;
+	private JdbcTemplateSpi jdbcTemplateSpi;
 
-	private JdbcDclRunner dclRunner;
-
-	public JdbcTemplateImpl(JdbcQueryRunner queryRunner,
-							  JdbcDmlRunner dmlRunner,
-			JdbcDclRunner dclRunner) {
-		this.queryRunner = queryRunner;
-		this.dmlRunner = dmlRunner;
-		this.dclRunner = dclRunner;
+	public StJdbcTemplateImpl(JdbcTemplateSpi jdbcTemplateSpi) {
+		this.jdbcTemplateSpi = jdbcTemplateSpi;
 	}
 
 	@Override
 	public <T> List<T> runQuery(SqlQueryMeta queryMeta) {
-		return queryRunner.run(queryMeta);
+		return jdbcTemplateSpi.run(queryMeta);
 	}
 
 	@Override
 	public <T> Page<T> pagination(SqlQueryMeta queryMeta) {
-		return queryRunner.runPagination(queryMeta);
+		return jdbcTemplateSpi.runPagination(queryMeta);
 	}
 
 	@Override
 	public int runDml(SqlDmlDclMeta meta) {
-		return dmlRunner.run(meta);
+		return jdbcTemplateSpi.exec(meta);
 	}
 
 	@Override
 	public int runDcl(String sql) {
-		return dclRunner.run(sql);
+		return jdbcTemplateSpi.exec(SqlDmlDclMeta.factory().sql(sql).build());
 	}
 
 	@Override
@@ -95,31 +83,16 @@ public class JdbcTemplateImpl implements JdbcTemplate {
 		return results;
 	}
 
-	@Override
-	public void runInsert(BaseDo obj) {
-		dmlRunner.runInsert(obj);
-	}
-
-	@Override
-	public void runDelete(BaseDo obj) {
-		dmlRunner.runDelete(obj);
-	}
-
-	@Override
-	public <T extends BaseDo> T runFindOne(BaseDo pk) {
-		return (T) queryRunner.runFind(pk);
-	}
-
-  @Override
-  public <T extends BaseDo> T runFind(SqlCondition condition) {
-    List list = runFindMany(condition);
-    if (!isCollectionEmpty(list)) {
-      return (T) list.iterator().next();
-    }
-    return null;
-  }
-
-  public <T> List<T> runFindMany(SqlCondition condition) {
+//  @Override
+//  public <T extends BaseDo> T runFind(SqlCondition condition) {
+//    List list = runFindMany(condition);
+//    if (!isCollectionEmpty(list)) {
+//      return (T) list.iterator().next();
+//    }
+//    return null;
+//  }
+//
+//  public <T> List<T> runFindMany(SqlCondition condition) {
 //		SqlQueryMeta queryMeta = condition.build();
 //		EntityMeta meta = dalEntityMetaManager.getEntity(queryMeta.getMappingClazz());
 //		RdbmsEntity entity = RdbmsEntityManager.getInstance().build(meta);
@@ -127,7 +100,7 @@ public class JdbcTemplateImpl implements JdbcTemplate {
 //		SqlQueryMeta _queryMeta = SqlQueryMeta.factory()
 //				.mappingClazz(queryMeta.getMappingClazz())
 //				.sql(sql).join(queryMeta).build();
-//		return run(_queryMeta);
-    return null;
-  }
+//		return exec(_queryMeta);
+//    return null;
+//  }
 }

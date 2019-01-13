@@ -3,16 +3,14 @@ package stone.dal.jdbc.api;
 import java.io.InputStream;
 import java.util.List;
 import stone.dal.jdbc.api.meta.ExecResult;
-import stone.dal.jdbc.api.meta.SqlCondition;
 import stone.dal.jdbc.api.meta.SqlDmlDclMeta;
 import stone.dal.jdbc.api.meta.SqlQueryMeta;
-import stone.dal.models.data.BaseDo;
 import stone.dal.models.data.Page;
 
 /**
  * @author fengxie
  */
-public interface JdbcTemplate {
+public interface StJdbcTemplate {
 	/**
 	 * Execute runQuery with a specified <code>com.rab.publication.persistence.SqlQueryMeta</code>
 	 *
@@ -61,27 +59,5 @@ public interface JdbcTemplate {
 	 */
 	List<ExecResult> runSqlScript(String sqlScripts);
 
-	/**
-	 * Run insert operation
-	 *
-	 * @param obj Dal obj
-	 */
-	void runInsert(BaseDo obj);
-
-	/**
-	 * Run delete operation
-	 *
-	 * @param obj Dal obj
-	 */
-	void runDelete(BaseDo obj);
-
-	/**
-	 * Run get operation
-	 *
-	 * @param pk Pk object
-	 * @return BaseDoect
-	 */
-	<T extends BaseDo> T runFindOne(BaseDo pk);
-
-  <T extends BaseDo> T runFind(SqlCondition condition);
+//  <T extends BaseDo> T runFind(SqlCondition condition);
 }

@@ -4,11 +4,11 @@ import java.util.Collection;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import stone.dal.jdbc.api.JdbcTemplate;
-import stone.dal.jdbc.api.JpaRepository;
+import stone.dal.jdbc.api.StJdbcTemplate;
+import stone.dal.jdbc.api.StJpaRepository;
 import stone.dal.jdbc.api.meta.SqlDmlDclMeta;
 import stone.dal.jdbc.api.meta.SqlQueryMeta;
-import stone.dal.jdbc.impl.utils.LazyLoadQueryMetaBuilder;
+import stone.dal.jdbc.impl.utils.RelationQueryBuilder;
 import stone.dal.kernel.utils.KernelRuntimeException;
 import stone.dal.kernel.utils.LogUtils;
 import stone.dal.models.data.BaseDo;
@@ -17,28 +17,31 @@ import stone.dal.models.meta.RelationMeta;
 import stone.dal.models.meta.RelationTypes;
 
 import static stone.dal.kernel.utils.KernelUtils.getPropVal;
+import static stone.dal.kernel.utils.KernelUtils.isCollectionEmpty;
 import static stone.dal.kernel.utils.KernelUtils.setPropVal;
 
 /**
  * @author fengxie
  */
-public class JpaRepositoryImpl<T extends BaseDo, K>
-    implements JpaRepository<T, K> {
+public class StJpaRepositoryImpl<T extends BaseDo, K>
+    implements StJpaRepository<T, K> {
 
-  protected JdbcTemplate jdbcTemplate;
+  private StJdbcTemplate jdbcTemplate;
 
-  protected RdbmsEntityManager entityMetaManager;
+  private RdbmsEntityManager entityMetaManager;
 
-  private LazyLoadQueryMetaBuilder lazyLoadQueryMetaBuilder;
+  private RelationQueryBuilder relationQueryBuilder;
 
-  private static Logger logger = LoggerFactory.getLogger(JpaRepositoryImpl.class);
+//  private DalSequence
 
-  public JpaRepositoryImpl(JdbcTemplate jdbcTemplate,
+  private static Logger logger = LoggerFactory.getLogger(StJpaRepositoryImpl.class);
+
+  public StJpaRepositoryImpl(StJdbcTemplate jdbcTemplate,
       RdbmsEntityManager entityMetaManager,
-      LazyLoadQueryMetaBuilder lazyLoadQueryMetaBuilder) {
+      RelationQueryBuilder relationQueryBuilder) {
     this.jdbcTemplate = jdbcTemplate;
     this.entityMetaManager = entityMetaManager;
-    this.lazyLoadQueryMetaBuilder = lazyLoadQueryMetaBuilder;
+    this.relationQueryBuilder = relationQueryBuilder;
   }
 
   @Override
@@ -54,9 +57,7 @@ public class JpaRepositoryImpl<T extends BaseDo, K>
       if (pkClazz != null) {
         try {
           K pk = (K) pkClazz.newInstance();
-          pks.forEach(_pkName -> {
-            setPropVal(pk, _pkName, getPropVal(obj, _pkName));
-          });
+          pks.forEach(_pkName -> setPropVal(pk, _pkName, getPropVal(obj, _pkName)));
           return pk;
         } catch (Exception e) {
           LogUtils.error(logger, e);
@@ -82,25 +83,26 @@ public class JpaRepositoryImpl<T extends BaseDo, K>
   @Override
   public T get(T pk) {
     RdbmsEntity entity = entityMetaManager.getEntity(pk.getClass());
-    BaseDo res = jdbcTemplate.runFindOne(pk);
-    if (res != null) {
-      cascadeFind(entity, res, true);
+    List<T> res = jdbcTemplate.runQuery(entity.getFindMeta(pk));
+    T obj = null;
+    if (!isCollectionEmpty(res)) {
+      obj = res.get(0);
+      cascadeFind(entity, obj, true);
     }
-    return (T) res;
+    return obj;
   }
 
   @SuppressWarnings("unchecked")
   private void runCreate(BaseDo obj) {
     RdbmsEntity entity = entityMetaManager.getEntity(obj.getClass());
-    jdbcTemplate.runInsert(obj);
+    jdbcTemplate.runDml(entity.getInsertMeta(obj));
     cascadeInsert(entity, obj);
   }
 
   private void runUpdate(BaseDo obj) {
     if (BaseDo.States.UPDATED == obj.get_state()) {
       RdbmsEntity entity = entityMetaManager.getEntity(obj.getClass());
-      SqlDmlDclMeta updateSqlMeta = entity.getUpdateMeta(obj);
-      jdbcTemplate.runDml(updateSqlMeta);
+      jdbcTemplate.runDml(entity.getUpdateMeta(obj));
       cascadeUpdate(entity, obj);
     } else if (BaseDo.States.DELETED == obj.get_state()) {
       runDel(obj);
@@ -172,14 +174,13 @@ public class JpaRepositoryImpl<T extends BaseDo, K>
             && relation.getRelationType() != RelationTypes.ONE_2_ONE_REF
             && relation.getRelationType() != RelationTypes.MANY_2_MANY)
         .forEach(relation -> {
-          SqlQueryMeta queryMeta = lazyLoadQueryMetaBuilder.buildMetaFactory(entity,
+          SqlQueryMeta queryMeta = relationQueryBuilder.buildMetaFactory(entity,
               mainObj, relation.getJoinProperty()).build();
           RdbmsEntity relEntity = entityMetaManager.getEntity(relation.getJoinPropertyType());
           List<BaseDo> relObjs = jdbcTemplate.runQuery(queryMeta);
           relObjs.forEach(relObj -> {
             cascadeDel(relEntity, relObj);
-            SqlDmlDclMeta sqlMeta = relEntity.getDeleteMeta(relObj);
-            jdbcTemplate.runDml(sqlMeta);
+            jdbcTemplate.runDml(relEntity.getDeleteMeta(relObj));
           });
         });
     meta.getRelations().stream().filter(relation -> relation.getRelationType() == RelationTypes.MANY_2_MANY)
@@ -193,7 +194,7 @@ public class JpaRepositoryImpl<T extends BaseDo, K>
             || relation.getRelationType() == RelationTypes.ONE_2_MANY
             || relation.getRelationType() == RelationTypes.MANY_2_MANY
             || relation.getRelationType() == RelationTypes.ONE_2_ONE_REF).forEach(relation -> {
-      SqlQueryMeta queryMeta = lazyLoadQueryMetaBuilder.buildMetaFactory(entity,
+      SqlQueryMeta queryMeta = relationQueryBuilder.buildMetaFactory(entity,
           mainObj, relation.getJoinProperty()).build();
       RdbmsEntity relEntity = entityMetaManager.getEntity(relation.getJoinPropertyType());
       List<BaseDo> relObjs = jdbcTemplate.runQuery(queryMeta);
@@ -202,9 +203,7 @@ public class JpaRepositoryImpl<T extends BaseDo, K>
         setPropVal(mainObj, relation.getJoinProperty(), relObjs.get(0));
       } else {
         setPropVal(mainObj, relation.getJoinProperty(), relObjs);
-        relObjs.forEach(relObj -> {
-          cascadeFind(relEntity, relObj, false);
-        });
+        relObjs.forEach(relObj -> cascadeFind(relEntity, relObj, false));
       }
     });
   }
@@ -213,4 +212,17 @@ public class JpaRepositoryImpl<T extends BaseDo, K>
     SqlDmlDclMeta delJoinTblMeta = entity.getDelJoinTableMeta(mainObj, relation.getJoinProperty());
     jdbcTemplate.runDml(delJoinTblMeta);
   }
+
+//  private void bindSequenceValues(Base obj, RdbmsEntity entity) {
+//    if (dalSequence != null) {
+//      List<FieldMeta> seqFields = entity.getSeqFields();
+//      for (FieldMeta seqField : seqFields) {
+//        Object v = getPropVal(obj, seqField.getName());
+//        if (v == null) {
+//          v = dalSequence.next(obj, seqField);
+//          setPropVal(obj, seqField.getName(), v);
+//        }
+//      }
+//    }
+//  }
 }

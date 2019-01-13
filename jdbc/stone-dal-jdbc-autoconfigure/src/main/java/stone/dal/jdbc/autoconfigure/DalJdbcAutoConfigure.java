@@ -4,15 +4,13 @@ import javax.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import stone.dal.jdbc.JdbcDclRunner;
-import stone.dal.jdbc.JdbcDmlRunner;
-import stone.dal.jdbc.JdbcQueryRunner;
-import stone.dal.jdbc.api.JdbcTemplate;
-import stone.dal.jdbc.api.JpaRepository;
-import stone.dal.jdbc.impl.JdbcTemplateImpl;
-import stone.dal.jdbc.impl.JpaRepositoryImpl;
+import stone.dal.jdbc.JdbcTemplateSpi;
+import stone.dal.jdbc.api.StJdbcTemplate;
+import stone.dal.jdbc.api.StJpaRepository;
 import stone.dal.jdbc.impl.RdbmsEntityManager;
-import stone.dal.jdbc.impl.utils.LazyLoadQueryMetaBuilder;
+import stone.dal.jdbc.impl.StJdbcTemplateImpl;
+import stone.dal.jdbc.impl.StJpaRepositoryImpl;
+import stone.dal.jdbc.impl.utils.RelationQueryBuilder;
 import stone.dal.models.EntityMetaManager;
 
 /**
@@ -33,55 +31,50 @@ public class DalJdbcAutoConfigure {
 //	@Autowired(required = false)
 //	private DalSequenceSpi dalSequenceSpi;
   @Autowired
-  private JdbcQueryRunner queryRunner;
-
-  @Autowired
-  private JdbcDclRunner dclRunner;
-
-  @Autowired
-  private JdbcDmlRunner dmlRunner;
+  private JdbcTemplateSpi jdbcTemplateSpi;
 
   //
-  private JpaRepository jpaRepository;
+  private StJpaRepository jpaRepository;
 
-  private JdbcTemplate jdbcTemplate;
+  private StJdbcTemplate jdbcTemplate;
 
-  private LazyLoadQueryMetaBuilder deferredDataLoader;
+  private RelationQueryBuilder relationQueryBuilder;
 
   @PostConstruct
   public void init() {
     rdbmsEntityManager = new RdbmsEntityManager(entityMetaManager);
-    jdbcTemplate = new JdbcTemplateImpl(queryRunner, dmlRunner, dclRunner);
-    jpaRepository = new JpaRepositoryImpl(jdbcTemplate, rdbmsEntityManager, deferredDataLoader);
-//		JdbcQueryRunner.Factory queryFactory = JdbcQueryRunner.factory();
-//		deferredDataLoader = new LazyLoadQueryMetaBuilder(entityMetaManager);
+    relationQueryBuilder = new RelationQueryBuilder(rdbmsEntityManager);
+    jdbcTemplate = new StJdbcTemplateImpl(jdbcTemplateSpi);
+    jpaRepository = new StJpaRepositoryImpl(jdbcTemplate, rdbmsEntityManager, relationQueryBuilder);
+//		JdbcQuerySpi.Factory queryFactory = JdbcQuerySpi.factory();
+//		deferredDataLoader = new RelationQueryBuilder(entityMetaManager);
 //		if (resultSetHandler == null) {
 //			queryFactory.rdbmsResultSetHandler(getDefaultResultSetHandler(queryFactory.getRunner()));
 //		} else {
 //			queryFactory.rdbmsResultSetHandler(resultSetHandler);
 //		}
 //		queryFactory.entityMetaManager(entityMetaManager);
-//		JdbcDmlRunner.Factory dmlFactory = JdbcDmlRunner.factory();
+//		JdbcTemplateSpi.Factory dmlFactory = JdbcTemplateSpi.factory();
 //		dmlFactory.entityMetaManager(entityMetaManager);
 //		dmlFactory.dalSequence(dalSequenceSpi);
 //
-//		jdbcTemplate = new JdbcTemplateImpl(queryFactory.build(), dmlFactory.build(),
-//				JdbcDclRunner.factory().build());
-//		dalCrudTemplate = new JpaRepositoryImpl(jdbcTemplate, entityMetaManager, deferredDataLoader);
+//		jdbcTemplate = new StJdbcTemplateImpl(queryFactory.build(), dmlFactory.build(),
+//				JdbcDclSpi.factory().build());
+//		dalCrudTemplate = new StJpaRepositoryImpl(jdbcTemplate, entityMetaManager, deferredDataLoader);
   }
 
   @Bean
-  public JpaRepository getJpaRepository() {
+  public StJpaRepository getJpaRepository() {
     return jpaRepository;
   }
 
   @Bean
-  public JdbcTemplate getJdbcTemplate() {
+  public StJdbcTemplate getJdbcTemplate() {
     return jdbcTemplate;
   }
 
 //
-//	JdbcResultHandlerSpi getDefaultResultSetHandler(JdbcQueryRunner queryRunner) {
+//	JdbcResultHandlerSpi getDefaultResultSetHandler(JdbcQuerySpi queryRunner) {
 //		return new JdbcResultHandlerSpiImpl(deferredDataLoader);
 //	}
 }

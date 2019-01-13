@@ -9,7 +9,7 @@ import stone.dal.jdbc.impl.aop.DalMethodFilter;
 import stone.dal.jdbc.impl.aop.DalMethodInterceptor;
 import stone.dal.jdbc.impl.aop.DalUpdatableMethodFilter;
 import stone.dal.jdbc.impl.aop.DalUpdatableMethodInterceptor;
-import stone.dal.jdbc.impl.utils.LazyLoadQueryMetaBuilder;
+import stone.dal.jdbc.impl.utils.RelationQueryBuilder;
 import stone.dal.kernel.utils.CGLibUtils;
 
 /**
@@ -22,7 +22,7 @@ public class JdbcResultHandlerSpiImpl implements JdbcResultHandlerSpi {
 	private DalMethodInterceptor methodInterceptor;
 	private DalUpdatableMethodInterceptor updatableMethodInterceptor;
 
-	public JdbcResultHandlerSpiImpl(LazyLoadQueryMetaBuilder loader) {
+	public JdbcResultHandlerSpiImpl(RelationQueryBuilder loader) {
 		this.updatableMethodFilter = new DalUpdatableMethodFilter();
 		this.methodFilter = new DalMethodFilter();
 		this.methodInterceptor = new DalMethodInterceptor(loader);

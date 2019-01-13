@@ -8,17 +8,16 @@ import stone.dal.jdbc.impl.RdbmsEntityManager;
 /**
  * @author fengxie
  */
-public class LazyLoadQueryMetaBuilder {
+public class RelationQueryBuilder {
 
 	private RdbmsEntityManager entityManager;
 
-	public LazyLoadQueryMetaBuilder(RdbmsEntityManager entityManager) {
+	public RelationQueryBuilder(RdbmsEntityManager entityManager) {
 		this.entityManager = entityManager;
 	}
 
 	public SqlQueryMeta.Factory buildMetaFactory(Object mainObj, String propertyName) {
 		RdbmsEntity entity = entityManager.getEntity(ClassUtils.getUserClass(mainObj.getClass()));
-
 		return buildMetaFactory(entity, mainObj, propertyName);
 	}
 

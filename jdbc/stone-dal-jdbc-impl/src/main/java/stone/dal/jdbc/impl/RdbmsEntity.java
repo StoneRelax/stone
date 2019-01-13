@@ -477,4 +477,8 @@ public class RdbmsEntity {
 		pks.forEach(pk -> params.add(ObjectUtils.getPropertyValue(object, pk)));
     return params.toArray(new Object[0]);
 	}
+
+	public List<FieldMeta> getSeqFields() {
+		return meta.getFields().stream().filter(field -> field.getSeqKey() != null).collect(Collectors.toList());
+	}
 }

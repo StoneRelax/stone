@@ -5,7 +5,7 @@ import stone.dal.models.data.BaseDo;
 /**
  * @author fengxie
  */
-public interface JpaRepository<T extends BaseDo, K> {
+public interface StJpaRepository<T extends BaseDo, K> {
 
   /**
    * @param obj
