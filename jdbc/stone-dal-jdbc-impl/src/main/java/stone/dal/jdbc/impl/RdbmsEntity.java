@@ -15,6 +15,7 @@ import stone.dal.kernel.utils.KernelRuntimeException;
 import stone.dal.kernel.utils.KernelUtils;
 import stone.dal.kernel.utils.ObjectUtils;
 import stone.dal.models.data.BaseDo;
+import stone.dal.models.data.BaseEntity;
 import stone.dal.models.meta.EntityMeta;
 import stone.dal.models.meta.FieldMeta;
 import stone.dal.models.meta.JoinColumn;
@@ -29,7 +30,7 @@ import static stone.dal.kernel.utils.KernelUtils.replace;
 /**
  * @author fengxie
  */
-public class RdbmsEntity {
+public class RdbmsEntity extends BaseEntity {
 
 	private String insertDml;
 	private String deleteDml;
@@ -57,19 +58,48 @@ public class RdbmsEntity {
 	private ConcurrentHashMap<String, String> findRelSqls;
 
 	public RdbmsEntity(EntityMeta meta) {
-		readEntityMeta(meta);
+		super(meta);
 	}
 
+	@Override
+	protected void doInit() {
+		dbFieldNameMapper = new HashMap<>();
+		relationMapper = new HashMap<>();
+		insertRelSqls = new ConcurrentHashMap<>();
+		delRelSqls = new ConcurrentHashMap<>();
+		findRelSqls = new ConcurrentHashMap<>();
+		dbFieldRelationRefMapper = new HashMap<>();
+	}
+
+	@Override
 	protected void readEntityMeta(EntityMeta meta) {
-		this.meta = meta;
-    meta.getFields().forEach(fieldMeta -> dbFieldNameMapper.put(fieldMeta.getDbName(), fieldMeta));
-    meta.getRelations().forEach(this::parseReleation);
+		super.readEntityMeta(meta);
+		meta.getRelations().forEach(this::readRelation);
 		insertDml = buildInsertSql();
 		deleteDml = buildDeleteSql();
 		updateDml = buildUpdateSql();
 		findSql = buildFindSql();
 		findSqlNoCondition = buildSelectSql(meta.getTableName(), false);
 	}
+	private void readRelation(RelationMeta relation) {
+		relationMapper.put(relation.getJoinProperty(), relation);
+		RelationTypes relationType = relation.getRelationType();
+		if (RelationTypes.MANY_2_MANY == relationType) {
+			insertRelSqls.put(relation.getJoinProperty(), buildMany2ManyInsertSql(relation));
+			delRelSqls.put(relation.getJoinProperty() + DEL_REL_WHEN_SAVE_SUFFIX, buildMany2ManyDelSql(relation, true));
+			delRelSqls.put(relation.getJoinProperty() + DEL_REL_WHEN_DEL_SUFFIX, buildMany2ManyDelSql(relation, false));
+		} else if (RelationTypes.MANY_2_ONE == relationType) {
+			relation.getJoinColumns().forEach(joinColumn -> {
+				dbFieldRelationRefMapper.put(joinColumn.getName(), relation.getJoinProperty() + "." + joinColumn.getReferencedColumnName());
+			});
+		}
+	}
+
+	@Override
+	protected void readFieldInfo(FieldMeta fieldMeta) {
+		dbFieldNameMapper.put(fieldMeta.getDbName(), fieldMeta);
+	}
+
 
   private void parseReleation(RelationMeta relation) {
 		relationMapper.put(relation.getJoinProperty(), relation);
@@ -103,7 +133,7 @@ public class RdbmsEntity {
 	}
 
 	public SqlDmlDclMeta getInsertMeta(BaseDo obj) {
-		List<Object> params = new ArrayList<>();
+		Map<String,Object> params = new HashMap<>();
 		meta.getFields().stream().filter(field -> !KernelUtils.boolValue(field.getNotPersist())).forEach(field -> {
 			bindDmlParams(obj, field, params);
 		});
@@ -117,52 +147,52 @@ public class RdbmsEntity {
 					throw new KernelRuntimeException(relation.getJoinProperty() + "." + joinColumn.getReferencedColumnName()
 							+ " can not be null!");
 				}
-				params.add(v);
+				params.put(joinColumn.getName(),v);
 			});
 		});
-		return SqlDmlDclMeta.factory().sql(insertDml).params(params.toArray(new Object[params.size()]))
+		return SqlDmlDclMeta.factory().sql(insertDml).params(params)
 				.build();
 	}
 
 	public SqlQueryMeta getFindMeta(BaseDo obj) {
-		List<Object> params = new ArrayList<>();
+		Map<String,Object> params = new HashMap<>();
 		SqlQueryMeta.Factory factory = SqlQueryMeta.factory().one2oneCascadeFetching(true).sql(findSql).mappingClazz(meta.getClazz());
 		bindPkParams(params, obj);
-		factory.params(params.toArray(new Object[params.size()]));
+		factory.params(params);
 		return factory.build();
 	}
 
 	public SqlDmlDclMeta getUpdateMeta(BaseDo obj) {
 		Set<String> changes = obj.get_changes();
 		List<String> changeFieldsName = new ArrayList<>();
-		List<Object> params = new ArrayList<>();
-		List<String> pks = getPks();
+		Map<String,Object> params = new HashMap<>();
+		Collection<String> pks = getPks();
 		List<FieldMeta> changedFields = this.meta.getFields().stream()
 				.filter(fieldMeta -> !pks.contains(fieldMeta.getName())
 						&& changes.contains(fieldMeta.getName())).collect(Collectors.toList());
 		changedFields.stream().filter(fieldMeta -> !KernelUtils.boolValue(fieldMeta.getNotPersist())).forEach(fieldMeta -> {
-			changeFieldsName.add(fieldMeta.getDbName() + "=?");
+			changeFieldsName.add(fieldMeta.getDbName() + "=:"+fieldMeta.getDbName());
 			bindDmlParams(obj, fieldMeta, params);
 		});
 		bindPkParams(params, obj);
 		String sql = replace(updateDml, UPDATE_SET_HOLDER, list2Str(changeFieldsName, ","));
 		SqlDmlDclMeta.Factory factory = SqlDmlDclMeta.factory().sql(sql)
-				.params(params.toArray(new Object[0]));
+				.params(params);
 		return factory.build();
 	}
 
 	public SqlDmlDclMeta getDeleteMeta(BaseDo obj) {
-		List<Object> params = new ArrayList<>();
+		Map<String,Object> params = new HashMap<>();
 		SqlDmlDclMeta.Factory factory = SqlDmlDclMeta.factory().sql(deleteDml);
-		List<String> pks = getPks();
+		Collection<String> pks = getPks();
 		pks.forEach(pk -> {
 			Object value = getPropVal(obj, pk);
 			if (value == null) {
 				throw new KernelRuntimeException(String.format("%s's %s can not be null", meta.getTableName(), pk));
 			}
-			params.add(value);
+			params.put(pk,value);
 		});
-		factory.params(params.toArray(new Object[params.size()]));
+		factory.params(params);
 		return factory.build();
 	}
 
@@ -172,17 +202,17 @@ public class RdbmsEntity {
 
 	public SqlDmlDclMeta getDelJoinTableMeta(BaseDo obj, String joinProperty) {
 		RelationMeta relation = relationMapper.get(joinProperty);
-		List<Object> params = new ArrayList<>();
+		Map<String,Object> params = new HashMap<>();
 		relation.getJoinColumns().forEach(joinColumn -> {
-			params.add(getPropVal(obj, joinColumn.getReferencedColumnName()));
+			params.put(joinColumn.getName(),getPropVal(obj, joinColumn.getReferencedColumnName()));
 		});
 		String delSql = delRelSqls.get(relation.getJoinProperty() + DEL_REL_WHEN_DEL_SUFFIX);
-		return SqlDmlDclMeta.factory().sql(delSql).params(params.toArray()).build();
+		return SqlDmlDclMeta.factory().sql(delSql).params(params).build();
 	}
 
 	@SuppressWarnings("unchecked")
-	private void bindDmlParams(BaseDo obj, FieldMeta field, List params) {
-		List<String> pks = getPks();
+	private void bindDmlParams(BaseDo obj, FieldMeta field, Map<String,Object> params) {
+		Collection<String> pks = getPks();
 		String propertyName = field.getName();
 		boolean nullable = KernelUtils.boolValue(field.getNullable());
 		Object value = getPropVal(obj, propertyName);
@@ -207,7 +237,7 @@ public class RdbmsEntity {
 		if (value instanceof Enum) {
 			value = ((Enum) value).ordinal();
 		}
-		params.add(value);
+		params.put(propertyName,value);
 	}
 
 	private String buildInsertSql() {
@@ -215,14 +245,14 @@ public class RdbmsEntity {
 		List<String> values = new ArrayList<>();
 		meta.getFields().stream().filter(field -> !KernelUtils.boolValue(field.getNotPersist())).forEach(field -> {
 			fields.add(field.getDbName());
-			values.add("?");
+			values.add(":"+field.getDbName());
 		});
 		meta.getRelations().stream().filter(
 				relation -> (relation.getRelationType() == RelationTypes.MANY_2_ONE
 						|| relation.getRelationType() == RelationTypes.ONE_2_ONE_REF)).forEach(relation -> {
 			relation.getJoinColumns().forEach(joinColumn -> {
 				fields.add(joinColumn.getName());
-				values.add("?");
+				values.add(":"+joinColumn.getName());
 			});
 		});
 		return "insert into " + meta.getTableName() +
@@ -275,7 +305,7 @@ public class RdbmsEntity {
 		List<String> values = new ArrayList<>();
 		List<FieldMeta> pks = getPkMeta();
 		pks.forEach(pk -> {
-			values.add(meta.getTableName() + "." + pk.getDbName() + "=?");
+			values.add(meta.getTableName() + "." + pk.getDbName() + "=:"+pk.getDbName());
 		});
 		return " where " + list2Str(values, " and ");
 	}
@@ -388,20 +418,20 @@ public class RdbmsEntity {
 		RelationMeta relationMeta = relationMapper.get(joinProperty);
 		if (records != null) {
 			records.forEach(record -> {
-				List<Object> params = new ArrayList<>();
+				Map<String,Object> params = new HashMap<>();
 				relationMeta.getJoinColumns().forEach(joinColumn -> {
-					params.add(getPropVal(obj, joinColumn.getReferencedColumnName()));
+					params.put(joinColumn.getName(),getPropVal(obj, joinColumn.getReferencedColumnName()));
 				});
 				relationMeta.getInverseJoinColumns().forEach(joinColumn -> {
-					params.add(getPropVal(record, joinColumn.getReferencedColumnName()));
+					params.put(joinColumn.getName(),getPropVal(record, joinColumn.getReferencedColumnName()));
 				});
 				if (BaseDo.States.DELETED == record.get_state()) {
 					SqlDmlDclMeta meta = SqlDmlDclMeta.factory().sql(delRelSqls.get(joinProperty + DEL_REL_WHEN_SAVE_SUFFIX))
-							.params(params.toArray(new Object[0])).build();
+							.params(params).build();
 					delSqlMetaList.add(meta);
 				} else {
 					SqlDmlDclMeta meta = SqlDmlDclMeta.factory().sql(insertRelSqls.get(joinProperty))
-							.params(params.toArray(new Object[0])).build();
+							.params(params).build();
 					insertSqlMetaList.add(meta);
 				}
 			});
@@ -421,11 +451,11 @@ public class RdbmsEntity {
 		List<String> params = new ArrayList<>();
 		many2manyRel.getJoinColumns().forEach(joinColumn -> {
 			names.add(joinColumn.getName());
-			params.add("?");
+			params.add(":"+joinColumn.getName());
 		});
 		many2manyRel.getInverseJoinColumns().forEach(joinColumn -> {
 			names.add(joinColumn.getName());
-			params.add("?");
+			params.add(":"+joinColumn.getName());
 		});
 		sb.append(list2Str(names, ","));
 		sb.append(") values (");
@@ -441,40 +471,44 @@ public class RdbmsEntity {
 		sb.append(" where ");
 		List<String> names = new ArrayList<>();
 		many2manyRel.getJoinColumns().forEach(joinColumn -> {
-			names.add(joinColumn.getName() + "=?");
+			names.add(joinColumn.getName() + "=:"+joinColumn.getName());
 		});
 		if (single) {
 			many2manyRel.getInverseJoinColumns().forEach(joinColumn -> {
-				names.add(joinColumn.getName() + "=?");
+				names.add(joinColumn.getName() + "=:"+joinColumn.getName());
 			});
 		}
 		sb.append(list2Str(names, " and "));
 		return sb.toString();
 	}
 
-	List<String> getPks() {
-		return meta.getFields().stream().filter(FieldMeta::getPk).map(FieldMeta::getName).collect(Collectors.toList());
-	}
-
 	private List<FieldMeta> getPkMeta() {
 		return meta.getFields().stream().filter(FieldMeta::getPk).collect(Collectors.toList());
 	}
 
-	private void bindPkParams(List<Object> params, BaseDo obj) {
-		List<String> pks = getPks();
+	private void bindPkParams(Map<String,Object> params, BaseDo obj) {
+		Collection<String> pks = getPks();
 		pks.forEach(pk -> {
 			Object value = getPropVal(obj, pk);
 			if (value == null) {
 				throw new KernelRuntimeException(String.format("%s's %s can not be null", meta.getTableName(), pk));
 			}
-			params.add(value);
+			params.put(pk,value);
 		});
 	}
 
 	public Object[] getPkValues(Object object) {
 		List<Object> params = new ArrayList<>();
-		List<String> pks = getPks();
+		Collection<String> pks = getPks();
 		pks.forEach(pk -> params.add(ObjectUtils.getPropertyValue(object, pk)));
     return params.toArray(new Object[0]);
 	}
+
+	public Map<String,Object> getParameterValues(Object object){
+		Map<String,Object> params = new HashMap<>();
+		Collection<String> pks = getPks();
+		pks.forEach(pk -> params.put(pk,ObjectUtils.getPropertyValue(object, pk)));
+		return params;
+	}
+
 }

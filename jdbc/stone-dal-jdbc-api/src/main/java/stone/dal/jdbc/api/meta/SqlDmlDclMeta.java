@@ -13,6 +13,7 @@
  */
 package stone.dal.jdbc.api.meta;
 
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -30,7 +31,7 @@ public abstract class SqlDmlDclMeta {
 	/**
 	 * parameters
 	 */
-	protected Object[] parameters;
+	protected Map<String,Object> parameters;
 	/**
 	 * Bean class whose instance might be imported with result value
 	 */
@@ -40,7 +41,7 @@ public abstract class SqlDmlDclMeta {
 		return sql;
 	}
 
-	public Object[] getParameters() {
+	public Map<String,Object> getParameters() {
 		return parameters;
 	}
 
@@ -67,7 +68,7 @@ public abstract class SqlDmlDclMeta {
 			return this;
 		}
 
-		public Factory params(Object[] params) {
+		public Factory params(Map<String,Object> params) {
 			meta.parameters = params;
 			return this;
 		}

@@ -30,7 +30,6 @@ public class LazyLoadQueryMetaBuilder {
 		return SqlQueryMeta.factory().
 				sql(sql).
 				mappingClazz(relClazz).
-				params(entity.getPkValues(mainObj));
+				params(entity.getParameterValues(mainObj));
 	}
-
 }

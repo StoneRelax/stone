@@ -37,3 +37,5 @@ include 'tools:stone-entity-generator'
 //include 'mongo:stone-dal-mongo-impl'
 //include 'mongo:stone-dal-mongo-autoconfigure'
 //include 'adaptor:stone-dal-mongo-autoconfigure'
+include 'stone-spring-seq-adaptor'
+
