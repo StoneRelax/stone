@@ -29,7 +29,7 @@ public abstract class SqlDmlDclMeta {
 	/**
 	 * parameters
 	 */
-	protected Map<String,Object> parameters;
+  protected Map<String, Object> parameters;
 	/**
 	 * Bean class whose instance might be imported with result value
 	 */
@@ -39,7 +39,7 @@ public abstract class SqlDmlDclMeta {
 		return sql;
 	}
 
-	public Map<String,Object> getParameters() {
+  public Map<String, Object> getParameters() {
 		return parameters;
 	}
 
@@ -66,7 +66,7 @@ public abstract class SqlDmlDclMeta {
 			return this;
 		}
 
-		public Factory params(Map<String,Object> params) {
+    public Factory params(Map<String, Object> params) {
 			meta.parameters = params;
 			return this;
 		}

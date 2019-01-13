@@ -29,7 +29,7 @@ public class RelationQueryBuilder {
 		return SqlQueryMeta.factory().
 				sql(sql).
 				mappingClazz(relClazz).
-				params(entity.getParameterValues(mainObj));
+				params(entity.getPkValues(mainObj));
 	}
 
 }
