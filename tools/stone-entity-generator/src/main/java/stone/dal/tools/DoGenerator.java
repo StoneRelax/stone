@@ -1,35 +1,42 @@
 package stone.dal.tools;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
-import java.math.BigDecimal;
-import java.sql.Timestamp;
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-
+import freemarker.cache.URLTemplateLoader;
+import freemarker.template.Configuration;
+import freemarker.template.DefaultObjectWrapper;
+import freemarker.template.SimpleHash;
+import freemarker.template.Template;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.poi.hssf.usermodel.HSSFCell;
 import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import stone.dal.kernel.utils.ClassUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import stone.dal.models.meta.FieldMeta;
 import stone.dal.models.meta.RelationTypes;
+import stone.dal.tools.meta.DataDictionary;
 import stone.dal.tools.meta.RawEntityMeta;
 import stone.dal.tools.meta.RawFieldMeta;
 import stone.dal.tools.meta.RawRelationMeta;
 import stone.dal.tools.utils.ExcelUtils;
 
 import javax.xml.datatype.XMLGregorianCalendar;
+import java.io.*;
+import java.math.BigDecimal;
+import java.net.URL;
+import java.sql.Timestamp;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
-import static stone.dal.kernel.utils.KernelUtils.boolValue;
-import static stone.dal.kernel.utils.KernelUtils.isStrEmpty;
-import static stone.dal.kernel.utils.KernelUtils.replaceNull;
-import static stone.dal.kernel.utils.KernelUtils.str2Arr;
+import static stone.dal.kernel.utils.KernelUtils.*;
 
 public class DoGenerator {
   private static Map<String, Class> classTypeMap = new ConcurrentHashMap<>();
+
+  private static Logger s_logger = LoggerFactory.getLogger(DoGenerator.class);
+
+  private DataDictionary dataDictionary;
 
   static {
     classTypeMap.put(String.class.getName(), String.class);
@@ -58,7 +65,7 @@ public class DoGenerator {
     classTypeMap.put("time", String.class);
   }
 
-  public void build(File file) throws Exception {
+  public List<RawEntityMeta> build(File file) throws Exception {
     InputStream is = new FileInputStream(file);
     HSSFWorkbook book = ExcelUtils.getWorkbook(is);
     int i = 0;
@@ -132,6 +139,69 @@ public class DoGenerator {
       entities.add(meta);
       i++;
     }
+    return entities;
+  }
+
+  public List<String> createJavaSource(List<RawEntityMeta> entities, String packageName) throws Exception {
+    List<String> javaContents = new ArrayList<String>();
+    for (RawEntityMeta entityMeta : entities) {
+      String javaContent = genJavaClass(entityMeta, packageName);
+      javaContents.add(javaContent);
+    }
+    return javaContents;
+  }
+
+  private String genJavaClass(RawEntityMeta entityMeta, String packageName) throws Exception {
+    List<FieldMeta> fields = entityMeta.getFields();
+    List<String> pkFields = new ArrayList<>();
+    for (FieldMeta field : fields) {
+      if (ExcelUtils.booleanValueForBoolean(field.getPk())) {
+        pkFields.add(field.getName());
+      }
+    }
+    entityMeta.pks().clear();
+    entityMeta.pks().addAll(pkFields);
+    List<RawRelationMeta> relations = entityMeta.getRawRelations();
+    if (!CollectionUtils.isEmpty(relations)) {
+      for (RawRelationMeta relation : relations) {
+        if (StringUtils.isEmpty(relation.getJoinPropertyType())) {
+          String propertyDomain = relation.getJoinDomain();
+          RawEntityMeta _entityMeta = (RawEntityMeta) dataDictionary.getEntityMeta(propertyDomain);
+          if (_entityMeta != null && !StringUtils.isEmpty(_entityMeta.getClazzName())) {
+            relation.setJoinPropertyType(_entityMeta.getClazzName());
+          } else {
+            relation.setJoinPropertyType(packageName + "." + propertyDomain);
+          }
+        }
+      }
+    }
+    Configuration cfg = new Configuration();
+    cfg.setTemplateLoader(
+        new URLTemplateLoader() {
+          protected URL getURL(String name) {
+            Locale locale = Locale.getDefault();
+            String urlName =
+                "stone/tools/stone-entity-generator/ftl/" + StringUtils.replace(name, "_" + locale.toString(), "");
+            return Thread.currentThread().getContextClassLoader().getResource(urlName);
+          }
+        });
+    cfg.setObjectWrapper(new DefaultObjectWrapper());
+    try {
+      Template temp = cfg.getTemplate("entity_java.ftl");
+      ByteArrayOutputStream bos = new ByteArrayOutputStream();
+      Writer out = new OutputStreamWriter(bos);
+      SimpleHash params = new SimpleHash();
+      params.put("entity", entityMeta);
+      params.put("className", entityMeta.getName());
+      params.put("packageName", stone.dal.kernel.utils.StringUtils.replaceNull(packageName));
+      params.put("gen", this);
+      temp.process(params, out);
+      out.flush();
+      return new String(bos.toByteArray(), "utf-8");
+    } catch (Exception e) {
+      s_logger.error(e.getMessage());
+      throw new Exception(e);
+    }
   }
 
   private FieldMeta readFields(String entityName, HSSFRow sfRow) throws Exception {
@@ -141,7 +211,7 @@ public class DoGenerator {
     meta.setName(fieldName);
     meta.setTypeName(typeName.toLowerCase());
     String property = sfRow.getCell(2).toString();
-     if (!isStrEmpty(property)) {
+    if (!isStrEmpty(property)) {
       if (meta.getTypeName().equalsIgnoreCase("double")
           || meta.getTypeName().equalsIgnoreCase("long")
           || meta.getTypeName().equalsIgnoreCase("int")) {

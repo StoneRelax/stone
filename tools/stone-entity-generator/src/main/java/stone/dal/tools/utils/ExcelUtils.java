@@ -28,6 +28,10 @@ public class ExcelUtils {
     return "true".equals(value) || "1".equals(value);
   }
 
+  public static boolean booleanValueForBoolean(Boolean value) {
+    return value != null && value;
+  }
+
   public static String cellStr(HSSFCell cell) {
     if (cell != null) {
       try {
