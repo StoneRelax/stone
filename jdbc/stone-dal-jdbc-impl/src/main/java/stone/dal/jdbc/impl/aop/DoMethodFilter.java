@@ -13,8 +13,13 @@ import org.springframework.cglib.proxy.CallbackFilter;
 /**
  * @author fengxie
  */
-public class DalMethodFilter implements CallbackFilter {
+public class DoMethodFilter implements CallbackFilter {
 
+	private boolean supportMarkDirty;
+
+	public DoMethodFilter(boolean supportMarkDirty) {
+		this.supportMarkDirty = supportMarkDirty;
+	}
 
 	public int accept(Method method) {
 		if (method.isAnnotationPresent(OneToMany.class)) {
@@ -45,6 +50,24 @@ public class DalMethodFilter implements CallbackFilter {
 				return 0;
 			}
 		}
+		if (supportMarkDirty) {
+			String methodName = method.getName();
+			if (methodName.startsWith("set") && !methodName.contains("_")) {
+				return 0;
+			}
+		}
 		return 1;
+	}
+
+	public static class DirtyMark extends DoMethodFilter {
+		public DirtyMark() {
+			super(true);
+		}
+	}
+
+	public static class LazyLoad extends DoMethodFilter {
+		public LazyLoad() {
+			super(false);
+		}
 	}
 }
