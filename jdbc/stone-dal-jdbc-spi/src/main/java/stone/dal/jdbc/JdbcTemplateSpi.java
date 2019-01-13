@@ -13,7 +13,7 @@ public interface JdbcTemplateSpi<T extends BaseDo> {
 
   int exec(SqlDmlDclMeta meta);
 
-  List<T> run(SqlQueryMeta queryMeta);
+  List<T> query(SqlQueryMeta queryMeta);
 
   Page<T> runPagination(SqlQueryMeta queryMeta);
 }

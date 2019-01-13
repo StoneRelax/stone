@@ -1,5 +1,7 @@
 package stone.dal.jdbc.api.meta;
 
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -11,181 +13,203 @@ import stone.dal.models.DalQueryPostHandler;
  */
 public abstract class SqlQueryMeta {
 
-	/**
-	 * Sql statement
-	 */
-	String sql;
-	/**
-	 * parameters
-	 */
-	Object[] parameters = new Object[0];
-	/**
-	 * Bean class whose instance might be imported with result value
-	 */
-	Class mappingClazz = Map.class;
-	/**
-	 * Callback list
-	 */
-	DalQueryPostHandler[] postHandlers;
-	/**
-	 * Page no
-	 */
-	int pageNo;
-	/**
-	 * Page size
-	 */
-	int pageSize = 50;
-	/**
-	 * Boolean flag of aop
-	 */
-	boolean supportFetchMore;
-	/**
-	 * Max record size
-	 */
-	int maxSize;
-	/**
-	 * Cache id used by ehcache
-	 */
-	String cacheId;
-	/**
-	 * Search 4 modify
-	 */
-	boolean updatable;
-	/**
-	 * Support field mapper
-	 */
-	boolean supportMapper = true;
-	/**
-	 * Support cascade fetching
-	 */
-	boolean one2oneCascadeFetching = false;
+  /**
+   * Sql statement
+   */
+  String sql;
 
-	public boolean isOne2oneCascadeFetching() {
-		return one2oneCascadeFetching;
-	}
+  /**
+   * parameters
+   */
+  Object[] parameters = new Object[0];
 
-	public int getPageNo() {
-		return pageNo;
-	}
+  RowMapper mapper;
 
-	public int getPageSize() {
-		return pageSize;
-	}
+  /**
+   * Bean class whose instance might be imported with result value
+   */
+  Class mappingClazz = Map.class;
 
-	public boolean isSupportFetchMore() {
-		return supportFetchMore;
-	}
+  /**
+   * Callback list
+   */
+  DalQueryPostHandler[] postHandlers;
 
-	public int getMaxSize() {
-		return maxSize;
-	}
+  /**
+   * Page no
+   */
+  int pageNo;
 
-	public String getCacheId() {
-		return cacheId;
-	}
+  /**
+   * Page size
+   */
+  int pageSize = 50;
 
-	public boolean isUpdatable() {
-		return updatable;
-	}
+  /**
+   * Boolean flag of aop
+   */
+  boolean supportFetchMore;
 
-	public boolean isSupportMapper() {
-		return supportMapper;
-	}
+  /**
+   * Max record size
+   */
+  int maxSize;
 
-	public DalQueryPostHandler[] getPostHandlers() {
-		return postHandlers;
-	}
+  /**
+   * Cache id used by ehcache
+   */
+  String cacheId;
 
-	public String getSql() {
-		return sql;
-	}
+  /**
+   * Search 4 modify
+   */
+  boolean updatable;
 
-	public Object[] getParameters() {
-		return parameters;
-	}
+  /**
+   * Support field mapper
+   */
+  boolean supportMapper = true;
 
-	public Class getMappingClazz() {
-		return mappingClazz;
-	}
+  /**
+   * Support cascade fetching
+   */
+  boolean one2oneCascadeFetching = false;
 
-	public static Factory factory() {
-		return new Factory();
-	}
+  public boolean isOne2oneCascadeFetching() {
+    return one2oneCascadeFetching;
+  }
 
-	public static class Factory {
+  public int getPageNo() {
+    return pageNo;
+  }
 
-		private SqlQueryMeta meta = new SqlQueryMeta() {
-		};
+  public int getPageSize() {
+    return pageSize;
+  }
 
-		public Factory sql(String sql) {
-			meta.sql = sql;
-			return this;
-		}
+  public boolean isSupportFetchMore() {
+    return supportFetchMore;
+  }
 
-		public Factory pageSize(int pageSize) {
-			meta.pageSize = pageSize;
-			return this;
-		}
+  public int getMaxSize() {
+    return maxSize;
+  }
 
-		public Factory pageNo(int pageNo) {
-			meta.pageNo = pageNo;
-			return this;
-		}
+  public boolean isUpdatable() {
+    return updatable;
+  }
 
-		public Factory updatable(boolean updatable) {
-			meta.updatable = updatable;
-			return this;
-		}
+  public boolean isSupportMapper() {
+    return supportMapper;
+  }
 
-		public Factory postHandlers(DalQueryPostHandler[] handlers) {
-			meta.postHandlers = handlers;
-			return this;
-		}
+  public DalQueryPostHandler[] getPostHandlers() {
+    return postHandlers;
+  }
 
-		public Factory supportFetchMore(boolean supportFetchMore) {
-			meta.supportFetchMore = supportFetchMore;
-			return this;
-		}
+  public String getSql() {
+    return sql;
+  }
 
-		public Factory maxSize(int maxSize) {
-			meta.maxSize = maxSize;
-			return this;
-		}
+  public Object[] getParameters() {
+    return parameters;
+  }
 
+  public Class getMappingClazz() {
+    return mappingClazz;
+  }
 
-		public Factory mappingClazz(Class clazz) {
-			meta.mappingClazz = clazz;
-			return this;
-		}
+  public RowMapper getMapper() {
+    return mapper;
+  }
 
-		public Factory params(Object[] params) {
-			meta.parameters = params;
-			return this;
-		}
+  public static interface RowMapper {
+    Object mapRow(SqlQueryMeta queryMeta,
+        ResultSetMetaData rsmd, int index, ResultSet rs);
+  }
 
-		public Factory supportMapper(boolean supportMapper) {
-			meta.supportMapper = supportMapper;
-			return this;
-		}
+  public static Factory factory() {
+    return new Factory();
+  }
 
-		public Factory one2oneCascadeFetching(boolean one2oneCascadeFetching) {
-			meta.one2oneCascadeFetching = one2oneCascadeFetching;
-			return this;
-		}
+  public static class Factory {
 
-		public SqlQueryMeta build() {
-			return meta;
-		}
+    private SqlQueryMeta meta = new SqlQueryMeta() {
+    };
 
-		public Factory join(SqlQueryMeta queryMeta) {
-			String sql = meta.getSql();
-			sql += queryMeta.sql;
-			meta.sql = sql;
-			List<Object> parameters = new ArrayList<>();
-			parameters.addAll(Arrays.asList(meta.parameters));
-			parameters.addAll(Arrays.asList(queryMeta.parameters));
-			meta.parameters = parameters.toArray(new Object[parameters.size()]);
-			return this;
-		}
-	}
+    public Factory sql(String sql) {
+      meta.sql = sql;
+      return this;
+    }
+
+    public Factory mapper(RowMapper rowMapper) {
+      meta.mapper = rowMapper;
+      return this;
+    }
+
+    public Factory pageSize(int pageSize) {
+      meta.pageSize = pageSize;
+      return this;
+    }
+
+    public Factory pageNo(int pageNo) {
+      meta.pageNo = pageNo;
+      return this;
+    }
+
+    public Factory updatable(boolean updatable) {
+      meta.updatable = updatable;
+      return this;
+    }
+
+    public Factory postHandlers(DalQueryPostHandler[] handlers) {
+      meta.postHandlers = handlers;
+      return this;
+    }
+
+    public Factory supportFetchMore(boolean supportFetchMore) {
+      meta.supportFetchMore = supportFetchMore;
+      return this;
+    }
+
+    public Factory maxSize(int maxSize) {
+      meta.maxSize = maxSize;
+      return this;
+    }
+
+    public Factory mappingClazz(Class clazz) {
+      meta.mappingClazz = clazz;
+      return this;
+    }
+
+    public Factory params(Object[] params) {
+      meta.parameters = params;
+      return this;
+    }
+
+    public Factory supportMapper(boolean supportMapper) {
+      meta.supportMapper = supportMapper;
+      return this;
+    }
+
+    public Factory one2oneCascadeFetching(boolean one2oneCascadeFetching) {
+      meta.one2oneCascadeFetching = one2oneCascadeFetching;
+      return this;
+    }
+
+    public SqlQueryMeta build() {
+      return meta;
+    }
+
+    public Factory join(SqlQueryMeta queryMeta) {
+      String sql = meta.getSql();
+      sql += queryMeta.sql;
+      meta.sql = sql;
+      List<Object> parameters = new ArrayList<>();
+      parameters.addAll(Arrays.asList(meta.parameters));
+      parameters.addAll(Arrays.asList(queryMeta.parameters));
+      meta.parameters = parameters.toArray(new Object[parameters.size()]);
+      return this;
+    }
+  }
 }

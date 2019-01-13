@@ -1,12 +1,10 @@
 package stone.dal.jdbc.spring.adaptor.impl;
 
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.List;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowMapper;
 import stone.dal.jdbc.JdbcTemplateSpi;
 import stone.dal.jdbc.api.meta.SqlDmlDclMeta;
 import stone.dal.jdbc.api.meta.SqlQueryMeta;
@@ -26,7 +24,7 @@ public class JdbcTemplateSpiImpl implements JdbcTemplateSpi {
   }
 
   @Override
-  public List run(SqlQueryMeta queryMeta) {
+  public List query(SqlQueryMeta queryMeta) {
     return jdbcTemplate.query(queryMeta.getSql(), ps -> {
       if (queryMeta.getMaxSize() > 0) {
         ps.setMaxRows(queryMeta.getMaxSize());
@@ -34,13 +32,7 @@ public class JdbcTemplateSpiImpl implements JdbcTemplateSpi {
       for (int i = 0; i < queryMeta.getParameters().length; i++) {
         setStatementParams(ps, queryMeta.getParameters()[i], i);
       }
-    }, new RowMapper<Object>() {
-      @Override
-      public Object mapRow(ResultSet rs, int rowNum) throws SQLException {
-
-        return null;
-      }
-    });
+    }, (rs, rowNum) -> queryMeta.getMapper().mapRow(queryMeta, rs.getMetaData(), rowNum, rs));
   }
 
   protected void setStatementParams(PreparedStatement ps, Object obj, int index) throws SQLException {

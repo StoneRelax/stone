@@ -83,7 +83,7 @@ public class StJpaRepositoryImpl<T extends BaseDo, K>
   @Override
   public T get(T pk) {
     RdbmsEntity entity = entityMetaManager.getEntity(pk.getClass());
-    List<T> res = jdbcTemplate.runQuery(entity.getFindMeta(pk));
+    List<T> res = jdbcTemplate.query(entity.getFindMeta(pk));
     T obj = null;
     if (!isCollectionEmpty(res)) {
       obj = res.get(0);
@@ -177,7 +177,7 @@ public class StJpaRepositoryImpl<T extends BaseDo, K>
           SqlQueryMeta queryMeta = relationQueryBuilder.buildMetaFactory(entity,
               mainObj, relation.getJoinProperty()).build();
           RdbmsEntity relEntity = entityMetaManager.getEntity(relation.getJoinPropertyType());
-          List<BaseDo> relObjs = jdbcTemplate.runQuery(queryMeta);
+          List<BaseDo> relObjs = jdbcTemplate.query(queryMeta);
           relObjs.forEach(relObj -> {
             cascadeDel(relEntity, relObj);
             jdbcTemplate.runDml(relEntity.getDeleteMeta(relObj));
@@ -197,7 +197,7 @@ public class StJpaRepositoryImpl<T extends BaseDo, K>
       SqlQueryMeta queryMeta = relationQueryBuilder.buildMetaFactory(entity,
           mainObj, relation.getJoinProperty()).build();
       RdbmsEntity relEntity = entityMetaManager.getEntity(relation.getJoinPropertyType());
-      List<BaseDo> relObjs = jdbcTemplate.runQuery(queryMeta);
+      List<BaseDo> relObjs = jdbcTemplate.query(queryMeta);
       if (relation.getRelationType() == RelationTypes.MANY_2_ONE
           || relation.getRelationType() == RelationTypes.ONE_2_ONE_VAL) {
         setPropVal(mainObj, relation.getJoinProperty(), relObjs.get(0));

@@ -12,19 +12,19 @@ import stone.dal.models.data.Page;
  */
 public interface StJdbcTemplate {
 	/**
-	 * Execute runQuery with a specified <code>com.rab.publication.persistence.SqlQueryMeta</code>
-	 *
-	 * @param queryMeta runQuery meta
-	 * @return result list, if runQuery meta has mapping class, then the result contains instances of mapping class. Otherwise, the result
+   * Execute query with a specified <code>com.rab.publication.persistence.SqlQueryMeta</code>
+   *
+   * @param queryMeta query meta
+   * @return result list, if query meta has mapping class, then the result contains instances of mapping class. Otherwise, the result
 	 * contains map instances.
 	 */
-	<T> List<T> runQuery(SqlQueryMeta queryMeta);
+  <T> List<T> query(SqlQueryMeta queryMeta);
 
 	/**
-	 * Execute pagination runQuery with specified meta name, and parameters
-	 *
-	 * @param queryMeta runQuery meta
-	 * @return result list, if runQuery meta has mapping class, then the result contains instances of mapping class. Otherwise, the result
+   * Execute pagination query with specified meta name, and parameters
+   *
+   * @param queryMeta query meta
+   * @return result list, if query meta has mapping class, then the result contains instances of mapping class. Otherwise, the result
 	 * contains map instances.
 	 */
 	<T> Page<T> pagination(SqlQueryMeta queryMeta);
