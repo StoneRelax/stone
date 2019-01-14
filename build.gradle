@@ -52,7 +52,7 @@ allprojects {
     ext['snakeyaml.version'] = '1.19'
     ext['tomcat.jdbc.version'] = '8.5.23'
     ext['mysql.jdbc.version'] = '8.0.13'
-    ext['poi.version'] = '3.16'
+    ext['poi.version'] = '3.17'
 
     group = 'stone'
     version = ext['stone.version']

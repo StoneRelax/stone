@@ -1,10 +1,10 @@
 package stone.dal.tools.utils;
 
-import java.io.IOException;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
+
 import java.io.InputStream;
-import org.apache.poi.hssf.usermodel.HSSFCell;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.poifs.filesystem.POIFSFileSystem;
 
 /**
  * Component:  ExcelUtils
@@ -14,12 +14,12 @@ import org.apache.poi.poifs.filesystem.POIFSFileSystem;
  */
 public class ExcelUtils {
 
-  public static HSSFWorkbook getWorkbook(InputStream is) throws IOException {
-    POIFSFileSystem fs = new POIFSFileSystem(is);
-    return new HSSFWorkbook(fs);
+  public static Workbook getWorkbook(InputStream is) throws Exception {
+    return WorkbookFactory.create(is);
+
   }
 
-  public static boolean cellBool(HSSFCell cell) {
+  public static boolean cellBool(Cell cell) {
     return cell != null && (cell.getStringCellValue().equalsIgnoreCase("y")
         || booleanValueForString(cell.getStringCellValue()));
   }
@@ -32,7 +32,7 @@ public class ExcelUtils {
     return value != null && value;
   }
 
-  public static String cellStr(HSSFCell cell) {
+  public static String cellStr(Cell cell) {
     if (cell != null) {
       try {
         return cell.getStringCellValue();
