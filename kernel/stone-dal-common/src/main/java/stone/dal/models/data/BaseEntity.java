@@ -35,17 +35,14 @@ public abstract class BaseEntity {
 
   public BaseEntity(EntityMeta meta) {
     this.meta = meta;
-    doInit();
     readEntityMeta(meta);
+    doInit();
   }
 
   protected abstract void doInit();
 
   protected void readEntityMeta(EntityMeta meta) {
-    meta.getFields().forEach(field -> {
-      readCommonFieldInfo(field);
-      readFieldInfo(field);
-    });
+    meta.getFields().forEach(this::readCommonFieldInfo);
     if (pks.size() > 1) {
       String pkClazzName = meta.getClazz().getName() + "Pk";
       try {
@@ -80,8 +77,6 @@ public abstract class BaseEntity {
     }
     return params.toArray(new Object[params.size()]);
   }
-
-  protected abstract void readFieldInfo(FieldMeta fieldMeta);
 
   public EntityMeta getMeta() {
     return meta;

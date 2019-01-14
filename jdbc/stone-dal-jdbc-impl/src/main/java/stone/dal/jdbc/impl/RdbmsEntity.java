@@ -42,11 +42,11 @@ public class RdbmsEntity extends BaseEntity {
 
   private String findSqlNoCondition;
 
-  private HashMap<String, FieldMeta> dbFieldNameMapper = new HashMap<>();
+  private HashMap<String, FieldMeta> dbFieldNameMapper;
 
-  private HashMap<String, String> dbFieldRelationRefMapper = new HashMap<>();
+  private HashMap<String, String> dbFieldRelationRefMapper;
 
-  private Map<String, RelationMeta> relationMapper = new HashMap<>();
+  private Map<String, RelationMeta> relationMapper;
 
   private static final String UPDATE_SET_HOLDER = "$CHANGED_FIELDS$";
 
@@ -75,11 +75,11 @@ public class RdbmsEntity extends BaseEntity {
     delRelSqls = new ConcurrentHashMap<>();
     findRelSqls = new ConcurrentHashMap<>();
     dbFieldRelationRefMapper = new HashMap<>();
-  }
 
-  @Override
-  protected void readEntityMeta(EntityMeta meta) {
-    super.readEntityMeta(meta);
+    meta.getFields().forEach(field -> {
+      dbFieldNameMapper.put(field.getDbName(), field);
+    });
+
     meta.getRelations().forEach(this::readRelation);
     insertDml = buildInsertSql();
     deleteDml = buildDeleteSql();
@@ -101,11 +101,6 @@ public class RdbmsEntity extends BaseEntity {
             .put(joinColumn.getName(), relation.getJoinProperty() + "." + joinColumn.getReferencedColumnName());
       });
     }
-  }
-
-  @Override
-  protected void readFieldInfo(FieldMeta fieldMeta) {
-    dbFieldNameMapper.put(fieldMeta.getDbName(), fieldMeta);
   }
 
   private void parseReleation(RelationMeta relation) {

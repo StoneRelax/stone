@@ -14,8 +14,9 @@ public class RdbmsEntityManager {
 
 
 	public RdbmsEntityManager(EntityMetaManager entityMetaManager) {
-		this.entityMapper = entityMetaManager.getAllEntities().stream().collect(Collectors.toMap(
-				EntityMeta::getClazz, RdbmsEntity::new));
+    this.entityMapper = entityMetaManager.getAllEntities().stream().filter(
+        entityMeta -> !entityMeta.isNosql()).collect(
+        Collectors.toMap(EntityMeta::getClazz, meta -> new RdbmsEntity(meta)));
 	}
 
 	public RdbmsEntity getEntity(Class clazz) {
