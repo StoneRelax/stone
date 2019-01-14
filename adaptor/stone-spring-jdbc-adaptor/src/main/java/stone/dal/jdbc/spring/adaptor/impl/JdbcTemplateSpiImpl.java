@@ -35,7 +35,7 @@ public class JdbcTemplateSpiImpl implements JdbcTemplateSpi {
     }, (rs, rowNum) -> queryMeta.getMapper().mapRow(queryMeta, rs.getMetaData(), rowNum, rs));
   }
 
-  protected void setStatementParams(PreparedStatement ps, Object obj, int index) throws SQLException {
+  private void setStatementParams(PreparedStatement ps, Object obj, int index) throws SQLException {
     int _index = index + 1;
     if (obj instanceof Timestamp) {
       ps.setTimestamp(_index, (Timestamp) obj);
