@@ -48,7 +48,7 @@ public class DalJdbcAutoConfigure {
   public void init() {
     rdbmsEntityManager = new RdbmsEntityManager(entityMetaManager);
     relationQueryBuilder = new RelationQueryBuilder(rdbmsEntityManager);
-    jdbcTemplate = new StJdbcTemplateImpl(jdbcTemplateSpi, dbDialectSpi, rdbmsEntityManager);
+    jdbcTemplate = new StJdbcTemplateImpl(jdbcTemplateSpi, dbDialectSpi, relationQueryBuilder, rdbmsEntityManager);
     jpaRepository = new StJpaRepositoryImpl(jdbcTemplate, rdbmsEntityManager, relationQueryBuilder);
 //		JdbcQuerySpi.Factory queryFactory = JdbcQuerySpi.factory();
 //		deferredDataLoader = new RelationQueryBuilder(entityMetaManager);
