@@ -73,7 +73,7 @@ public class SqlCondition {
 			sb.append(" ");
 		});
 		return SqlQueryMeta.factory().mappingClazz(clazz)
-        .sql(sb.toString()).params(params.toArray(new Object[params.size()])).build();
+        .sql(sb.toString()).params(params.toArray(new Object[0])).build();
 	}
 
 }

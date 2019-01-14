@@ -18,6 +18,8 @@ public abstract class SqlQueryMeta {
    */
   String sql;
 
+  String pageQuerySql;
+
   /**
    * parameters
    */
@@ -200,5 +202,16 @@ public abstract class SqlQueryMeta {
       meta.parameters = parameters.toArray(new Object[parameters.size()]);
       return this;
     }
+
+    public Factory pageQueryMeta(SqlQueryMeta queryMeta, String pageQuerySql) {
+      meta.sql = queryMeta.sql;
+      meta.pageQuerySql = pageQuerySql;
+      List<Object> parameters = new ArrayList<>();
+      parameters.addAll(Arrays.asList(meta.parameters));
+      parameters.addAll(Arrays.asList(queryMeta.parameters));
+      meta.parameters = parameters.toArray(new Object[parameters.size()]);
+      return this;
+    }
+
   }
 }

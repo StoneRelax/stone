@@ -5,6 +5,7 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.List;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
 import stone.dal.jdbc.api.meta.SqlDmlDclMeta;
 import stone.dal.jdbc.api.meta.SqlQueryMeta;
 import stone.dal.jdbc.spi.JdbcTemplateSpi;
@@ -54,7 +55,34 @@ public class JdbcTemplateSpiImpl implements JdbcTemplateSpi {
   }
 
   @Override
-  public Page runPagination(SqlQueryMeta queryMeta, SqlQueryMeta.RowMapper rowMapper) {
-    return null;
+  @SuppressWarnings("unchecked")
+  public Page queryPage(SqlQueryMeta queryMeta, SqlQueryMeta.RowMapper rowMapper) {
+    Page.PageInfo pageInfo = (Page.PageInfo) jdbcTemplate.query(queryMeta.getSql(), ps -> {
+      ps.setMaxRows(1);
+      for (int i = 0; i < queryMeta.getParameters().length; i++) {
+        setStatementParams(ps, queryMeta.getParameters()[i], i);
+      }
+    }, (RowMapper<Object>) (rs, rowNum) -> {
+      int totalCount = rs.getBigDecimal(1).intValue();
+      int pageSize = queryMeta.getPageSize();
+      int totalPage = (totalCount + pageSize - 1) / pageSize;
+      int pageNo = queryMeta.getPageNo();
+      if (totalCount > 0) {
+        if (totalPage > queryMeta.getPageNo()) {
+          pageNo = queryMeta.getPageNo();
+        } else {
+          pageNo = totalPage;
+        }
+      }
+      return Page.createInfo(pageNo, totalPage, totalCount);
+    });
+    List rows = jdbcTemplate.query(queryMeta.getSql(), ps -> {
+      for (int i = 0; i < queryMeta.getParameters().length; i++) {
+        setStatementParams(ps, queryMeta.getParameters()[i], i);
+      }
+    }, (rs, rowNum) -> rowMapper.mapRow(queryMeta, rs.getMetaData(), rowNum, rs));
+    return new Page(pageInfo, rows);
   }
+
+
 }
