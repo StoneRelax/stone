@@ -34,7 +34,7 @@ public class DalJdbcAutoConfigure {
   @Autowired
   private SequenceSpi sequenceSpi;
 
-  @Value("${st.db.dialect}")
+  @Value("${stone.dal.dialect}")
   private String dialectType;
 
   @Autowired(required = false)
