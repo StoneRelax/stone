@@ -33,9 +33,9 @@ public class SequenceMixGeneratorImpl implements SequenceGenerator<String> {
 	private static final String EXPRESS_EXP = "\\$\\{(\\w)*(\\.)?(\\w)+\\}";
 	private HashMap<String, SequenceSeed> registry = new HashMap<>();
 
-	SequenceMixGeneratorImpl(Collection<SequenceMeta> definitions) {
+	SequenceMixGeneratorImpl(String storePath, Collection<SequenceMeta> definitions) {
 		definitions.stream().filter(meta -> meta.getType().equals("mix")).forEach(meta -> {
-			registry.put(meta.getId(), new SequenceSeed(meta));
+			registry.put(meta.getId(), new SequenceSeed(storePath, meta));
 		});
 	}
 

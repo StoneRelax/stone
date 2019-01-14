@@ -19,8 +19,8 @@ class SequenceSeed {
 	private String seedFileName;
 	private SequenceMeta meta;
 
-	SequenceSeed(SequenceMeta seqMeta) {
-		this.seedFileName = "sequence/" + seqMeta.getId() + ".seed";
+	SequenceSeed(String storePath, SequenceMeta seqMeta) {
+		this.seedFileName = storePath + "/sequence/" + seqMeta.getId() + ".seed";
 		this.meta = seqMeta;
 		init();
 	}

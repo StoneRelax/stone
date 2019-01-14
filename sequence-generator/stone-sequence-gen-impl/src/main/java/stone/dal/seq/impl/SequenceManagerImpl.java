@@ -14,9 +14,9 @@ public class SequenceManagerImpl implements SequenceManager {
 
 	private Map<String, SequenceGenerator> seqGeneratorMap = new HashMap<>();
 
-	public SequenceManagerImpl(Collection<SequenceMeta> seqs) {
-		SequenceMixGeneratorImpl mixGenerator = new SequenceMixGeneratorImpl(seqs);
-		SequenceSeedGeneratorImpl seedGenerator = new SequenceSeedGeneratorImpl(seqs);
+  public SequenceManagerImpl(String storePath, Collection<SequenceMeta> seqs) {
+    SequenceMixGeneratorImpl mixGenerator = new SequenceMixGeneratorImpl(storePath, seqs);
+    SequenceSeedGeneratorImpl seedGenerator = new SequenceSeedGeneratorImpl(storePath, seqs);
 		SequenceUuidGeneratorImpl uuidGenerator = new SequenceUuidGeneratorImpl();
 		seqs.forEach(seqMeta -> {
 			if ("mix".equals(seqMeta.getType())) {
