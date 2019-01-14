@@ -17,7 +17,7 @@ public class SpringJdbcAdaptorAutoConfigure {
   private SequenceManager sequenceManager;
 
   @Bean
-  public JdbcTemplateSpi getQueryRunner(@Autowired JdbcTemplate jdbcTemplate) {
+  public JdbcTemplateSpi getJdbcTemplateSpi(@Autowired JdbcTemplate jdbcTemplate) {
     return new JdbcTemplateSpiImpl(jdbcTemplate);
   }
 

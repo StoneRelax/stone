@@ -32,9 +32,6 @@ public class DalJdbcAutoConfigure {
   private JdbcTemplateSpi jdbcTemplateSpi;
 
   @Autowired
-  private DBDialectSpi dbDialectSpi;
-
-  @Autowired
   private SequenceSpi sequenceSpi;
 
   @Value("${st.db.dialect}")
@@ -54,7 +51,7 @@ public class DalJdbcAutoConfigure {
     }
     RdbmsEntityManager rdbmsEntityManager = new RdbmsEntityManager(entityMetaManager);
     RelationQueryBuilder relationQueryBuilder = new RelationQueryBuilder(rdbmsEntityManager);
-    jdbcTemplate = new StJdbcTemplateImpl(jdbcTemplateSpi, dbDialectSpi, relationQueryBuilder, rdbmsEntityManager);
+    jdbcTemplate = new StJdbcTemplateImpl(jdbcTemplateSpi, dialectSpi, relationQueryBuilder, rdbmsEntityManager);
     jpaRepository = new StJpaRepositoryImpl(jdbcTemplate, rdbmsEntityManager, relationQueryBuilder, sequenceSpi);
   }
 

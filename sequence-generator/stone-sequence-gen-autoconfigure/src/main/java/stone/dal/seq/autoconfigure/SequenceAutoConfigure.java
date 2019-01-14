@@ -17,8 +17,12 @@ public class SequenceAutoConfigure {
   @Autowired
   private SequenceMetaLoaderSpi sequenceMetaLoader;
 
-  @Value("#{stone.dal.seq.storePath?:'' }")
+  @Value("${stone.dal.seq.storePath}")
   private String storePath;
+
+  public SequenceAutoConfigure() {
+    System.out.println("init sequence");
+  }
 
   @Bean
   public SequenceManager getSequenceManager() {

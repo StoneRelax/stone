@@ -4,5 +4,6 @@ dependencies {
     compile project(':sequence-generator:stone-sequence-gen-autoconfigure')
     compile project(':jdbc:stone-dal-jdbc-autoconfigure')
     testCompile 'org.springframework.boot:spring-boot-starter-test'
+    testCompile 'mysql:mysql-connector-java'
 
 }

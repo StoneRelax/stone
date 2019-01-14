@@ -42,8 +42,6 @@ public class RdbmsEntity extends BaseEntity {
 
   private String findSqlNoCondition;
 
-  private EntityMeta meta;
-
   private HashMap<String, FieldMeta> dbFieldNameMapper = new HashMap<>();
 
   private HashMap<String, String> dbFieldRelationRefMapper = new HashMap<>();
