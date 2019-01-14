@@ -1,10 +1,5 @@
 package stone.dal.tools;
 
-import freemarker.cache.URLTemplateLoader;
-import freemarker.template.Configuration;
-import freemarker.template.DefaultObjectWrapper;
-import freemarker.template.SimpleHash;
-import freemarker.template.Template;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -23,6 +18,12 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.xml.datatype.XMLGregorianCalendar;
+
+import freemarker.cache.URLTemplateLoader;
+import freemarker.template.Configuration;
+import freemarker.template.DefaultObjectWrapper;
+import freemarker.template.SimpleHash;
+import freemarker.template.Template;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.poi.ss.usermodel.Cell;
@@ -32,6 +33,7 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import stone.dal.models.meta.FieldMeta;
+import stone.dal.models.meta.RelationMeta;
 import stone.dal.models.meta.RelationTypes;
 import stone.dal.tools.meta.RawEntityMeta;
 import stone.dal.tools.meta.RawFieldMeta;
@@ -45,6 +47,10 @@ import static stone.dal.kernel.utils.KernelUtils.str2Arr;
 
 public class DoGenerator {
   private static Map<String, Class> classTypeMap = new ConcurrentHashMap<>();
+
+//  private static final String TEMPLATE_PATH = "src/main/java/stone/dal/tools/templates";
+
+  private static final String TEMPLATE_PATH = "src/main/resources/stone/dal/tools/template";
 
   private static Logger s_logger = LoggerFactory.getLogger(DoGenerator.class);
 
@@ -132,8 +138,9 @@ public class DoGenerator {
               RawRelationMeta relation = readRelations(meta, sfRow, n2nJoinTables);
               meta.getRawRelations().add(relation);
             } else if (beginFieldRead && !replaceNull(ExcelUtils.cellStr(sfRow.getCell(0))).equals("Name")) {
-              FieldMeta fieldMeta = readFields(entityName, sfRow);
-              meta.getFields().add(fieldMeta);
+              RawFieldMeta fieldMeta = readFields(entityName, sfRow);
+              fieldMeta.setAddOn(true);
+              meta.getRawFields().add(fieldMeta);
             }
           }
         } else {
@@ -162,7 +169,7 @@ public class DoGenerator {
   }
 
   private String genJavaClass(RawEntityMeta entityMeta, String packageName) throws Exception {
-    List<FieldMeta> fields = entityMeta.getFields();
+    List<RawFieldMeta> fields = entityMeta.getRawFields();
     List<String> pkFields = new ArrayList<>();
     for (FieldMeta field : fields) {
       if (ExcelUtils.booleanValueForBoolean(field.getPk())) {
@@ -174,26 +181,17 @@ public class DoGenerator {
     List<RawRelationMeta> relations = entityMeta.getRawRelations();
     if (!CollectionUtils.isEmpty(relations)) {
       for (RawRelationMeta relation : relations) {
-        if (StringUtils.isEmpty(relation.getJoinPropertyType())) {
+        if (StringUtils.isEmpty(relation.getJoinPropertyTypeName())) {
           String propertyDomain = relation.getJoinDomain();
           relation.setJoinPropertyType(packageName + "." + propertyDomain);
         }
       }
     }
     Configuration cfg = new Configuration();
-    cfg.setTemplateLoader(
-        new URLTemplateLoader() {
-          protected URL getURL(String name) {
-            Locale locale = Locale.getDefault();
-            String urlName =
-                "stone/tools/template/" + StringUtils.replace(name, "_" + locale.toString(), "");
-            return Thread.currentThread().getContextClassLoader().getResource(urlName);
-          }
-        });
+    cfg.setDirectoryForTemplateLoading(new File(TEMPLATE_PATH));
     cfg.setObjectWrapper(new DefaultObjectWrapper());
     try {
-//      Template temp = cfg.getTemplate("entity_java.ftl");
-      Template temp = cfg.getTemplate(getClass().getResource("entity_java.ftl").getFile());
+      Template temp = cfg.getTemplate("entity_java.ftl");
       ByteArrayOutputStream bos = new ByteArrayOutputStream();
       Writer out = new OutputStreamWriter(bos);
       SimpleHash params = new SimpleHash();
@@ -210,7 +208,73 @@ public class DoGenerator {
     }
   }
 
-  private FieldMeta readFields(String entityName, Row sfRow) throws Exception {
+  public boolean nosql(RawEntityMeta entity) {
+    return ExcelUtils.booleanValueForBoolean(entity.isNosql());
+  }
+
+  public String extraHead(RawEntityMeta entity) {
+    return "";
+  }
+
+  public List<RawFieldMeta> fields2Add(RawEntityMeta meta) {
+    List<RawFieldMeta> fields = null;
+      fields = new ArrayList<>();
+      for (RawFieldMeta field : meta.getRawFields()) {
+        if (ExcelUtils.booleanValueForBoolean(field.getAddOn())) {
+          fields.add(field);
+        }
+    }
+    return fields;
+  }
+
+  public String getFieldType(RawEntityMeta meta, RawFieldMeta fieldMeta) {
+    String classType = fieldMeta.getTypeName();
+    if (ExcelUtils.booleanValueForBoolean(meta.isNosql())) {
+      if (classType.equalsIgnoreCase("bigDecimal")) {
+        classType = "double";
+      }
+    }
+    return classType;
+  }
+
+  public boolean one2many(RawEntityMeta entity,RawRelationMeta relationMeta) {
+    return relationMeta.getRelationType().name().equalsIgnoreCase("one_2_many");
+  }
+
+  public String getAnnotation(RawFieldMeta fieldMeta) {
+    List<String> annotations = new ArrayList<String>();
+    if (ExcelUtils.booleanValueForBoolean(fieldMeta.getPk())) {
+      annotations.add("@javax.persistence.Id");
+    }
+    if (!StringUtils.isEmpty(fieldMeta.getMappedBy()) && !StringUtils.isEmpty(fieldMeta.getMapper())) {
+      annotations.add("@FieldMapper(mapper = \"" + fieldMeta.getMapper() + "\", mappedBy = \"" + fieldMeta.getMappedBy() + "\")");
+    }
+    if (!StringUtils.isEmpty(fieldMeta.getSeqType())) {
+      String sql = "@Sequence(";
+      if (!StringUtils.isEmpty(fieldMeta.getSeqKey())){
+        sql += "key = \"" + fieldMeta.getSeqKey() + "\"";
+      }
+      if (!StringUtils.isEmpty(fieldMeta.getSeqType())) {
+        sql += "generator = \"" + fieldMeta.getSeqType() + "\"";
+      }
+      if (ExcelUtils.booleanValueForBoolean(fieldMeta.getWriteWhenNotEmpty())) {
+        sql += ",writeWhenNotEmpty = true";
+      }
+      sql += ")";
+      annotations.add(sql);
+    }
+    return ExcelUtils.combineString(annotations, "\n");
+  }
+
+  public String getMethodName(String fieldName) {
+    return ExcelUtils.convertFirstAlphetUpperCase(fieldName);
+  }
+
+  public List<String> getPks(RawEntityMeta entityMeta) {
+    return new ArrayList<>(entityMeta.pks());
+  }
+
+  private RawFieldMeta readFields(String entityName, Row sfRow) throws Exception {
     RawFieldMeta meta = new RawFieldMeta();
     String fieldName = ExcelUtils.cellStr(sfRow.getCell(0)).trim();
     String typeName = ExcelUtils.cellStr(sfRow.getCell(1));
