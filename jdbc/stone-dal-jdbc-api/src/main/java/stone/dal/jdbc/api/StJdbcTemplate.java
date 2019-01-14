@@ -30,18 +30,18 @@ public interface StJdbcTemplate {
 	<T> Page<T> pagination(SqlQueryMeta queryMeta);
 
 	/**
-	 * Execute runDml operation
+	 * Execute execDml operation
 	 *
 	 * @param baseMeta jdbc meta
 	 */
-	int runDml(SqlDmlDclMeta baseMeta);
+	int execDml(SqlDmlDclMeta baseMeta);
 
 	/**
 	 * Execute dml
 	 *
 	 * @param sql Sql
 	 */
-	int runDcl(String sql);
+	int execDcl(String sql);
 
 	/**
 	 * Execute sql file
@@ -49,7 +49,7 @@ public interface StJdbcTemplate {
 	 * @param inputStream Inputstream of sqlfile
 	 * @return Execute code
 	 */
-	List<ExecResult> runSqlStream(InputStream inputStream);
+	List<ExecResult> execSqlStream(InputStream inputStream);
 
 	/**
 	 * Execute sql script
@@ -57,7 +57,7 @@ public interface StJdbcTemplate {
 	 * @param sqlScripts sql scripts which splitted by ;
 	 * @return Sql errors
 	 */
-	List<ExecResult> runSqlScript(String sqlScripts);
+	List<ExecResult> execSqlScript(String sqlScripts);
 
 //  <T extends BaseDo> T runFind(SqlCondition condition);
 }

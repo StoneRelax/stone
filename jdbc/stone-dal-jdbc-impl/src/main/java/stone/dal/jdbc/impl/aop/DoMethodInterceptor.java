@@ -5,7 +5,10 @@ import java.util.List;
 import org.springframework.cglib.proxy.MethodInterceptor;
 import org.springframework.cglib.proxy.MethodProxy;
 import stone.dal.jdbc.api.meta.SqlQueryMeta;
+import stone.dal.jdbc.impl.DefaultRowMapper;
+import stone.dal.jdbc.impl.RdbmsEntityManager;
 import stone.dal.jdbc.impl.utils.RelationQueryBuilder;
+import stone.dal.jdbc.spi.DBDialectSpi;
 import stone.dal.jdbc.spi.JdbcTemplateSpi;
 import stone.dal.kernel.utils.StringUtils;
 import stone.dal.models.data.BaseDo;
@@ -19,15 +22,25 @@ public class DoMethodInterceptor implements MethodInterceptor {
 
   private RelationQueryBuilder relationQueryBuilder;
 
+  private RdbmsEntityManager entityMetaManager;
+
   private JdbcTemplateSpi jdbcTemplateSpi;
+
+  private DBDialectSpi dbDialectSpi;
 
   private boolean supportMarkDirty;
 
-  public DoMethodInterceptor(RelationQueryBuilder relationQueryBuilder,
-      JdbcTemplateSpi jdbcTemplateSpi, boolean supportMarkDirty) {
+  public DoMethodInterceptor(
+      RelationQueryBuilder relationQueryBuilder,
+      JdbcTemplateSpi jdbcTemplateSpi,
+      DBDialectSpi dbDialectSpi,
+      RdbmsEntityManager entityMetaManager,
+      boolean supportMarkDirty) {
     this.relationQueryBuilder = relationQueryBuilder;
     this.jdbcTemplateSpi = jdbcTemplateSpi;
     this.supportMarkDirty = supportMarkDirty;
+    this.dbDialectSpi = dbDialectSpi;
+    this.entityMetaManager = entityMetaManager;
   }
 
   public Object intercept(
@@ -69,7 +82,8 @@ public class DoMethodInterceptor implements MethodInterceptor {
       if (!((BaseDo) obj).isLoaded(propertyName)) {
         SqlQueryMeta queryMeta = relationQueryBuilder.buildMetaFactory(obj, propertyName).supportFetchMore(true)
             .build();
-        List resultSet = jdbcTemplateSpi.query(queryMeta);
+        List resultSet = jdbcTemplateSpi.query(queryMeta,
+            new DefaultRowMapper(dbDialectSpi, entityMetaManager, relationQueryBuilder, jdbcTemplateSpi));
         if (!isCollectionEmpty(resultSet)) {
           if (method.getReturnType().isAssignableFrom(List.class)) {
             result = resultSet;
@@ -85,14 +99,20 @@ public class DoMethodInterceptor implements MethodInterceptor {
   }
 
   public static class LazyLoad extends DoMethodInterceptor {
-    public LazyLoad(RelationQueryBuilder relationQueryBuilder, JdbcTemplateSpi jdbcTemplateSpi) {
-      super(relationQueryBuilder, jdbcTemplateSpi, false);
+    public LazyLoad(RelationQueryBuilder relationQueryBuilder,
+        JdbcTemplateSpi jdbcTemplateSpi,
+        DBDialectSpi dbDialectSpi,
+        RdbmsEntityManager entityMetaManager) {
+      super(relationQueryBuilder, jdbcTemplateSpi, dbDialectSpi, entityMetaManager, false);
     }
   }
 
   public static class DirtyMark extends DoMethodInterceptor {
-    public DirtyMark(RelationQueryBuilder relationQueryBuilder, JdbcTemplateSpi jdbcTemplateSpi) {
-      super(relationQueryBuilder, jdbcTemplateSpi, true);
+    public DirtyMark(RelationQueryBuilder relationQueryBuilder,
+        JdbcTemplateSpi jdbcTemplateSpi,
+        DBDialectSpi dbDialectSpi,
+        RdbmsEntityManager entityMetaManager) {
+      super(relationQueryBuilder, jdbcTemplateSpi, dbDialectSpi, entityMetaManager, true);
     }
   }
 

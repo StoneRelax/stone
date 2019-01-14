@@ -101,14 +101,14 @@ public class StJpaRepositoryImpl<T extends BaseDo, K>
   private void runCreate(BaseDo obj) {
     RdbmsEntity entity = entityMetaManager.getEntity(obj.getClass());
     bindSeqVals(obj, entity);
-    jdbcTemplate.runDml(entity.getInsertMeta(obj));
+    jdbcTemplate.execDml(entity.getInsertMeta(obj));
     cascadeInsert(entity, obj);
   }
 
   private void runUpdate(BaseDo obj) {
     if (BaseDo.States.UPDATED == obj.get_state()) {
       RdbmsEntity entity = entityMetaManager.getEntity(obj.getClass());
-      jdbcTemplate.runDml(entity.getUpdateMeta(obj));
+      jdbcTemplate.execDml(entity.getUpdateMeta(obj));
       cascadeUpdate(entity, obj);
     } else if (BaseDo.States.DELETED == obj.get_state()) {
       runDel(obj);
@@ -121,13 +121,13 @@ public class StJpaRepositoryImpl<T extends BaseDo, K>
     RdbmsEntity entity = entityMetaManager.getEntity(pkObj.getClass());
     cascadeDel(entity, pkObj);
     SqlDmlDclMeta sqlMeta = entity.getDeleteMeta(pkObj);
-    jdbcTemplate.runDml(sqlMeta);
+    jdbcTemplate.execDml(sqlMeta);
   }
 
   private void saveJoinTable(BaseDo obj, RelationMeta many2many) {
     RdbmsEntity entity = entityMetaManager.getEntity(obj.getClass());
     Collection<SqlDmlDclMeta> saveMetaList = entity.buildMany2ManySaveMeta(obj, many2many.getJoinProperty());
-    saveMetaList.forEach(insertMeta -> jdbcTemplate.runDml(insertMeta));
+    saveMetaList.forEach(insertMeta -> jdbcTemplate.execDml(insertMeta));
   }
 
   private void cascadeInsert(RdbmsEntity entity, BaseDo mainObj) {
@@ -169,7 +169,7 @@ public class StJpaRepositoryImpl<T extends BaseDo, K>
         mainObj.get_changes().contains(relation.getJoinProperty()) &&
             relation.getRelationType() == RelationTypes.MANY_2_MANY).forEach(relation -> {
       Collection<SqlDmlDclMeta> saveMetaList = entity.buildMany2ManySaveMeta(mainObj, relation.getJoinProperty());
-      saveMetaList.forEach(saveMeta -> jdbcTemplate.runDml(saveMeta));
+      saveMetaList.forEach(saveMeta -> jdbcTemplate.execDml(saveMeta));
     });
   }
 
@@ -186,7 +186,7 @@ public class StJpaRepositoryImpl<T extends BaseDo, K>
           List<BaseDo> relObjs = jdbcTemplate.query(queryMeta);
           relObjs.forEach(relObj -> {
             cascadeDel(relEntity, relObj);
-            jdbcTemplate.runDml(relEntity.getDeleteMeta(relObj));
+            jdbcTemplate.execDml(relEntity.getDeleteMeta(relObj));
           });
         });
     meta.getRelations().stream().filter(relation -> relation.getRelationType() == RelationTypes.MANY_2_MANY)
@@ -216,7 +216,7 @@ public class StJpaRepositoryImpl<T extends BaseDo, K>
 
   private void delJoinTable(RdbmsEntity entity, BaseDo mainObj, RelationMeta relation) {
     SqlDmlDclMeta delJoinTblMeta = entity.getDelJoinTableMeta(mainObj, relation.getJoinProperty());
-    jdbcTemplate.runDml(delJoinTblMeta);
+    jdbcTemplate.execDml(delJoinTblMeta);
   }
 
   private void bindSeqVals(BaseDo obj, RdbmsEntity entity) {

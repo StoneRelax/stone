@@ -1,0 +1,8 @@
+dependencies {
+    compile project(':jdbc:stone-dal-jdbc-autoconfigure')
+    compile project(':adaptor:stone-spring-jdbc-adaptor')
+    compile project(':sequence-generator:stone-sequence-gen-autoconfigure')
+    compile project(':jdbc:stone-dal-jdbc-autoconfigure')
+    testCompile 'org.springframework.boot:spring-boot-starter-test'
+
+}

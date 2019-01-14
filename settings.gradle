@@ -28,12 +28,7 @@ include 'jdbc:stone-dal-jdbc-api'
 include 'jdbc:stone-dal-jdbc-spi'
 include 'jdbc:stone-dal-jdbc-autoconfigure'
 include 'jdbc:stone-dal-jdbc-impl'
-
 include 'adaptor:stone-spring-jdbc-adaptor'
-
 include 'tools:stone-entity-generator'
 
-//include 'mongo:stone-dal-mongo-api'
-//include 'mongo:stone-dal-mongo-autoconfigure'
-//include 'mongo:stone-dal-mongo-autoconfigure'
-//include 'adaptor:stone-dal-mongo-autoconfigure'
+include 'starter:stone-dal-starter'

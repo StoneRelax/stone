@@ -1,6 +1,5 @@
 dependencies {
     compile project(':sequence-generator:stone-sequence-gen-api')
-    compile project(':sequence-generator:stone-sequence-gen-autoconfigure')
     compile project(':sequence-generator:stone-sequence-gen-spi')
     compile project(':sequence-generator:stone-sequence-gen-impl')
     compile 'org.springframework:spring-beans'
