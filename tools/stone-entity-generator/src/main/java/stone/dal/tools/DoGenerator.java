@@ -25,10 +25,10 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.xml.datatype.XMLGregorianCalendar;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
-import org.apache.poi.hssf.usermodel.HSSFCell;
-import org.apache.poi.hssf.usermodel.HSSFRow;
-import org.apache.poi.hssf.usermodel.HSSFSheet;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import stone.dal.models.meta.FieldMeta;
@@ -77,12 +77,12 @@ public class DoGenerator {
 
   public List<RawEntityMeta> build(File file) throws Exception {
     InputStream is = new FileInputStream(file);
-    HSSFWorkbook book = ExcelUtils.getWorkbook(is);
+    Workbook book = ExcelUtils.getWorkbook(is);
     int i = 0;
     List<RawEntityMeta> entities = new ArrayList<>();
     HashSet<String> n2nJoinTables = new HashSet<>();
     while (true) {
-      HSSFSheet sheet = book.getSheetAt(0);
+      Sheet sheet = book.getSheetAt(0);
       if (i > 0) {
         try {
           sheet = book.getSheetAt(i);
@@ -99,7 +99,7 @@ public class DoGenerator {
         continue;
       }
       RawEntityMeta meta = new RawEntityMeta();
-      HSSFRow headRow = sheet.getRow(0);
+      Row headRow = sheet.getRow(0);
       meta.setName(entityName);
       meta.setNosql(ExcelUtils.cellBool(headRow.getCell(3)));
       String delInd = ExcelUtils.cellStr(headRow.getCell(9));
@@ -114,10 +114,10 @@ public class DoGenerator {
       boolean beginFieldRead = false;
       boolean beginRelationRead = false;
       while (true) {
-        HSSFRow sfRow = sheet.getRow(row);
+        Row sfRow = sheet.getRow(row);
         int col = 0;
         if (sfRow != null) {
-          HSSFCell cell = sfRow.getCell(col);
+          Cell cell = sfRow.getCell(col);
           if (beginRelationRead && (cell == null || isStrEmpty(ExcelUtils.cellStr(cell)))) {
             break;
           }
@@ -192,7 +192,8 @@ public class DoGenerator {
         });
     cfg.setObjectWrapper(new DefaultObjectWrapper());
     try {
-      Template temp = cfg.getTemplate("entity_java.ftl");
+//      Template temp = cfg.getTemplate("entity_java.ftl");
+      Template temp = cfg.getTemplate(getClass().getResource("entity_java.ftl").getFile());
       ByteArrayOutputStream bos = new ByteArrayOutputStream();
       Writer out = new OutputStreamWriter(bos);
       SimpleHash params = new SimpleHash();
@@ -209,7 +210,7 @@ public class DoGenerator {
     }
   }
 
-  private FieldMeta readFields(String entityName, HSSFRow sfRow) throws Exception {
+  private FieldMeta readFields(String entityName, Row sfRow) throws Exception {
     RawFieldMeta meta = new RawFieldMeta();
     String fieldName = ExcelUtils.cellStr(sfRow.getCell(0)).trim();
     String typeName = ExcelUtils.cellStr(sfRow.getCell(1));
@@ -306,7 +307,7 @@ public class DoGenerator {
     return meta;
   }
 
-  private RawRelationMeta readRelations(RawEntityMeta entityMeta, HSSFRow sfRow, HashSet<String> n2nJoinTables) {
+  private RawRelationMeta readRelations(RawEntityMeta entityMeta, Row sfRow, HashSet<String> n2nJoinTables) {
     RawRelationMeta meta = new RawRelationMeta();
     meta.setJoinDomain(ExcelUtils.cellStr(sfRow.getCell(1)));
     meta.setJoinProperty(ExcelUtils.cellStr(sfRow.getCell(2)));
