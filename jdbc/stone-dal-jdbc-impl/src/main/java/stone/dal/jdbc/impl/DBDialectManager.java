@@ -7,7 +7,7 @@ import java.util.Properties;
 import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import stone.dal.jdbc.DBDialectSpi;
+import stone.dal.jdbc.spi.DBDialectSpi;
 import stone.dal.kernel.utils.LogUtils;
 import stone.dal.kernel.utils.StringUtils;
 

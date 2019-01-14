@@ -1,17 +1,22 @@
 package stone.dal.jdbc.autoconfigure;
 
+import java.util.HashMap;
 import javax.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import stone.dal.jdbc.DBDialectSpi;
-import stone.dal.jdbc.JdbcTemplateSpi;
 import stone.dal.jdbc.api.StJdbcTemplate;
 import stone.dal.jdbc.api.StJpaRepository;
 import stone.dal.jdbc.impl.RdbmsEntityManager;
 import stone.dal.jdbc.impl.StJdbcTemplateImpl;
 import stone.dal.jdbc.impl.StJpaRepositoryImpl;
+import stone.dal.jdbc.impl.dialect.MysqlDialect;
+import stone.dal.jdbc.impl.dialect.OracleDialect;
 import stone.dal.jdbc.impl.utils.RelationQueryBuilder;
+import stone.dal.jdbc.spi.DBDialectSpi;
+import stone.dal.jdbc.spi.JdbcTemplateSpi;
+import stone.dal.jdbc.spi.SequenceSpi;
 import stone.dal.models.EntityMetaManager;
 
 /**
@@ -23,48 +28,34 @@ public class DalJdbcAutoConfigure {
   @Autowired
   private EntityMetaManager entityMetaManager;
 
-  private RdbmsEntityManager rdbmsEntityManager;
-
-  //	@Autowired
-//	private EntityMetaManager entityMetaManager;
-//	@Autowired(required = false)
-//	private JdbcResultHandlerSpiImpl resultSetHandler;
-//	@Autowired(required = false)
-//	private DalSequenceSpi dalSequenceSpi;
   @Autowired
   private JdbcTemplateSpi jdbcTemplateSpi;
 
   @Autowired
   private DBDialectSpi dbDialectSpi;
 
-  //
+  @Autowired
+  private SequenceSpi sequenceSpi;
+
+  @Value("${st.db.dialect}")
+  private String dialectType;
+
+  @Autowired(required = false)
+  private DBDialectSpi dialectSpi;
+
   private StJpaRepository jpaRepository;
 
   private StJdbcTemplate jdbcTemplate;
 
-  private RelationQueryBuilder relationQueryBuilder;
-
   @PostConstruct
   public void init() {
-    rdbmsEntityManager = new RdbmsEntityManager(entityMetaManager);
-    relationQueryBuilder = new RelationQueryBuilder(rdbmsEntityManager);
+    if (dialectSpi == null) {
+      dialectSpi = getDialect();
+    }
+    RdbmsEntityManager rdbmsEntityManager = new RdbmsEntityManager(entityMetaManager);
+    RelationQueryBuilder relationQueryBuilder = new RelationQueryBuilder(rdbmsEntityManager);
     jdbcTemplate = new StJdbcTemplateImpl(jdbcTemplateSpi, dbDialectSpi, relationQueryBuilder, rdbmsEntityManager);
-    jpaRepository = new StJpaRepositoryImpl(jdbcTemplate, rdbmsEntityManager, relationQueryBuilder);
-//		JdbcQuerySpi.Factory queryFactory = JdbcQuerySpi.factory();
-//		deferredDataLoader = new RelationQueryBuilder(entityMetaManager);
-//		if (resultSetHandler == null) {
-//			queryFactory.rdbmsResultSetHandler(getDefaultResultSetHandler(queryFactory.getRunner()));
-//		} else {
-//			queryFactory.rdbmsResultSetHandler(resultSetHandler);
-//		}
-//		queryFactory.entityMetaManager(entityMetaManager);
-//		JdbcTemplateSpi.Factory dmlFactory = JdbcTemplateSpi.factory();
-//		dmlFactory.entityMetaManager(entityMetaManager);
-//		dmlFactory.dalSequence(dalSequenceSpi);
-//
-//		jdbcTemplate = new StJdbcTemplateImpl(queryFactory.build(), dmlFactory.build(),
-//				JdbcDclSpi.factory().build());
-//		dalCrudTemplate = new StJpaRepositoryImpl(jdbcTemplate, entityMetaManager, deferredDataLoader);
+    jpaRepository = new StJpaRepositoryImpl(jdbcTemplate, rdbmsEntityManager, relationQueryBuilder, sequenceSpi);
   }
 
   @Bean
@@ -77,8 +68,15 @@ public class DalJdbcAutoConfigure {
     return jdbcTemplate;
   }
 
-//
-//	JdbcResultHandlerSpi getDefaultResultSetHandler(JdbcQuerySpi queryRunner) {
-//		return new JdbcResultHandlerSpiImpl(deferredDataLoader);
-//	}
+  @Bean
+  public DBDialectSpi getDialect() {
+    if ("mysql".equalsIgnoreCase(dialectType)) {
+      //todo:configure mysql errors
+      return new MysqlDialect(new HashMap<>());
+    } else if ("oracle".equalsIgnoreCase(dialectType)) {
+      return new OracleDialect(new HashMap<>());
+    }
+    return null;
+  }
+
 }

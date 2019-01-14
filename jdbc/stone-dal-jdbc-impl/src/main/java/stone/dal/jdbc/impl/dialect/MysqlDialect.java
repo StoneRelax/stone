@@ -5,8 +5,8 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.Map;
 import org.apache.commons.lang.StringUtils;
-import stone.dal.jdbc.DBDialectSpi;
 import stone.dal.jdbc.api.meta.DBField;
+import stone.dal.jdbc.spi.DBDialectSpi;
 
 import static stone.dal.kernel.utils.KernelUtils.boolValue;
 import static stone.dal.kernel.utils.KernelUtils.isStrEmpty;

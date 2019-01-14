@@ -1,4 +1,4 @@
-package stone.dal.jdbc;
+package stone.dal.jdbc.spi;
 
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;

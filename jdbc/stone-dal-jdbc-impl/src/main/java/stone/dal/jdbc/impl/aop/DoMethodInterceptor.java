@@ -4,9 +4,9 @@ import java.lang.reflect.Method;
 import java.util.List;
 import org.springframework.cglib.proxy.MethodInterceptor;
 import org.springframework.cglib.proxy.MethodProxy;
-import stone.dal.jdbc.JdbcTemplateSpi;
 import stone.dal.jdbc.api.meta.SqlQueryMeta;
 import stone.dal.jdbc.impl.utils.RelationQueryBuilder;
+import stone.dal.jdbc.spi.JdbcTemplateSpi;
 import stone.dal.kernel.utils.StringUtils;
 import stone.dal.models.data.BaseDo;
 

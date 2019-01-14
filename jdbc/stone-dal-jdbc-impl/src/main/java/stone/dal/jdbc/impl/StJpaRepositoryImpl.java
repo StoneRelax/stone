@@ -2,6 +2,7 @@ package stone.dal.jdbc.impl;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import stone.dal.jdbc.api.StJdbcTemplate;
@@ -9,10 +10,12 @@ import stone.dal.jdbc.api.StJpaRepository;
 import stone.dal.jdbc.api.meta.SqlDmlDclMeta;
 import stone.dal.jdbc.api.meta.SqlQueryMeta;
 import stone.dal.jdbc.impl.utils.RelationQueryBuilder;
+import stone.dal.jdbc.spi.SequenceSpi;
 import stone.dal.kernel.utils.KernelRuntimeException;
 import stone.dal.kernel.utils.LogUtils;
 import stone.dal.models.data.BaseDo;
 import stone.dal.models.meta.EntityMeta;
+import stone.dal.models.meta.FieldMeta;
 import stone.dal.models.meta.RelationMeta;
 import stone.dal.models.meta.RelationTypes;
 
@@ -32,16 +35,18 @@ public class StJpaRepositoryImpl<T extends BaseDo, K>
 
   private RelationQueryBuilder relationQueryBuilder;
 
-//  private DalSequence
+  private SequenceSpi sequenceSpi;
 
   private static Logger logger = LoggerFactory.getLogger(StJpaRepositoryImpl.class);
 
   public StJpaRepositoryImpl(StJdbcTemplate jdbcTemplate,
       RdbmsEntityManager entityMetaManager,
-      RelationQueryBuilder relationQueryBuilder) {
+      RelationQueryBuilder relationQueryBuilder,
+      SequenceSpi sequenceSpi) {
     this.jdbcTemplate = jdbcTemplate;
     this.entityMetaManager = entityMetaManager;
     this.relationQueryBuilder = relationQueryBuilder;
+    this.sequenceSpi = sequenceSpi;
   }
 
   @Override
@@ -95,6 +100,7 @@ public class StJpaRepositoryImpl<T extends BaseDo, K>
   @SuppressWarnings("unchecked")
   private void runCreate(BaseDo obj) {
     RdbmsEntity entity = entityMetaManager.getEntity(obj.getClass());
+    bindSeqVals(obj, entity);
     jdbcTemplate.runDml(entity.getInsertMeta(obj));
     cascadeInsert(entity, obj);
   }
@@ -213,16 +219,17 @@ public class StJpaRepositoryImpl<T extends BaseDo, K>
     jdbcTemplate.runDml(delJoinTblMeta);
   }
 
-//  private void bindSequenceValues(Base obj, RdbmsEntity entity) {
-//    if (dalSequence != null) {
-//      List<FieldMeta> seqFields = entity.getSeqFields();
-//      for (FieldMeta seqField : seqFields) {
-//        Object v = getPropVal(obj, seqField.getName());
-//        if (v == null) {
-//          v = dalSequence.next(obj, seqField);
-//          setPropVal(obj, seqField.getName(), v);
-//        }
-//      }
-//    }
-//  }
+  private void bindSeqVals(BaseDo obj, RdbmsEntity entity) {
+    if (sequenceSpi != null) {
+      Set<String> seqFields = entity.getSeqFields();
+      for (String seqField : seqFields) {
+        FieldMeta meta = entity.getField(seqField);
+        Object v = getPropVal(obj, seqField);
+        if (v == null) {
+          v = sequenceSpi.next(obj, meta);
+          setPropVal(obj, seqField, v);
+        }
+      }
+    }
+  }
 }

@@ -5,9 +5,9 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.List;
 import org.springframework.jdbc.core.JdbcTemplate;
-import stone.dal.jdbc.JdbcTemplateSpi;
 import stone.dal.jdbc.api.meta.SqlDmlDclMeta;
 import stone.dal.jdbc.api.meta.SqlQueryMeta;
+import stone.dal.jdbc.spi.JdbcTemplateSpi;
 import stone.dal.models.data.Page;
 
 public class JdbcTemplateSpiImpl implements JdbcTemplateSpi {

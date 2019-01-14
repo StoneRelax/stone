@@ -1,4 +1,4 @@
-package stone.dal.jdbc;
+package stone.dal.jdbc.spi;
 
 import java.util.List;
 import stone.dal.jdbc.api.meta.SqlDmlDclMeta;
