@@ -24,7 +24,7 @@ public class JdbcTemplateSpiImpl implements JdbcTemplateSpi {
   }
 
   @Override
-  public List query(SqlQueryMeta queryMeta) {
+  public List query(SqlQueryMeta queryMeta, SqlQueryMeta.RowMapper rowMapper) {
     return jdbcTemplate.query(queryMeta.getSql(), ps -> {
       if (queryMeta.getMaxSize() > 0) {
         ps.setMaxRows(queryMeta.getMaxSize());
@@ -32,7 +32,7 @@ public class JdbcTemplateSpiImpl implements JdbcTemplateSpi {
       for (int i = 0; i < queryMeta.getParameters().length; i++) {
         setStatementParams(ps, queryMeta.getParameters()[i], i);
       }
-    }, (rs, rowNum) -> queryMeta.getMapper().mapRow(queryMeta, rs.getMetaData(), rowNum, rs));
+    }, (rs, rowNum) -> rowMapper.mapRow(queryMeta, rs.getMetaData(), rowNum, rs));
   }
 
   private void setStatementParams(PreparedStatement ps, Object obj, int index) throws SQLException {
@@ -54,7 +54,7 @@ public class JdbcTemplateSpiImpl implements JdbcTemplateSpi {
   }
 
   @Override
-  public Page runPagination(SqlQueryMeta queryMeta) {
+  public Page runPagination(SqlQueryMeta queryMeta, SqlQueryMeta.RowMapper rowMapper) {
     return null;
   }
 }

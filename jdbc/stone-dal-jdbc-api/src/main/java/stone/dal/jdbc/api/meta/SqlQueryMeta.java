@@ -23,8 +23,6 @@ public abstract class SqlQueryMeta {
    */
   Object[] parameters = new Object[0];
 
-  RowMapper mapper;
-
   /**
    * Bean class whose instance might be imported with result value
    */
@@ -119,11 +117,7 @@ public abstract class SqlQueryMeta {
     return mappingClazz;
   }
 
-  public RowMapper getMapper() {
-    return mapper;
-  }
-
-  public static interface RowMapper {
+  public interface RowMapper {
     Object mapRow(SqlQueryMeta queryMeta,
         ResultSetMetaData rsmd, int index, ResultSet rs);
   }
@@ -139,11 +133,6 @@ public abstract class SqlQueryMeta {
 
     public Factory sql(String sql) {
       meta.sql = sql;
-      return this;
-    }
-
-    public Factory mapper(RowMapper rowMapper) {
-      meta.mapper = rowMapper;
       return this;
     }
 

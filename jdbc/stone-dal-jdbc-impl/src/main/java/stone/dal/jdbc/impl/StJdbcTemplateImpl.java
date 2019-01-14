@@ -51,14 +51,6 @@ public class StJdbcTemplateImpl implements StJdbcTemplate {
 
   private RdbmsEntityManager entityMetaManager;
 
-  private DoMethodInterceptor.DirtyMark dirtyMarkInterceptor;
-
-  private DoMethodInterceptor.LazyLoad lazyLoadInterceptor;
-
-  private DoMethodFilter.DirtyMark dirtyMarkMethodFilter;
-
-  private DoMethodFilter.LazyLoad lazyLoadMethodFilter;
-
   private RelationQueryBuilder relationQueryBuilder;
 
   private static Logger logger = LoggerFactory.getLogger(StJdbcTemplateImpl.class);
@@ -69,11 +61,7 @@ public class StJdbcTemplateImpl implements StJdbcTemplate {
     this.jdbcTemplateSpi = jdbcTemplateSpi;
     this.dbDialectSpi = dbDialectSpi;
     this.entityMetaManager = entityMetaManager;
-    dirtyMarkInterceptor = new DoMethodInterceptor.DirtyMark(relationQueryBuilder, jdbcTemplateSpi);
-    lazyLoadInterceptor = new DoMethodInterceptor.LazyLoad(relationQueryBuilder, jdbcTemplateSpi);
-
-    dirtyMarkMethodFilter = new DoMethodFilter.DirtyMark();
-    lazyLoadMethodFilter = new DoMethodFilter.LazyLoad();
+    this.relationQueryBuilder = relationQueryBuilder;
   }
 
   @Override
@@ -151,36 +139,31 @@ public class StJdbcTemplateImpl implements StJdbcTemplate {
 //    return null;
 //  }
 
-  public Object buildRowObj(SqlQueryMeta queryMeta) throws CreateRowObjectException {
-    Object rowObj;
-    Class clazz = queryMeta.getMappingClazz();
-    if (clazz != null && clazz != Map.class) {
-      try {
-        if (queryMeta.isUpdatable()) {
-          rowObj = CGLibUtils.buildProxyClass(clazz, dirtyMarkInterceptor, dirtyMarkMethodFilter);
-        } else if (queryMeta.isSupportFetchMore()) {
-          rowObj = CGLibUtils.buildProxyClass(clazz, lazyLoadInterceptor, lazyLoadMethodFilter);
-        } else {
-          rowObj = clazz.newInstance();
-        }
-      } catch (Exception e) {
-        throw new CreateRowObjectException(e);
-      }
-    } else {
-      rowObj = new HashMap();
-    }
-    return rowObj;
-  }
-
   public static class DefaultRowMapper implements SqlQueryMeta.RowMapper {
 
     private DBDialectSpi dbDialectSpi;
 
     private RdbmsEntityManager entityMetaManager;
 
-    public DefaultRowMapper(DBDialectSpi dbDialectSpi, RdbmsEntityManager entityMetaManager) {
+    private DoMethodInterceptor.DirtyMark dirtyMarkInterceptor;
+
+    private DoMethodInterceptor.LazyLoad lazyLoadInterceptor;
+
+    private DoMethodFilter.DirtyMark dirtyMarkMethodFilter;
+
+    private DoMethodFilter.LazyLoad lazyLoadMethodFilter;
+
+    public DefaultRowMapper(DBDialectSpi dbDialectSpi,
+        RdbmsEntityManager entityMetaManager,
+        RelationQueryBuilder relationQueryBuilder,
+        JdbcTemplateSpi jdbcTemplateSpi) {
       this.dbDialectSpi = dbDialectSpi;
       this.entityMetaManager = entityMetaManager;
+      dirtyMarkInterceptor = new DoMethodInterceptor.DirtyMark(relationQueryBuilder, jdbcTemplateSpi);
+      lazyLoadInterceptor = new DoMethodInterceptor.LazyLoad(relationQueryBuilder, jdbcTemplateSpi);
+
+      dirtyMarkMethodFilter = new DoMethodFilter.DirtyMark();
+      lazyLoadMethodFilter = new DoMethodFilter.LazyLoad();
     }
 
     private String getColumnName(Class clazz, String rsColName) {
@@ -203,11 +186,29 @@ public class StJdbcTemplateImpl implements StJdbcTemplate {
       return columnName;
     }
 
+    private Class getRowMapClazz(SqlQueryMeta queryMeta) throws CreateRowObjectException {
+      Class clazz = queryMeta.getMappingClazz();
+      if (clazz != null && clazz != Map.class) {
+        try {
+          if (queryMeta.isUpdatable()) {
+            clazz = CGLibUtils.buildProxyClass(clazz, dirtyMarkInterceptor, dirtyMarkMethodFilter);
+          } else if (queryMeta.isSupportFetchMore()) {
+            clazz = CGLibUtils.buildProxyClass(clazz, lazyLoadInterceptor, lazyLoadMethodFilter);
+          }
+        } catch (Exception e) {
+          throw new CreateRowObjectException(e);
+        }
+      } else {
+        clazz = HashMap.class;
+      }
+      return clazz;
+    }
+
     @SuppressWarnings("unchecked")
     public Object mapRow(SqlQueryMeta queryMeta,
         ResultSetMetaData rsmd, int index, ResultSet rs) {
       try {
-        Object rowObj = queryMeta.getMappingClazz().newInstance();
+        Object rowObj = getRowMapClazz(queryMeta).newInstance();
         String colName = dbDialectSpi.getColumnName(index + 1, rsmd).toLowerCase();
         String colClassName = rsmd.getColumnClassName(index + 1);
         Class clazz = queryMeta.getMappingClazz();

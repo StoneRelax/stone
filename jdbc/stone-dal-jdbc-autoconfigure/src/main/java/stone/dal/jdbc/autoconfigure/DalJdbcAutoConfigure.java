@@ -68,8 +68,7 @@ public class DalJdbcAutoConfigure {
     return jdbcTemplate;
   }
 
-  @Bean
-  public DBDialectSpi getDialect() {
+  private DBDialectSpi getDialect() {
     if ("mysql".equalsIgnoreCase(dialectType)) {
       //todo:configure mysql errors
       return new MysqlDialect(new HashMap<>());

@@ -8,7 +8,6 @@ import org.springframework.cglib.proxy.CallbackFilter;
 import org.springframework.cglib.proxy.Enhancer;
 import org.springframework.cglib.proxy.MethodInterceptor;
 import org.springframework.cglib.proxy.NoOp;
-import org.springframework.util.ClassUtils;
 
 /**
  * @author fengxie
@@ -43,14 +42,15 @@ public class CGLibUtils {
     return enhancedClass;
   }
 
-  public static Class getUserClass(Class clazz) {
-    return ClassUtils.getUserClass(clazz);
-  }
+//  public static Class getUserClass(Class clazz) {
+//    return ClassUtils.getUserClass(clazz);
+//  }
 
-  public static Class getUserClass(Object obj) {
-    return ClassUtils.getUserClass(obj);
-  }
-  public static Object buildProxyClass(
+//  public static Class getUserClass(Object obj) {
+//    return ClassUtils.getUserClass(obj);
+//  }
+
+  public static Class buildProxyClass(
       Class clazz,
       MethodInterceptor methodInterceptor,
       CallbackFilter callBackFilter)
@@ -69,6 +69,6 @@ public class CGLibUtils {
     if (enhancedClass == null) {
       throw new IllegalAccessException("Initial class fails,[" + clazz.getName() + "]");
     }
-    return enhancedClass.newInstance();
+    return enhancedClass;
   }
 }
