@@ -14,6 +14,7 @@ import stone.dal.jdbc.api.StJpaRepository;
 import stone.dal.jdbc.api.meta.SqlDmlDclMeta;
 import stone.dal.jdbc.api.meta.SqlQueryMeta;
 import stone.dal.jdbc.spring.adaptor.init.SpringJdbcAdaptorTestApplication;
+import stone.dal.models.Goods;
 import stone.dal.models.MyOrder;
 import stone.dal.models.MyOrderItem;
 import stone.dal.models.Person;
@@ -30,6 +31,9 @@ public class StJpaRepositoryTest {
 
   @Autowired
   private StJpaRepository<Person, Long> personRepository;
+
+  @Autowired
+  private StJpaRepository<Goods, Long> goodsRepository;
 
   @Before
   public void before() {
@@ -78,6 +82,24 @@ public class StJpaRepositoryTest {
         new Object[] { 10000L }).build());
     Assert.assertEquals(0, res.size());
   }
+
+  @Test
+  public void testCreate_withSeq() {
+    Goods goods = new Goods();
+    goods.setName("plan_model");
+
+    Long uuid = goodsRepository.create(goods);
+    Assert.assertEquals(new Long(1001), uuid);
+
+//    Goods _person = personRepository.get(goods);
+//    Assert.assertEquals(new Long(1001l), _person.getUuid());
+//    Assert.assertEquals("jinny", _person.getName());
+//    Assert.assertEquals("M00001", _person.getMyOrders().get(0).getOrderNo());
+//    Assert.assertEquals(new Long(1), _person.getMyOrders().get(0).getUuid());
+//    Assert.assertEquals("M00002", _person.getMyOrders().get(1).getOrderNo());
+//    Assert.assertEquals(new Long(2), _person.getMyOrders().get(1).getUuid());
+  }
+
 
   @Test
   public void testCreate_many2many() {
