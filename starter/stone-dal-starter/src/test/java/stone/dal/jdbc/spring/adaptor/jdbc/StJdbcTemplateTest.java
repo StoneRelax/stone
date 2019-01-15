@@ -9,7 +9,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import stone.dal.jdbc.api.StJdbcTemplate;
 import stone.dal.jdbc.api.meta.SqlQueryMeta;
-import stone.dal.jdbc.spring.adaptor.init.SpringJdbcAdaptorTestApplication;
+import stone.dal.jdbc.spring.adaptor.autoconfigure.SpringJdbcAdaptorTestApplication;
 import stone.dal.models.MyOrder;
 
 @RunWith(SpringJUnit4ClassRunner.class)

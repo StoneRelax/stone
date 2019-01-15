@@ -3,7 +3,6 @@ package stone.dal.impl;
 
 import org.springframework.cglib.proxy.MethodInterceptor;
 import org.springframework.cglib.proxy.MethodProxy;
-import org.springframework.util.ClassUtils;
 import stone.dal.jdbc.api.StJdbcTemplate;
 import stone.dal.jdbc.api.StJpaRepository;
 import stone.dal.models.EntityMetaManager;
@@ -15,15 +14,15 @@ import java.lang.reflect.Type;
 
 public class DalRepositoryMethodInterceptor implements MethodInterceptor {
 
-    EntityMetaManager entityMetaManager;
-    StJdbcTemplate jdbcTemplate;
-
 
     @Override
     public Object intercept(Object o, Method method, Object[] objects, MethodProxy methodProxy) throws Throwable {
+        EntityMetaManager entityMetaManager = SpringContextHolder.getBean(EntityMetaManager.class);
+        StJdbcTemplate jdbcTemplate = SpringContextHolder.getBean(StJdbcTemplate.class);
         Object result = null;
         String methodName = method.getName();
         Class doClazz = getDoClass(o);
+        System.out.println("Overriding method " + methodName);
 
             //todo : get entity meta , generate SqlMeta , run with jdbcTemplate and return result
         return result;

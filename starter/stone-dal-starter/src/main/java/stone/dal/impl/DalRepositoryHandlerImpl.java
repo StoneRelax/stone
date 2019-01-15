@@ -10,22 +10,22 @@ public class DalRepositoryHandlerImpl {
     private DalRepositoryMethodInterceptor dalRepositoryMethodInterceptor;
     private DalMethodFilter dalMethodFilter;
 
-    public DalRepositoryHandlerImpl(DalRepositoryMethodInterceptor dalRepositoryMethodInterceptor, DalMethodFilter dalMethodFilter) {
-        this.dalRepositoryMethodInterceptor = dalRepositoryMethodInterceptor;
-        this.dalMethodFilter = dalMethodFilter;
+    public DalRepositoryHandlerImpl() {
+        this.dalRepositoryMethodInterceptor = new DalRepositoryMethodInterceptor();
+        this.dalMethodFilter = new DalMethodFilter();
     }
 
-    public Object build(Class clazz){
-        Object repoObj = null ;
+    public Class build(Class clazz){
+        Class repoClazz = null ;
             try {
                 if(clazz.isInterface()){
-                    repoObj = CGLibUtils.enhanceObject(clazz,dalRepositoryMethodInterceptor,dalMethodFilter);
+                    repoClazz = CGLibUtils.buildProxyClass(clazz,dalRepositoryMethodInterceptor,dalMethodFilter);
                 }else {
-                    repoObj = clazz.newInstance();
+                    repoClazz = clazz.getSuperclass();
                 }
             }catch (Exception e){
                 // todo handle exception
             }
-        return repoObj;
+        return repoClazz;
     }
 }
