@@ -157,7 +157,7 @@ public class EntityMetaManager {
 			} else if (readMethod.isAnnotationPresent(ManyToMany.class)) {
 				JoinTable joinTable = readMethod.getAnnotation(JoinTable.class);
 				JoinColumn[] inverseJoinColumns = joinTable.inverseJoinColumns();
-				JoinColumn[] joinColumns = joinTable.inverseJoinColumns();
+        JoinColumn[] joinColumns = joinTable.joinColumns();
 				factory.relationType(RelationTypes.MANY_2_MANY);
 				for (JoinColumn joinColumn : joinColumns) {
           factory.addJoinColumn(new stone.dal.models.meta.JoinColumn(joinColumn));
@@ -165,6 +165,7 @@ public class EntityMetaManager {
 				for (JoinColumn joinColumn : inverseJoinColumns) {
           factory.addInverseJoinColumn(new stone.dal.models.meta.JoinColumn(joinColumn));
 				}
+        factory.joinTable(joinTable.name());
 				parseOrder(factory, readMethod);
 				factory.joinProperty(propertyDesc.getName());
 				factory.joinPropertyType(getRelationClazz(readMethod, clazz));
