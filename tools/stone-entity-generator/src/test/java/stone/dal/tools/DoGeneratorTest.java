@@ -1,11 +1,8 @@
 package stone.dal.tools;
 
+import java.io.File;
 import org.junit.Before;
 import org.junit.Test;
-import stone.dal.tools.meta.RawEntityMeta;
-
-import java.io.File;
-import java.util.List;
 
 public class DoGeneratorTest {
 
@@ -16,12 +13,12 @@ public class DoGeneratorTest {
   @Before
   public void init() {
     doGenerator = new DoGenerator();
-    file = new File("ebayuniversity-entities.xlsx");
+    file = new File("do-meta.xlsx");
   }
 
   @Test
   public void testBuild() throws Exception {
-    doGenerator.build(file);
+    doGenerator.build(file, "stone.dal.pojo");
     System.out.println("in test");
   }
 }

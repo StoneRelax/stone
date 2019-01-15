@@ -9,6 +9,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
+import stone.dal.models.data.BaseDo;
 import stone.dal.models.annotation.Sequence;
 import stone.dal.models.annotation.FieldMapper;
 import stone.dal.models.annotation.Nosql;
@@ -19,7 +20,12 @@ import java.util.List;
 @Entity
 <#if gen.nosql(entity)>@Nosql</#if>${gen.extraHead(entity)}
 @Table(name = "${entity.name}")
-public class ${className} {
+<#if gen.hasUniqueKeys(entity)>
+@UniqueIndices(indices =
+{<#list gen.uniqueIndices(entity) as idxName>
+@UniqueIndex(name="${gen.dbIdxName(idxName)}",columnNames = {<#list gen.getUniqueColumns(entity,idxName) as keyField>"${keyField}"<#if keyField_has_next>,</#if></#list>})
+<#if idxName_has_next>,</#if>
+public class ${className} extends BaseDo{
 
     <#list gen.fields2Add(entity) as dataField>
     private ${gen.getFieldType(entity,dataField)} ${dataField.name};
