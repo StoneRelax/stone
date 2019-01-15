@@ -9,11 +9,11 @@ import javax.persistence.JoinColumn;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
-import stone.dal.models.annotationSequence;
-import stone.dal.models.annotationFieldMapper;
-import stone.dal.models.annotationNosql;
-import stone.dal.models.annotationUniqueIndex;
-import stone.dal.models.annotationUniqueIndices;
+import stone.dal.models.annotation.Sequence;
+import stone.dal.models.annotation.FieldMapper;
+import stone.dal.models.annotation.Nosql;
+import stone.dal.models.annotation.UniqueIndex;
+import stone.dal.models.annotation.UniqueIndices;
 import java.util.List;
 
 @Entity
@@ -76,7 +76,7 @@ public class ${className} {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getCanonicalClazz(getClass()) != getCanonicalClazz(o.getClass())) return false;
+        if (o == null) return false;
 
         ${className} obj = (${className}) o;
         <#list gen.getPks(entity) as pk>

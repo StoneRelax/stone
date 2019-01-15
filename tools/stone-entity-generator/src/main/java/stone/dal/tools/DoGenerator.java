@@ -10,12 +10,7 @@ import java.math.BigDecimal;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.xml.datatype.XMLGregorianCalendar;
 
@@ -81,7 +76,25 @@ public class DoGenerator {
     classTypeMap.put("time", String.class);
   }
 
-  public List<RawEntityMeta> build(File file) throws Exception {
+  public void build(File file) throws Exception {
+    List<RawEntityMeta> entityMetas = parseFile(file);
+    String pojoPath = "src/main/java/stone/dal/pojo/";
+    generateJavaFiles(entityMetas, pojoPath);
+
+  }
+
+  private void generateJavaFiles(List<RawEntityMeta> entityMetas, String pojoPath) throws Exception {
+    String packageName = "stone.dal.pojo";
+    List<String> contents = createJavaSource(entityMetas, packageName);
+    String javaFile;
+    for (int i = 0; i < contents.size(); i++) {
+      String content = contents.get(i);
+      javaFile = pojoPath + ExcelUtils.convertFirstAlphetUpperCase(entityMetas.get(i).getName()) + ".java";
+      ExcelUtils.writeFile(javaFile, content.getBytes("utf-8"));
+    }
+  }
+
+  private List<RawEntityMeta> parseFile(File file) throws Exception {
     InputStream is = new FileInputStream(file);
     Workbook book = ExcelUtils.getWorkbook(is);
     int i = 0;
@@ -234,7 +247,7 @@ public class DoGenerator {
         classType = "double";
       }
     }
-    return classType;
+    return classTypeMap.get(classType).getName();
   }
 
   public boolean one2many(RawEntityMeta entity,RawRelationMeta relationMeta) {
