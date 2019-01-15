@@ -1,8 +1,9 @@
-*/out/*
+out
 /build/*
 .idea/*
 .gradle/*
 /gradle/*
 *.iml
 *.class
+pojo-src
 

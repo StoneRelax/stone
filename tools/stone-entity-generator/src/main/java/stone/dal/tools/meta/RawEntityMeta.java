@@ -2,8 +2,10 @@ package stone.dal.tools.meta;
 
 import stone.dal.models.meta.EntityMeta;
 import stone.dal.models.meta.FieldMeta;
+import stone.dal.models.meta.UniqueIndexMeta;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 
@@ -22,6 +24,8 @@ public class RawEntityMeta extends EntityMeta {
   private List<RawFieldMeta> fields = new ArrayList<>();
 
   protected List<RawRelationMeta> rawRelations = new ArrayList<>();
+
+  protected Collection<UniqueIndexMeta> uniqueIndices = new ArrayList<>();
 
   private transient HashSet<String> pks = new HashSet<String>();
 
@@ -87,5 +91,10 @@ public class RawEntityMeta extends EntityMeta {
 
   public void setClazzName(String clazzName) {
     this.clazzName = clazzName;
+  }
+
+  @Override
+  public Collection<UniqueIndexMeta> getUniqueIndices() {
+    return uniqueIndices;
   }
 }
