@@ -20,6 +20,8 @@ public class RawFieldMeta extends FieldMeta {
 
   private String unique;
 
+  private Boolean addOn;
+
   public String getUnique() {
     return unique;
   }
@@ -114,5 +116,13 @@ public class RawFieldMeta extends FieldMeta {
 
   public void setUpdatable(Boolean updatable) {
     this.updatable = updatable;
+  }
+
+  public Boolean getAddOn() {
+    return addOn;
+  }
+
+  public void setAddOn(Boolean addOn) {
+    this.addOn = addOn;
   }
 }

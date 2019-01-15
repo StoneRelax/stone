@@ -19,7 +19,7 @@ public class RawEntityMeta extends EntityMeta {
 
   private String clazzName;
 
-  private List<FieldMeta> fields = new ArrayList<>();
+  private List<RawFieldMeta> fields = new ArrayList<>();
 
   protected List<RawRelationMeta> rawRelations = new ArrayList<>();
 
@@ -69,12 +69,11 @@ public class RawEntityMeta extends EntityMeta {
     this.fileFieldTags = fileFieldTags;
   }
 
-  @Override
-  public List<FieldMeta> getFields() {
+  public List<RawFieldMeta> getRawFields() {
     return fields;
   }
 
-  public void setFields(List<FieldMeta> fields) {
+  public void setRawFields(List<RawFieldMeta> fields) {
     this.fields = fields;
   }
 

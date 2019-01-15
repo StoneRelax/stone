@@ -3,8 +3,12 @@ package stone.dal.tools.utils;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
+import stone.dal.kernel.utils.StringUtils;
 
 import java.io.InputStream;
+import java.util.List;
+
+import static stone.dal.kernel.utils.StringUtils.replaceNull;
 
 /**
  * Component:  ExcelUtils
@@ -46,6 +50,30 @@ public class ExcelUtils {
       }
     }
     return null;
+  }
+
+  public static String combineString(List<String> strsInput, String strToken) {
+    if (strsInput == null) {
+      return null;
+    }
+    StringBuilder sb = new StringBuilder();
+    int l = strsInput.size();
+    for (int i = 0; i < l; i++) {
+      sb.append(replaceNull(strsInput.get(i)));
+      if (i < l - 1) {
+        sb.append(strToken);
+      }
+    }
+    return sb.toString();
+  }
+
+  public static String convertFirstAlphetUpperCase(String str) {
+    if (StringUtils.isEmpty(str)) {
+      return null;
+    } else {
+      String firstLetter = str.substring(0, 1).toUpperCase();
+      return firstLetter + str.substring(1);
+    }
   }
 
 }
