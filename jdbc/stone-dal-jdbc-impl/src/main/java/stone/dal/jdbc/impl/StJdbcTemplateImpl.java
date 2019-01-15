@@ -39,6 +39,7 @@ public class StJdbcTemplateImpl implements StJdbcTemplate {
   public StJdbcTemplateImpl(JdbcTemplateSpi jdbcTemplateSpi, DBDialectSpi dbDialectSpi,
       RelationQueryBuilder relationQueryBuilder,
       RdbmsEntityManager entityMetaManager) {
+    this.dbDialectSpi = dbDialectSpi;
     this.entityMetaManager = entityMetaManager;
     this.jdbcTemplateSpi = jdbcTemplateSpi;
     this.rowMapper = new DefaultRowMapper(dbDialectSpi, entityMetaManager, relationQueryBuilder, jdbcTemplateSpi);
@@ -50,7 +51,7 @@ public class StJdbcTemplateImpl implements StJdbcTemplate {
     return jdbcTemplateSpi.query(queryMeta, this.rowMapper);
   }
 
-  public <T> List<T> queryByCondition(SqlCondition condition) {
+  public <T> List<T> query(SqlCondition condition) {
     SqlQueryMeta queryMeta = condition.build();
     RdbmsEntity entity = entityMetaManager.getEntity(queryMeta.getMappingClazz());
     String sql = entity.getFindSqlNoCondition() + " where ";
@@ -60,7 +61,7 @@ public class StJdbcTemplateImpl implements StJdbcTemplate {
     return query(_queryMeta);
   }
 
-  public <T> T queryOneByCondition(SqlCondition condition) {
+  public <T> T queryOne(SqlCondition condition) {
     SqlQueryMeta queryMeta = condition.build();
     RdbmsEntity entity = entityMetaManager.getEntity(queryMeta.getMappingClazz());
     String sql = entity.getFindSqlNoCondition() + " where ";
@@ -82,8 +83,17 @@ public class StJdbcTemplateImpl implements StJdbcTemplate {
     int pageSize = queryMeta.getPageSize();
     String pageQuerySql = replace(sql, "\n", " ");
     pageQuerySql = dbDialectSpi.getPaginationSql(pageQuerySql, pageNo, pageSize);
-    SqlQueryMeta pageQueryMeta = SqlQueryMeta.factory().pageQueryMeta(queryMeta, pageQuerySql).build();
+    SqlQueryMeta pageQueryMeta = SqlQueryMeta.bindPageSql(queryMeta, pageQuerySql);
     return jdbcTemplateSpi.queryPage(pageQueryMeta, this.rowMapper);
+  }
+
+  @Override
+  public <T> T queryOne(SqlQueryMeta queryMeta) {
+    List<T> result = query(queryMeta);
+    if (!isCollectionEmpty(result)) {
+      return result.get(0);
+    }
+    return null;
   }
 
   @Override

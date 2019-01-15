@@ -18,6 +18,9 @@ public abstract class SqlQueryMeta {
    */
   String sql;
 
+  /**
+   * Page info query sql
+   */
   String pageQuerySql;
 
   /**
@@ -56,11 +59,6 @@ public abstract class SqlQueryMeta {
   int maxSize;
 
   /**
-   * Cache id used by ehcache
-   */
-  String cacheId;
-
-  /**
    * Search 4 modify
    */
   boolean updatable;
@@ -74,6 +72,11 @@ public abstract class SqlQueryMeta {
    * Support cascade fetching
    */
   boolean one2oneCascadeFetching = false;
+
+  public static SqlQueryMeta bindPageSql(SqlQueryMeta queryMeta, String pageQuerySql) {
+    queryMeta.pageQuerySql = pageQuerySql;
+    return queryMeta;
+  }
 
   public boolean isOne2oneCascadeFetching() {
     return one2oneCascadeFetching;
@@ -109,6 +112,10 @@ public abstract class SqlQueryMeta {
 
   public String getSql() {
     return sql;
+  }
+
+  public String getPageQuerySql() {
+    return pageQuerySql;
   }
 
   public Object[] getParameters() {
@@ -206,17 +213,7 @@ public abstract class SqlQueryMeta {
       List<Object> parameters = new ArrayList<>();
       parameters.addAll(Arrays.asList(meta.parameters));
       parameters.addAll(Arrays.asList(queryMeta.parameters));
-      meta.parameters = parameters.toArray(new Object[parameters.size()]);
-      return this;
-    }
-
-    public Factory pageQueryMeta(SqlQueryMeta queryMeta, String pageQuerySql) {
-      meta.sql = queryMeta.sql;
-      meta.pageQuerySql = pageQuerySql;
-      List<Object> parameters = new ArrayList<>();
-      parameters.addAll(Arrays.asList(meta.parameters));
-      parameters.addAll(Arrays.asList(queryMeta.parameters));
-      meta.parameters = parameters.toArray(new Object[parameters.size()]);
+      meta.parameters = parameters.toArray(new Object[0]);
       return this;
     }
 

@@ -99,89 +99,90 @@ public class DefaultRowMapper implements SqlQueryMeta.RowMapper {
 
   @SuppressWarnings("unchecked")
   public Object mapRow(SqlQueryMeta queryMeta,
-      ResultSetMetaData rsmd, int index, ResultSet rs) {
+      ResultSetMetaData rsmd, int row, ResultSet rs) {
     try {
       Object rowObj = getRowMapClazz(queryMeta).newInstance();
-      String colName = dbDialectSpi.getColumnName(index + 1, rsmd).toLowerCase();
-      String colClassName = rsmd.getColumnClassName(index + 1);
-      Class clazz = queryMeta.getMappingClazz();
-      colName = getColumnName(clazz, colName);
-      if (colName == null || (!queryMeta.isOne2oneCascadeFetching() && colName.contains("."))) {
-        //disable one 2 one loading
-        return null;
-      }
-      if (colClassName.
-          equalsIgnoreCase("java.lang.String")) {
-        setPropVal(rowObj, colName, rs.getObject(index + 1));
-      } else if (colClassName.
-          equalsIgnoreCase("java.lang.Integer")) {
-        setPropVal(rowObj, colName, rs.getObject(index + 1));
-      } else if (colClassName.
-          equalsIgnoreCase("oracle.sql.TIMESTAMP")) {
-        Timestamp timeValue = rs.getTimestamp(index + 1);
-        setPropVal(rowObj, colName, timeValue);
-      } else if (colClassName.
-          equalsIgnoreCase("java.sql.Timestamp")) {
-        Timestamp timeValue = rs.getTimestamp(index + 1);
-        if (timeValue != null) {
-          timeValue = new Timestamp(timeValue.getTime());
-          Date v = timeValue;
-          if ("oracle".equals(dbDialectSpi.getDbType())) {
-            int type = rsmd.getColumnType(index + 1);
-            if (Types.DATE == type) {
-              v = DateUtils.floor(timeValue);
-            }
-          } else {
-            if (ClassUtils.getPropertyType(rowObj, colName) == Date.class) {
-              v = DateUtils.floor(timeValue);
-            }
-          }
-          setPropVal(rowObj, colName, v);
-        }
-      } else if (colClassName.
-          equalsIgnoreCase("java.lang.Float")) {
-        setPropVal(rowObj, colName, rs.getObject(index + 1));
-      } else if (colClassName.
-          equalsIgnoreCase("java.lang.Double")) {
-        setPropVal(rowObj, colName, rs.getObject(index + 1));
-      } else if (colClassName.
-          equalsIgnoreCase("java.sql.Date")) {
-        Date dateValue = (Date) rs.getObject(index + 1);
-        if (dateValue != null) {
-          dateValue = new Date(dateValue.getTime());
-          setPropVal(rowObj, colName, dateValue);
-        }
-      } else if (colClassName.
-          equalsIgnoreCase("java.sql.Long") || colClassName.equalsIgnoreCase("java.lang.Long")) {
-        setPropVal(rowObj, colName, rs.getObject(index + 1));
-      } else if (colClassName.
-          equalsIgnoreCase("oracle.sql.CLOB") || colClassName.equalsIgnoreCase("com.mysql.jdbc.Clob")) {
-        setPropVal(rowObj, colName, getClobData(rs.getClob(index + 1)));
-      } else if (colClassName.
-          equalsIgnoreCase("java.math.BigDecimal")) {
-        Object o = rs.getObject(index + 1);
-        if (o != null) {
-          int intColPrecise = rsmd.getPrecision(index + 1);
-          int intColScale = rsmd.getScale(index + 1);
-          boolean isMathFunc = isMathFunc(queryMeta.getSql(), index);
-          if (!isMathFunc) {
-            if (intColScale > 0) {
-              setPropVal(rowObj, colName, rs.getBigDecimal(index + 1));
-            } else {
-              if (intColPrecise > 8) {
-                setPropVal(rowObj, colName, rs.getLong(index + 1));
+      int numberOfColumns = rsmd.getColumnCount();
+      for (int index = 0; index < numberOfColumns; index++) {
+        String colName = dbDialectSpi.getColumnName(index + 1, rsmd).toLowerCase();
+        String colClassName = rsmd.getColumnClassName(index + 1);
+        Class clazz = queryMeta.getMappingClazz();
+        colName = getColumnName(clazz, colName);
+        if (colName != null) {
+          if (colClassName.
+              equalsIgnoreCase("java.lang.String")) {
+            setPropVal(rowObj, colName, rs.getObject(index + 1));
+          } else if (colClassName.
+              equalsIgnoreCase("java.lang.Integer")) {
+            setPropVal(rowObj, colName, rs.getObject(index + 1));
+          } else if (colClassName.
+              equalsIgnoreCase("oracle.sql.TIMESTAMP")) {
+            Timestamp timeValue = rs.getTimestamp(index + 1);
+            setPropVal(rowObj, colName, timeValue);
+          } else if (colClassName.
+              equalsIgnoreCase("java.sql.Timestamp")) {
+            Timestamp timeValue = rs.getTimestamp(index + 1);
+            if (timeValue != null) {
+              timeValue = new Timestamp(timeValue.getTime());
+              Date v = timeValue;
+              if ("oracle".equals(dbDialectSpi.getDbType())) {
+                int type = rsmd.getColumnType(index + 1);
+                if (Types.DATE == type) {
+                  v = DateUtils.floor(timeValue);
+                }
               } else {
-                setPropVal(rowObj, colName, rs.getInt(index + 1));
+                if (ClassUtils.getPropertyType(rowObj, colName) == Date.class) {
+                  v = DateUtils.floor(timeValue);
+                }
               }
+              setPropVal(rowObj, colName, v);
+            }
+          } else if (colClassName.
+              equalsIgnoreCase("java.lang.Float")) {
+            setPropVal(rowObj, colName, rs.getObject(index + 1));
+          } else if (colClassName.
+              equalsIgnoreCase("java.lang.Double")) {
+            setPropVal(rowObj, colName, rs.getObject(index + 1));
+          } else if (colClassName.
+              equalsIgnoreCase("java.sql.Date")) {
+            Date dateValue = (Date) rs.getObject(index + 1);
+            if (dateValue != null) {
+              dateValue = new Date(dateValue.getTime());
+              setPropVal(rowObj, colName, dateValue);
+            }
+          } else if (colClassName.
+              equalsIgnoreCase("java.sql.Long") || colClassName.equalsIgnoreCase("java.lang.Long")) {
+            setPropVal(rowObj, colName, rs.getObject(index + 1));
+          } else if (colClassName.
+              equalsIgnoreCase("oracle.sql.CLOB") || colClassName.equalsIgnoreCase("com.mysql.jdbc.Clob")) {
+            setPropVal(rowObj, colName, getClobData(rs.getClob(index + 1)));
+          } else if (colClassName.
+              equalsIgnoreCase("java.math.BigDecimal")) {
+            Object o = rs.getObject(index + 1);
+            if (o != null) {
+              int intColPrecise = rsmd.getPrecision(index + 1);
+              int intColScale = rsmd.getScale(index + 1);
+              boolean isMathFunc = isMathFunc(queryMeta.getSql(), index);
+              if (!isMathFunc) {
+                if (intColScale > 0) {
+                  setPropVal(rowObj, colName, rs.getBigDecimal(index + 1));
+                } else {
+                  if (intColPrecise > 8) {
+                    setPropVal(rowObj, colName, rs.getLong(index + 1));
+                  } else {
+                    setPropVal(rowObj, colName, rs.getInt(index + 1));
+                  }
+                }
+              } else {
+                setPropVal(rowObj, colName, rs.getBigDecimal(index + 1));
+              }
+            } else {
+              setPropVal(rowObj, colName, o);
             }
           } else {
-            setPropVal(rowObj, colName, rs.getBigDecimal(index + 1));
+            setPropVal(rowObj, colName, rs.getString(index + 1));
           }
-        } else {
-          setPropVal(rowObj, colName, o);
         }
-      } else {
-        setPropVal(rowObj, colName, rs.getString(index + 1));
       }
       return rowObj;
     } catch (Exception ex) {
