@@ -15,5 +15,5 @@ public interface JdbcTemplateSpi<T extends BaseDo> {
 
   List<T> query(SqlQueryMeta queryMeta, SqlQueryMeta.RowMapper rowMapper);
 
-  Page<T> runPagination(SqlQueryMeta queryMeta, SqlQueryMeta.RowMapper rowMapper);
+  Page<T> queryPage(SqlQueryMeta queryMeta, SqlQueryMeta.RowMapper rowMapper);
 }

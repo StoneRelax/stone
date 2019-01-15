@@ -9,31 +9,24 @@ import javax.persistence.JoinColumn;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
-import stone.dal.models.annotationSequence;
-import stone.dal.models.annotationFieldMapper;
-import stone.dal.models.annotationNosql;
-import stone.dal.models.annotationUniqueIndex;
-import stone.dal.models.annotationUniqueIndices;
+import stone.dal.models.annotation.Sequence;
+import stone.dal.models.annotation.FieldMapper;
+import stone.dal.models.annotation.Nosql;
+import stone.dal.models.annotation.UniqueIndex;
+import stone.dal.models.annotation.UniqueIndices;
 import java.util.List;
 
 @Entity
 <#if gen.nosql(entity)>@Nosql</#if>${gen.extraHead(entity)}
-@Table(name = "${entity.dbName}")
-<#if gen.hasUniqueKeys(entity)>
-@UniqueIndices(indices =
-{<#list gen.uniqueIndices(entity) as idxName>
-@UniqueIndex(name="${gen.dbIdxName(idxName)}",columnNames = {<#list gen.uniqueKeys(entity,idxName) as keyField>"${keyField}"<#if keyField_has_next>,</#if></#list>})
-<#if idxName_has_next>,</#if>
-</#list>})
-</#if>
-public class ${className} extends  ${gen.extClass(entity)} {
+@Table(name = "${entity.name}")
+public class ${className} {
 
     <#list gen.fields2Add(entity) as dataField>
     private ${gen.getFieldType(entity,dataField)} ${dataField.name};
     </#list>
-    <#list entity.relations as relation><#if gen.one2many(entity,relation)|| gen.many2many(entity,relation)>
-    private List<${relation.joinPropertyType}> ${relation.joinProperty};<#else>
-    private ${relation.joinPropertyType} ${relation.joinProperty};</#if>
+    <#list entity.rawRelations as relation><#if gen.one2many(entity,relation)|| gen.many2many(entity,relation)>
+    private List<${relation.getJoinPropertyTypeName()}> ${relation.joinProperty};<#else>
+    private ${relation.getJoinPropertyTypeName()} ${relation.joinProperty};</#if>
     </#list>
 
     <#list gen.fields2Add(entity) as dataField>
@@ -47,13 +40,13 @@ public class ${className} extends  ${gen.extClass(entity)} {
     }
     </#list>
 
-    <#list entity.relations as relation><#if gen.one2many(entity,relation)>
+    <#list entity.rawRelations as relation><#if gen.one2many(entity,relation)>
     @javax.persistence.OneToMany(cascade = {javax.persistence.CascadeType.ALL}<#if relation.mapperBy?exists>, mappedBy = "${relation.mapperBy}"</#if>)
-    public java.util.List<${relation.joinPropertyType}> get${gen.getMethodName(relation.joinProperty)}(){
+    public java.util.List<${relation.getJoinPropertyTypeName()}> get${gen.getMethodName(relation.joinProperty)}(){
         return this.${relation.joinProperty};
     }
 
-    public void set${gen.getMethodName(relation.joinProperty)}(java.util.List<${relation.joinPropertyType}> ${relation.joinProperty}){
+    public void set${gen.getMethodName(relation.joinProperty)}(java.util.List<${relation.getJoinPropertyTypeName()}> ${relation.joinProperty}){
         this.${relation.joinProperty} = ${relation.joinProperty};
     }
     <#elseif gen.many2many(entity,relation)>
@@ -80,12 +73,10 @@ public class ${className} extends  ${gen.extClass(entity)} {
     </#if>
     </#list>
 
-    <#if gen.notExt(entity)>
-    ${gen.localizationAccessor(entity)}
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getCanonicalClazz(getClass()) != getCanonicalClazz(o.getClass())) return false;
+        if (o == null) return false;
 
         ${className} obj = (${className}) o;
         <#list gen.getPks(entity) as pk>
@@ -100,6 +91,5 @@ public class ${className} extends  ${gen.extClass(entity)} {
         return get${gen.getMethodName(pk)}() != null ? get${gen.getMethodName(pk)}().hashCode() : 0;
         </#list>
     }
-    </#if>
 
 }

@@ -1,8 +1,9 @@
 package stone.dal.tools.meta;
 
+import stone.dal.models.meta.RelationMeta;
 import stone.dal.models.meta.RelationTypes;
 
-public class RawRelationMeta {
+public class RawRelationMeta extends RelationMeta {
   private String joinDomain;
   private String joinColumnName;
   private String refColumn;
@@ -11,7 +12,7 @@ public class RawRelationMeta {
 
   protected String joinProperty;
 
-  protected String joinPropertyType;
+  public String joinPropertyType;
   private String joinTable;
 
   private RelationTypes relationType;
@@ -20,12 +21,17 @@ public class RawRelationMeta {
     return joinProperty;
   }
 
-  public String getJoinPropertyType() {
+  public String getJoinPropertyTypeName() {
     return joinPropertyType;
   }
 
   public String getJoinTable() {
     return joinTable;
+  }
+
+  @Override
+  public RelationTypes getRelationType() {
+    return relationType;
   }
 
   public void setRelationType(RelationTypes relationType) {

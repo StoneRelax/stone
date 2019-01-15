@@ -4,9 +4,9 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import stone.dal.models.DalQueryPostHandler;
 
 /**
  * @author fengxie
@@ -17,6 +17,8 @@ public abstract class SqlQueryMeta {
    * Sql statement
    */
   String sql;
+
+  String pageQuerySql;
 
   /**
    * parameters
@@ -31,7 +33,7 @@ public abstract class SqlQueryMeta {
   /**
    * Callback list
    */
-  DalQueryPostHandler[] postHandlers;
+  List<ResultSetCallback> callbacks;
 
   /**
    * Page no
@@ -101,8 +103,8 @@ public abstract class SqlQueryMeta {
     return supportMapper;
   }
 
-  public DalQueryPostHandler[] getPostHandlers() {
-    return postHandlers;
+  public List<ResultSetCallback> getCallbacks() {
+    return callbacks;
   }
 
   public String getSql() {
@@ -122,6 +124,10 @@ public abstract class SqlQueryMeta {
         ResultSetMetaData rsmd, int index, ResultSet rs);
   }
 
+  public interface ResultSetCallback<T> {
+    void callback(List<T> rows);
+  }
+
   public static Factory factory() {
     return new Factory();
   }
@@ -130,6 +136,8 @@ public abstract class SqlQueryMeta {
 
     private SqlQueryMeta meta = new SqlQueryMeta() {
     };
+
+    private List<ResultSetCallback> callbacks = new ArrayList<>();
 
     public Factory sql(String sql) {
       meta.sql = sql;
@@ -151,8 +159,8 @@ public abstract class SqlQueryMeta {
       return this;
     }
 
-    public Factory postHandlers(DalQueryPostHandler[] handlers) {
-      meta.postHandlers = handlers;
+    public Factory addCallback(ResultSetCallback callback) {
+      callbacks.add(callback);
       return this;
     }
 
@@ -187,6 +195,7 @@ public abstract class SqlQueryMeta {
     }
 
     public SqlQueryMeta build() {
+      meta.callbacks = Collections.unmodifiableList(callbacks);
       return meta;
     }
 
@@ -200,5 +209,16 @@ public abstract class SqlQueryMeta {
       meta.parameters = parameters.toArray(new Object[parameters.size()]);
       return this;
     }
+
+    public Factory pageQueryMeta(SqlQueryMeta queryMeta, String pageQuerySql) {
+      meta.sql = queryMeta.sql;
+      meta.pageQuerySql = pageQuerySql;
+      List<Object> parameters = new ArrayList<>();
+      parameters.addAll(Arrays.asList(meta.parameters));
+      parameters.addAll(Arrays.asList(queryMeta.parameters));
+      meta.parameters = parameters.toArray(new Object[parameters.size()]);
+      return this;
+    }
+
   }
 }

@@ -3,6 +3,6 @@ dependencies {
     compile project(':kernel:stone-dal-utils')
     compile 'org.apache.poi:poi'
     compile "org.apache.poi:poi-ooxml:3.17"
-    compile 'freemarker:freemarker:2.3.8'
+    compile 'org.freemarker:freemarker:2.3.20'
     testCompile 'org.springframework.boot:spring-boot-starter-test'
 }

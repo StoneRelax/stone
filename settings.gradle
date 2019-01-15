@@ -20,6 +20,7 @@ rootProject.name = 'stone'
 
 include 'kernel:stone-dal-utils'
 include 'kernel:stone-dal-common'
+include 'kernel:stone-dal-common-spi'
 include 'sequence-generator:stone-sequence-gen-api'
 include 'sequence-generator:stone-sequence-gen-spi'
 include 'sequence-generator:stone-sequence-gen-autoconfigure'

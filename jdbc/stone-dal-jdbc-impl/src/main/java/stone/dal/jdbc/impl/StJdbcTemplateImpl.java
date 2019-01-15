@@ -9,6 +9,7 @@ import java.util.List;
 import org.springframework.stereotype.Component;
 import stone.dal.jdbc.api.StJdbcTemplate;
 import stone.dal.jdbc.api.meta.ExecResult;
+import stone.dal.jdbc.api.meta.SqlCondition;
 import stone.dal.jdbc.api.meta.SqlDmlDclMeta;
 import stone.dal.jdbc.api.meta.SqlQueryMeta;
 import stone.dal.jdbc.impl.utils.RelationQueryBuilder;
@@ -17,6 +18,8 @@ import stone.dal.jdbc.spi.JdbcTemplateSpi;
 import stone.dal.kernel.utils.KernelRuntimeException;
 import stone.dal.models.data.Page;
 
+import static stone.dal.kernel.utils.KernelUtils.isCollectionEmpty;
+import static stone.dal.kernel.utils.KernelUtils.replace;
 import static stone.dal.kernel.utils.KernelUtils.str2Arr;
 
 /**
@@ -27,11 +30,16 @@ public class StJdbcTemplateImpl implements StJdbcTemplate {
 
   private JdbcTemplateSpi jdbcTemplateSpi;
 
+  private DBDialectSpi dbDialectSpi;
+
   private DefaultRowMapper rowMapper;
+
+  private RdbmsEntityManager entityMetaManager;
 
   public StJdbcTemplateImpl(JdbcTemplateSpi jdbcTemplateSpi, DBDialectSpi dbDialectSpi,
       RelationQueryBuilder relationQueryBuilder,
       RdbmsEntityManager entityMetaManager) {
+    this.entityMetaManager = entityMetaManager;
     this.jdbcTemplateSpi = jdbcTemplateSpi;
     this.rowMapper = new DefaultRowMapper(dbDialectSpi, entityMetaManager, relationQueryBuilder, jdbcTemplateSpi);
   }
@@ -42,10 +50,40 @@ public class StJdbcTemplateImpl implements StJdbcTemplate {
     return jdbcTemplateSpi.query(queryMeta, this.rowMapper);
   }
 
+  public <T> List<T> queryByCondition(SqlCondition condition) {
+    SqlQueryMeta queryMeta = condition.build();
+    RdbmsEntity entity = entityMetaManager.getEntity(queryMeta.getMappingClazz());
+    String sql = entity.getFindSqlNoCondition() + " where ";
+    SqlQueryMeta _queryMeta = SqlQueryMeta.factory()
+        .mappingClazz(queryMeta.getMappingClazz())
+        .sql(sql).join(queryMeta).build();
+    return query(_queryMeta);
+  }
+
+  public <T> T queryOneByCondition(SqlCondition condition) {
+    SqlQueryMeta queryMeta = condition.build();
+    RdbmsEntity entity = entityMetaManager.getEntity(queryMeta.getMappingClazz());
+    String sql = entity.getFindSqlNoCondition() + " where ";
+    SqlQueryMeta _queryMeta = SqlQueryMeta.factory()
+        .mappingClazz(queryMeta.getMappingClazz())
+        .sql(sql).join(queryMeta).build();
+    List<T> res = query(_queryMeta);
+    if (isCollectionEmpty(res)) {
+      return res.get(0);
+    }
+    return null;
+  }
+
   @Override
   @SuppressWarnings("unchecked")
   public <T> Page<T> pagination(SqlQueryMeta queryMeta) {
-    return jdbcTemplateSpi.runPagination(queryMeta, this.rowMapper);
+    String sql = queryMeta.getSql();
+    int pageNo = queryMeta.getPageNo();
+    int pageSize = queryMeta.getPageSize();
+    String pageQuerySql = replace(sql, "\n", " ");
+    pageQuerySql = dbDialectSpi.getPaginationSql(pageQuerySql, pageNo, pageSize);
+    SqlQueryMeta pageQueryMeta = SqlQueryMeta.factory().pageQueryMeta(queryMeta, pageQuerySql).build();
+    return jdbcTemplateSpi.queryPage(pageQueryMeta, this.rowMapper);
   }
 
   @Override
@@ -91,25 +129,4 @@ public class StJdbcTemplateImpl implements StJdbcTemplate {
     }
     return results;
   }
-
-//  @Override
-//  public <T extends BaseDo> T runFind(SqlCondition condition) {
-//    List list = runFindMany(condition);
-//    if (!isCollectionEmpty(list)) {
-//      return (T) list.iterator().next();
-//    }
-//    return null;
-//  }
-//
-//  public <T> List<T> runFindMany(SqlCondition condition) {
-//		SqlQueryMeta queryMeta = condition.build();
-//		EntityMeta meta = dalEntityMetaManager.getEntity(queryMeta.getMappingClazz());
-//		RdbmsEntity entity = RdbmsEntityManager.getInstance().build(meta);
-//		String sql = entity.getFindSqlNoCondition() + " where ";
-//		SqlQueryMeta _queryMeta = SqlQueryMeta.factory()
-//				.mappingClazz(queryMeta.getMappingClazz())
-//				.sql(sql).join(queryMeta).build();
-//		return exec(_queryMeta);
-//    return null;
-//  }
 }

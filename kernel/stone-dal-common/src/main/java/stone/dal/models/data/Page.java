@@ -8,57 +8,19 @@ import java.util.List;
  */
 public class Page<T> {
 
-	/**
-	 * Page Number
-	 */
-	private int total;
-	/**
-	 * Current Page Number
-	 */
-	private int pageNo;
-	/**
-	 * Total count
-	 */
-	private int totalCount;
+  private PageInfo pageInfo;
 	/**
 	 * Record set of Current Page
 	 */
 	private List<T> rows = new ArrayList<>();
 
-	/**
-	 * Load Page Numbers
-	 *
-	 * @return Number of Pages
-	 */
-	public int getTotal() {
-		return total;
-	}
+  public Page(PageInfo pageInfo, List<T> rows) {
+    this.pageInfo = pageInfo;
+    this.rows = rows;
+  }
 
-	/**
-	 * Set Page Numbers
-	 *
-	 * @param total Number of Pages
-	 */
-	public void setTotal(int total) {
-		this.total = total;
-	}
-
-	/**
-	 * Load Current Page Number
-	 *
-	 * @return Current Page Number
-	 */
-	public int getPageNo() {
-		return pageNo;
-	}
-
-	/**
-	 * Set Current Page Number
-	 *
-	 * @param pageNo Current Page Number
-	 */
-	public void setPageNo(int pageNo) {
-		this.pageNo = pageNo;
+  public PageInfo getPageInfo() {
+    return pageInfo;
 	}
 
 	/**
@@ -70,20 +32,33 @@ public class Page<T> {
 		return rows;
 	}
 
-	/**
-	 * Set Page Recordset Info
-	 *
-	 * @param rows Recordsets in Current Page
-	 */
-	public void setRows(List<T> rows) {
-		this.rows = rows;
-	}
+  public static PageInfo createInfo(int pageNo, int total, int totalRows) {
+    return new PageInfo(pageNo, total, totalRows);
+  }
 
-	public int getTotalCount() {
-		return totalCount;
-	}
+  public static class PageInfo {
+    private int pageNo;
 
-	public void setTotalCount(int totalCount) {
-		this.totalCount = totalCount;
+    private int total;
+
+    private int totalRows;
+
+    public PageInfo(int pageNo, int total, int totalRows) {
+      this.pageNo = pageNo;
+      this.total = total;
+      this.totalRows = totalRows;
+    }
+
+    public int getTotalRows() {
+      return totalRows;
+    }
+
+    public int getPageNo() {
+      return pageNo;
+    }
+
+    public int getTotal() {
+      return total;
+    }
 	}
 }
