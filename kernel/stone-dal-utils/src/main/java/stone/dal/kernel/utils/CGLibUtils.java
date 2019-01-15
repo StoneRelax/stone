@@ -20,6 +20,16 @@ public class CGLibUtils {
   private CGLibUtils() {
   }
 
+  public static Object enhanceObject(Class clazz,
+                              MethodInterceptor methodInterceptor,
+                              CallbackFilter callBackFilter){
+    Enhancer enhancer = new Enhancer();
+    enhancer.setSuperclass(clazz);
+    enhancer.setCallback(methodInterceptor);
+    enhancer.setCallbackFilter(callBackFilter);
+    return enhancer.create();
+  }
+
   /**
    * Create CGLib Proxy object
    *
@@ -29,9 +39,9 @@ public class CGLibUtils {
    * @return Proxy object
    */
   private static Class buildProxy(
-      Class clazz,
-      MethodInterceptor methodInterceptor,
-      CallbackFilter callBackFilter) {
+          Class clazz,
+          MethodInterceptor methodInterceptor,
+          CallbackFilter callBackFilter) {
     Enhancer enhancer = new Enhancer();
     enhancer.setSuperclass(clazz);
     enhancer.setCallbackTypes(new Class[] { methodInterceptor.getClass(), NoOp.class });
