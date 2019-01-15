@@ -25,6 +25,8 @@ import java.util.List;
 {<#list gen.uniqueIndices(entity) as idxName>
 @UniqueIndex(name="${gen.dbIdxName(idxName)}",columnNames = {<#list gen.getUniqueColumns(entity,idxName) as keyField>"${keyField}"<#if keyField_has_next>,</#if></#list>})
 <#if idxName_has_next>,</#if>
+</#list>})
+</#if>
 public class ${className} extends BaseDo{
 
     <#list gen.fields2Add(entity) as dataField>
