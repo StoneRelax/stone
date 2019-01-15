@@ -302,7 +302,7 @@ public class FileUtils {
    *
    * @param root specified file root
    */
-  public static void deleteDirs(File root) throws Exception {
+  public static void deleteDirs(File root) {
     if (root.isDirectory()) {
       List allFiles = deleteAll(root);
       if (allFiles != null) {
@@ -310,7 +310,7 @@ public class FileUtils {
           File f = (File) allFiles.remove(i);
           String fileName = f.toString();
           if (!f.delete()) {
-            throw new Exception("Exception: delete file " + fileName + " false!");
+            throw new KernelRuntimeException("Exception: delete file " + fileName + " false!");
           }
         }
       }

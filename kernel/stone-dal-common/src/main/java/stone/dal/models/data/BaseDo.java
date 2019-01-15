@@ -47,6 +47,10 @@ public class BaseDo {
 		return _monitor;
 	}
 
+  public void markDel() {
+    _state = States.DELETED;
+  }
+
 	public void markLazyLoadedField(String field) {
 		_lazyLoading.add(field);
 	}

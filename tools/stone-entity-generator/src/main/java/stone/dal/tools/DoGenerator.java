@@ -5,6 +5,7 @@ import freemarker.template.Configuration;
 import freemarker.template.DefaultObjectWrapper;
 import freemarker.template.SimpleHash;
 import freemarker.template.Template;
+
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -15,17 +16,11 @@ import java.math.BigDecimal;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import javax.xml.datatype.XMLGregorianCalendar;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.poi.ss.usermodel.Cell;
@@ -48,6 +43,7 @@ import static stone.dal.kernel.utils.KernelUtils.isStrEmpty;
 import static stone.dal.kernel.utils.KernelUtils.replace;
 import static stone.dal.kernel.utils.KernelUtils.replaceNull;
 import static stone.dal.kernel.utils.KernelUtils.str2Arr;
+import static stone.dal.kernel.utils.StringUtils.canonicalPropertyName2DBField;
 
 public class DoGenerator {
   private static Map<String, Class> classTypeMap = new ConcurrentHashMap<>();
@@ -101,7 +97,7 @@ public class DoGenerator {
   }
 
   public boolean hasUniqueKeys(RawEntityMeta entityMeta) {
-    return !entityMeta.getUniqueIndices().isEmpty();
+    return CollectionUtils.isNotEmpty(entityMeta.getUniqueIndices());
   }
 
   public Set<String> uniqueIndices(EntityMeta entityMeta) {
@@ -190,10 +186,29 @@ public class DoGenerator {
         }
         row++;
       }
-      entities.add(meta);
+      entities.add(buildUniqueIndices(meta));
       i++;
     }
     return entities;
+  }
+
+  private RawEntityMeta buildUniqueIndices(RawEntityMeta meta){
+    Map<String, List<String>> uniqueIndexMetaMap = new HashMap<>();
+    meta.getRawFields().forEach(fieldMeta -> {
+      if(StringUtils.isNotEmpty(fieldMeta.getUnique())){
+        if (uniqueIndexMetaMap.containsKey(fieldMeta.getUnique())){
+          uniqueIndexMetaMap.get(fieldMeta.getUnique()).add(fieldMeta.getDbName());
+        }else{
+          List<String> columns = new ArrayList<>();
+          columns.add(fieldMeta.getDbName());
+          uniqueIndexMetaMap.put(fieldMeta.getUnique(), columns);
+        }
+      }
+    });
+    uniqueIndexMetaMap.forEach((unique, columns) ->{
+      meta.getUniqueIndices().add(new UniqueIndexMeta(columns.toArray(new String[0]), unique));
+    });
+    return meta;
   }
 
   public List<String> createJavaSource(List<RawEntityMeta> entities, String packageName) throws Exception {
@@ -439,6 +454,8 @@ public class DoGenerator {
     }
     if (!isStrEmpty(dbName)) {
       meta.setDbName(dbName);
+    } else {
+      meta.setDbName(canonicalPropertyName2DBField(fieldName));
     }
     validFieldMeta(entityName, meta);
     return meta;

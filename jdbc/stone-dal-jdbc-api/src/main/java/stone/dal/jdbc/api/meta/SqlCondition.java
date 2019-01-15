@@ -9,71 +9,75 @@ import java.util.List;
  */
 public class SqlCondition {
 
-	private Class clazz;
+  private Class clazz;
 
   private List<Object> params = new ArrayList<>();
-	private List<String> operators = new ArrayList<>();
 
-	public SqlCondition(Class clazz) {
-		this.clazz = clazz;
-	}
+  private List<String> operators = new ArrayList<>();
 
-	public SqlCondition eq(String field, Object value) {
+  public SqlCondition(Class clazz) {
+    this.clazz = clazz;
+  }
+
+  public static SqlCondition create(Class clazz) {
+    return new SqlCondition(clazz);
+  }
+
+  public SqlCondition eq(String field, Object value) {
     params.add(value);
     operators.add(field + "=?");
-		return this;
-	}
+    return this;
+  }
 
-	public SqlCondition gt(String field, Object value) {
+  public SqlCondition gt(String field, Object value) {
     params.add(value);
     operators.add(field + ">?");
-		return this;
-	}
+    return this;
+  }
 
-	public SqlCondition gtAndEq(String field, Object value) {
+  public SqlCondition gtAndEq(String field, Object value) {
     params.add(value);
     operators.add(field + ">=?");
-		return this;
-	}
+    return this;
+  }
 
-	public SqlCondition ls(String field, Object value) {
+  public SqlCondition ls(String field, Object value) {
     params.add(value);
     operators.add(field + "<?");
-		return this;
-	}
+    return this;
+  }
 
-	public SqlCondition lsAndeq(String field, Object value) {
+  public SqlCondition lsAndeq(String field, Object value) {
     params.add(value);
     operators.add(field + "<=?");
-		return this;
-	}
+    return this;
+  }
 
-	public SqlCondition and() {
-		operators.add("and");
-		return this;
-	}
+  public SqlCondition and() {
+    operators.add("and");
+    return this;
+  }
 
-	public SqlCondition or() {
-		operators.add("or");
-		return this;
-	}
+  public SqlCondition or() {
+    operators.add("or");
+    return this;
+  }
 
-	public SqlCondition join(SqlCondition condition) {
-		SqlQueryMeta joinMeta = condition.build();
-		operators.add("(" + joinMeta.getSql() + ")");
+  public SqlCondition join(SqlCondition condition) {
+    SqlQueryMeta joinMeta = condition.build();
+    operators.add("(" + joinMeta.getSql() + ")");
     params.addAll(Arrays.asList(joinMeta.getParameters()));
-		return this;
-	}
+    return this;
+  }
 
-
-	public SqlQueryMeta build() {
-		StringBuilder sb = new StringBuilder();
-		operators.forEach(operator -> {
-			sb.append(operator);
-			sb.append(" ");
-		});
-		return SqlQueryMeta.factory().mappingClazz(clazz)
+  public SqlQueryMeta build() {
+    StringBuilder sb = new StringBuilder();
+    operators.forEach(operator -> {
+      sb.append(operator);
+      sb.append(" ");
+    });
+    return SqlQueryMeta.factory().mappingClazz(clazz)
         .sql(sb.toString()).params(params.toArray(new Object[0])).build();
-	}
+  }
 
 }
