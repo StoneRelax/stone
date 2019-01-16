@@ -70,6 +70,18 @@ public class SqlCondition {
     return this;
   }
 
+  public SqlCondition union(SqlCondition condition, String operator){
+    SqlQueryMeta joinMeta = condition.build();
+    if(operator.toUpperCase().equals("AND")){
+      operators.add("AND (" + joinMeta.getSql() + ")");
+      params.addAll(Arrays.asList(joinMeta.getParameters()));
+    }else if(operator.toUpperCase().equals("OR")){
+      operators.add("OR (" + joinMeta.getSql() + ")");
+      params.addAll(Arrays.asList(joinMeta.getParameters()));
+    }
+    return this;
+  }
+
   public SqlQueryMeta build() {
     StringBuilder sb = new StringBuilder();
     operators.forEach(operator -> {

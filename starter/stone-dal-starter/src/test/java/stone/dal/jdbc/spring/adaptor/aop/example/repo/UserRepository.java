@@ -4,6 +4,8 @@ import java.util.List;
 import stone.dal.jdbc.api.StJpaRepository;
 import stone.dal.models.User;
 
+import javax.persistence.OneToMany;
+
 public interface UserRepository extends StJpaRepository<User, Long> {
 
   /**
@@ -12,6 +14,7 @@ public interface UserRepository extends StJpaRepository<User, Long> {
    * @param manager If manager
    * @return User list
    */
-  List<User> findByManager(boolean manager);
+  @OneToMany
+  List<User> findByManagerAndCreateByOrUserIdOrPassword(boolean manager,String created,String uid,String passwd);
 
 }

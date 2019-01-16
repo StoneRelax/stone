@@ -28,6 +28,7 @@ public class DalJdbcAutoConfigure {
   @Autowired
   private EntityMetaManager entityMetaManager;
 
+
   @Autowired
   private JdbcTemplateSpi jdbcTemplateSpi;
 
@@ -44,12 +45,14 @@ public class DalJdbcAutoConfigure {
 
   private StJdbcTemplate jdbcTemplate;
 
+  RdbmsEntityManager rdbmsEntityManager;
+
   @PostConstruct
   public void init() {
     if (dialectSpi == null) {
       dialectSpi = getDialect();
     }
-    RdbmsEntityManager rdbmsEntityManager = new RdbmsEntityManager(entityMetaManager);
+    rdbmsEntityManager = new RdbmsEntityManager(entityMetaManager);
     RelationQueryBuilder relationQueryBuilder = new RelationQueryBuilder(rdbmsEntityManager);
     jdbcTemplate = new StJdbcTemplateImpl(jdbcTemplateSpi, dialectSpi, relationQueryBuilder, rdbmsEntityManager);
     jpaRepository = new StJpaRepositoryImpl(jdbcTemplate, rdbmsEntityManager, relationQueryBuilder, sequenceSpi);
@@ -63,6 +66,11 @@ public class DalJdbcAutoConfigure {
   @Bean
   public StJdbcTemplate getJdbcTemplate() {
     return jdbcTemplate;
+  }
+
+  @Bean
+  public RdbmsEntityManager getRdbmsEntityManager(){
+    return  rdbmsEntityManager;
   }
 
   private DBDialectSpi getDialect() {

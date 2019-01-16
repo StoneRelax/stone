@@ -11,7 +11,7 @@ public class PartTreeTest {
 
   @Test
   public void testMethod() {
-    PartTree tree = new PartTree("findByContactPersonOrAddressOrCreateDate", Contact.class);
+    PartTree tree = new PartTree("findByContactPersonAndAddressOrCreateDate", Contact.class);
 //    tree.hasPredicate()
     Streamable<Part> parts = tree.getParts();
     Iterator<PartTree.OrPart> orPartIterator = tree.iterator();
@@ -54,28 +54,5 @@ public class PartTreeTest {
 
     private Date createDate;
 
-    public String getContactPerson() {
-      return contactPerson;
-    }
-
-    public void setContactPerson(String contactPerson) {
-      this.contactPerson = contactPerson;
-    }
-
-    public String getAddress() {
-      return address;
-    }
-
-    public void setAddress(String address) {
-      this.address = address;
-    }
-
-    public Date getCreateDate() {
-      return createDate;
-    }
-
-    public void setCreateDate(Date createDate) {
-      this.createDate = createDate;
-    }
   }
 }

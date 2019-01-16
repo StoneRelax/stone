@@ -12,7 +12,7 @@ import stone.dal.seq.api.meta.SequenceMeta;
 import stone.dal.seq.spi.SequenceMetaLoaderSpi;
 
 @Configuration
-public class DalAutoConfigure {
+public class  DalAutoConfigure {
 
   @Autowired
   private EntityScanPackages entityScanPackages;

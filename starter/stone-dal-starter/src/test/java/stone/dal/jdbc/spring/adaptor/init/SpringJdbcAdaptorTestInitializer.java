@@ -6,6 +6,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import stone.dal.jdbc.api.StJdbcTemplate;
 
+import stone.dal.jdbc.spring.adaptor.aop.example.repo.UserRepository;
+
+
 /**
  * @author fengxie
  */
@@ -15,10 +18,14 @@ public class SpringJdbcAdaptorTestInitializer {
   @Autowired
   private StJdbcTemplate stJdbcTemplate;
 
+  @Autowired
+  private UserRepository userRepository;
+
   @PostConstruct
   public void dbInit() {
-    InputStream is = SpringJdbcAdaptorTestInitializer.class.getResourceAsStream("/dbscript.sql");
-    stJdbcTemplate.execSqlStream(is);
+//    InputStream is = SpringJdbcAdaptorTestInitializer.class.getResourceAsStream("/dbscript.sql");
+//    stJdbcTemplate.execSqlStream(is);
+    userRepository.findByManagerAndCreateByOrUserIdOrPassword(true,"me","me","me");
   }
 
 }

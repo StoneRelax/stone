@@ -1,33 +1,70 @@
 package stone.dal.jdbc.spring.adaptor.aop;
 
+import org.springframework.cglib.proxy.MethodInterceptor;
+import org.springframework.cglib.proxy.MethodProxy;
+import org.springframework.data.mapping.PropertyPath;
+import org.springframework.data.repository.query.parser.Part;
+import org.springframework.data.repository.query.parser.PartTree;
+import stone.dal.jdbc.api.StJdbcTemplate;
+import stone.dal.jdbc.api.StJpaRepository;
+import stone.dal.jdbc.api.meta.SqlCondition;
+import stone.dal.jdbc.impl.RdbmsEntity;
+import stone.dal.jdbc.impl.RdbmsEntityManager;
+import stone.dal.kernel.utils.KernelUtils;
+import stone.dal.models.data.BaseDo;
+import stone.dal.models.meta.FieldMeta;
+import stone.dal.starter.impl.SpringContextHolder;
+
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import org.springframework.cglib.proxy.MethodInterceptor;
-import org.springframework.cglib.proxy.MethodProxy;
-import stone.dal.jdbc.api.StJdbcTemplate;
-import stone.dal.jdbc.api.StJpaRepository;
-import stone.dal.jdbc.spring.adaptor.impl.SpringContextHolder;
-import stone.dal.models.EntityMetaManager;
-import stone.dal.models.data.BaseDo;
-import stone.dal.models.meta.EntityMeta;
+import java.util.Iterator;
+import java.util.List;
 
 public class StJpaRepositoryMethodInterceptor implements MethodInterceptor {
 
 
     @Override
     public Object intercept(Object o, Method method, Object[] objects, MethodProxy methodProxy) {
-        EntityMetaManager entityMetaManager = SpringContextHolder.getBean(EntityMetaManager.class);
+        RdbmsEntityManager entityMetaManager = SpringContextHolder.getBean(RdbmsEntityManager.class);
         StJdbcTemplate jdbcTemplate = SpringContextHolder.getBean(StJdbcTemplate.class);
         Object result = null;
         String methodName = method.getName();
         Class doClazz = getDoClass(o);
         System.out.println("Overriding method " + methodName);
-        EntityMeta meta = entityMetaManager.getEntity(doClazz);
+        RdbmsEntity meta = entityMetaManager.getEntity(doClazz);
+        SqlCondition condition = SqlCondition.create(doClazz);
 
-            //todo : get entity meta , generate SqlMeta , run with jdbcTemplate and return result
+        PartTree tree = new PartTree(methodName,doClazz);
+        Iterator<PartTree.OrPart> orPartIterator = tree.iterator();
+        while (orPartIterator.hasNext()) {
+            PartTree.OrPart orPart = orPartIterator.next();
+            Iterator<Part> andPartIterator = orPart.iterator();
+            SqlCondition andCondition = SqlCondition.create(doClazz);
+            while (andPartIterator.hasNext()) {
+                Part andPart = andPartIterator.next();
+                PropertyPath propertyPath = andPart.getProperty();
+                FieldMeta fieldMeta = meta.getField(propertyPath.getSegment());
+                andCondition.eq(fieldMeta.getDbName(),objects);
+                if(andPartIterator.hasNext()){
+                    andCondition.and();
+                }
+            }
+            condition.join(andCondition);
+            if(orPartIterator.hasNext()){
+                condition.or();
+            }
+        }
+
+        List resultSet = jdbcTemplate.query(condition.build());
+        if (!KernelUtils.isCollectionEmpty(resultSet)) {
+            if (method.getReturnType().isAssignableFrom(List.class)) {
+                result = resultSet;
+            } else {
+                result = resultSet.iterator().next();
+            }
+        }
         return result;
-
     }
 
     private Class getDoClass(Object o) {

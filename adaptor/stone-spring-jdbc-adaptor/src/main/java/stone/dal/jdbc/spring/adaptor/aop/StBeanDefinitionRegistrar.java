@@ -30,11 +30,32 @@ public class StBeanDefinitionRegistrar implements ImportBeanDefinitionRegistrar 
 
   private static Logger logger = LoggerFactory.getLogger(StBeanDefinitionRegistrar.class);
 
-  private List<TypeFilter> interfaceFilter;
 
-  private List<TypeFilter> abstractClassFilter;
+  private static final TypeFilter interfaceFilter = new TypeFilter() {
+    @Override
+    public boolean match(MetadataReader metadataReader, MetadataReaderFactory metadataReaderFactory) throws IOException {
+      if(metadataReader.getClassMetadata().isInterface()){
+        return true;
+      }
+      return false;
+    }
+  };
+  private static final TypeFilter abstractClassFilter = new TypeFilter() {
+    @Override
+    public boolean match(MetadataReader metadataReader, MetadataReaderFactory metadataReaderFactory) throws IOException {
+      if(metadataReader.getClassMetadata().isAbstract()){
+        return true;
+      }
+      return false;
+    }
+  };
 
-  private List<TypeFilter> excludeFilter;
+  TypeFilter excludeFilter = new TypeFilter() {
+    @Override
+    public boolean match(MetadataReader metadataReader, MetadataReaderFactory metadataReaderFactory) throws IOException {
+      return false;
+    }
+  };
 
   private StJpaRepositoryMethodFilter jpaRepositoryMethodFilter;
 
@@ -46,33 +67,43 @@ public class StBeanDefinitionRegistrar implements ImportBeanDefinitionRegistrar 
   }
 
   @Override
-  public void registerBeanDefinitions(AnnotationMetadata importingClassMetadata, BeanDefinitionRegistry registry) {
+  public void registerBeanDefinitions(AnnotationMetadata importingClassMetadata, BeanDefinitionRegistry registry)  {
     AnnotationAttributes annAttr = AnnotationAttributes.fromMap(importingClassMetadata.getAnnotationAttributes(
         StRepositoryScan.class.getName()));
     String[] basePackages = annAttr.getStringArray("value");
-    List<Class<?>> interfaceDoRepositories = scanPackages(basePackages, interfaceFilter, excludeFilter);
-    for (Class<?> repoClass : interfaceDoRepositories) {
-      Class enhancedClass = build(repoClass);
+    List<Class<?>> doRepositories = scanPackages(basePackages,abstractClassFilter,excludeFilter);
+    List<Class<?>> interfaceDoRepositories = scanPackages(basePackages,interfaceFilter,excludeFilter);
+    for(Class clazz : doRepositories){
+      Class[] interf = clazz.getInterfaces();
+      for(int i = 0; i<interf.length; i++){
+        if(interfaceDoRepositories.contains(interf[i])){
+          doRepositories.remove(interf[i]);
+        }
+      }
+    }
+
+    for(Class<?> doRepository : doRepositories){
+      Class enhancedClass = build(doRepository);
       RootBeanDefinition rootBeanDefinition = new RootBeanDefinition(enhancedClass);
-      registry.registerBeanDefinition(enhancedClass.getName(), rootBeanDefinition);
+      registry.registerBeanDefinition(enhancedClass.getName(),rootBeanDefinition);
     }
   }
 
-  private List<Class<?>> scanPackages(String[] basePackages, List<TypeFilter> includeFilters,
-      List<TypeFilter> excludeFilters) {
+  private List<Class<?>> scanPackages(String[] basePackages, TypeFilter includeFilter,
+      TypeFilter excludeFilter) {
     List<Class<?>> candidates = new ArrayList<Class<?>>();
     for (String pkg : basePackages) {
       try {
-        candidates.addAll(findCandidateClasses(pkg, includeFilters, excludeFilters));
-      } catch (IOException e) {
+        candidates.addAll(findCandidateClasses(pkg, includeFilter, excludeFilter));
+      } catch (Exception e) {
         logger.error("Exception when scanning DO repositories", pkg);
       }
     }
     return candidates;
   }
 
-  private List<Class<?>> findCandidateClasses(String basePackage, List<TypeFilter> includeFilters,
-      List<TypeFilter> excludeFilters) throws IOException {
+  private List<Class<?>> findCandidateClasses(String basePackage, TypeFilter includeFilter,
+      TypeFilter excludeFilter) throws Exception {
     if (logger.isDebugEnabled()) {
       logger.debug("Scanning DO repositories in package : " + basePackage);
     }
@@ -85,7 +116,7 @@ public class StBeanDefinitionRegistrar implements ImportBeanDefinitionRegistrar 
         .getResources(packageSearchPath);
     for (Resource resource : resources) {
       MetadataReader reader = readerFactory.getMetadataReader(resource);
-      if (isCandidateResource(reader, readerFactory, includeFilters, excludeFilters)) {
+      if (isCandidateResource(reader, readerFactory, includeFilter, excludeFilter)) {
         try {
           Class<?> candidateClass = Class.forName(reader.getClassMetadata().getClassName());
           if (candidateClass != null) {
@@ -101,10 +132,9 @@ public class StBeanDefinitionRegistrar implements ImportBeanDefinitionRegistrar 
     return candidates;
   }
 
-  private boolean isCandidateResource(MetadataReader reader, MetadataReaderFactory readerFactory,
-      List<TypeFilter> includeFilter, List<TypeFilter> excludeFilter) {
-    //todo impl
-    if (reader.getClassMetadata().isInterface()) {
+  private boolean isCandidateResource(MetadataReader reader,MetadataReaderFactory readerFactory,TypeFilter includeFilter,TypeFilter excludeFilter) throws Exception{
+
+    if(includeFilter.match(reader,readerFactory)){
       return true;
     }
     return false;
