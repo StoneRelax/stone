@@ -49,4 +49,4 @@ CREATE TABLE `goods` (
   PRIMARY KEY (`uuid`)
 );
 
-insert into my_order_item (uuid,name) values(-1,'GOOD_1');
+insert into goods (uuid,name) values(-1,'GOODS_1');
