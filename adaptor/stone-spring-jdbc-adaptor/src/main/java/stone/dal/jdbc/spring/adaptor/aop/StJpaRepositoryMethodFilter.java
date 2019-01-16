@@ -10,7 +10,6 @@ public class StJpaRepositoryMethodFilter implements CallbackFilter {
     public int accept(Method method) {
         if (Modifier.isPublic(method.getModifiers()) && !Modifier.isStatic(method.getModifiers())) {
             if (StJpaRepository.class.isAssignableFrom(method.getDeclaringClass())) {
-                System.out.println(method);
                 return 0;
             }
         }
