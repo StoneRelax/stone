@@ -13,5 +13,6 @@ import stone.dal.jdbc.spring.adaptor.aop.StBeanDefinitionRegistrar;
 @Retention(RetentionPolicy.RUNTIME)
 @Import(StBeanDefinitionRegistrar.class)
 public @interface StRepositoryScan {
+
   String[] value() default {};
 }
