@@ -1,4 +1,4 @@
-package stone.dal.impl;
+package stone.dal.jdbc.spring.adaptor.aop;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -12,7 +12,6 @@ import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
-import static org.springframework.core.io.support.ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX;
 import org.springframework.core.io.support.ResourcePatternUtils;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.classreading.MetadataReader;
@@ -21,18 +20,29 @@ import org.springframework.core.type.classreading.SimpleMetadataReaderFactory;
 import org.springframework.core.type.filter.TypeFilter;
 import org.springframework.util.ClassUtils;
 import stone.dal.jdbc.spring.adaptor.annotation.StRepositoryScan;
+import stone.dal.kernel.utils.CGLibUtils;
+import stone.dal.kernel.utils.KernelRuntimeException;
+import stone.dal.kernel.utils.LogUtils;
+
+import static org.springframework.core.io.support.ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX;
 
 public class StBeanDefinitionRegistrar implements ImportBeanDefinitionRegistrar {
 
   private static Logger logger = LoggerFactory.getLogger(StBeanDefinitionRegistrar.class);
-  private SpringContextHolder springContextHolder;
+
   private List<TypeFilter> interfaceFilter;
+
   private List<TypeFilter> abstractClassFilter;
+
   private List<TypeFilter> excludeFilter;
-  private DalRepositoryHandlerImpl dalRepositoryHandler;
+
+  private StJpaRepositoryMethodFilter jpaRepositoryMethodFilter;
+
+  private StJpaRepositoryMethodInterceptor jpaRepositoryMethodInterceptor;
 
   public StBeanDefinitionRegistrar() {
-    this.dalRepositoryHandler = new DalRepositoryHandlerImpl();
+    jpaRepositoryMethodFilter = new StJpaRepositoryMethodFilter();
+    jpaRepositoryMethodInterceptor = new StJpaRepositoryMethodInterceptor();
   }
 
   @Override
@@ -40,15 +50,13 @@ public class StBeanDefinitionRegistrar implements ImportBeanDefinitionRegistrar 
     AnnotationAttributes annAttr = AnnotationAttributes.fromMap(importingClassMetadata.getAnnotationAttributes(
         StRepositoryScan.class.getName()));
     String[] basePackages = annAttr.getStringArray("value");
-    List<Class<?>> interfaceDoRepostoties = scanPackages(basePackages,interfaceFilter,excludeFilter);
-    for(Class<?> interfaceDoRepostory : interfaceDoRepostoties){
-      Class enhancedClass = dalRepositoryHandler.build(interfaceDoRepostory);
+    List<Class<?>> interfaceDoRepositories = scanPackages(basePackages, interfaceFilter, excludeFilter);
+    for (Class<?> repoClass : interfaceDoRepositories) {
+      Class enhancedClass = build(repoClass);
       RootBeanDefinition rootBeanDefinition = new RootBeanDefinition(enhancedClass);
-      registry.registerBeanDefinition(enhancedClass.getName(),rootBeanDefinition);
+      registry.registerBeanDefinition(enhancedClass.getName(), rootBeanDefinition);
     }
   }
-
-
 
   private List<Class<?>> scanPackages(String[] basePackages, List<TypeFilter> includeFilters,
       List<TypeFilter> excludeFilters) {
@@ -70,10 +78,11 @@ public class StBeanDefinitionRegistrar implements ImportBeanDefinitionRegistrar 
     }
     List<Class<?>> candidates = new ArrayList<Class<?>>();
     String packageSearchPath = CLASSPATH_ALL_URL_PREFIX + ClassUtils
-            .convertClassNameToResourcePath(basePackage) + "/*";
+        .convertClassNameToResourcePath(basePackage) + "/*";
     ResourceLoader resourceLoader = new DefaultResourceLoader();
     MetadataReaderFactory readerFactory = new SimpleMetadataReaderFactory(resourceLoader);
-    Resource[] resources = ResourcePatternUtils.getResourcePatternResolver(resourceLoader).getResources(packageSearchPath);
+    Resource[] resources = ResourcePatternUtils.getResourcePatternResolver(resourceLoader)
+        .getResources(packageSearchPath);
     for (Resource resource : resources) {
       MetadataReader reader = readerFactory.getMetadataReader(resource);
       if (isCandidateResource(reader, readerFactory, includeFilters, excludeFilters)) {
@@ -83,7 +92,7 @@ public class StBeanDefinitionRegistrar implements ImportBeanDefinitionRegistrar 
             candidates.add(candidateClass);
             logger.debug("DO repository scanned : " + candidateClass.getName());
           }
-        }catch (Exception e){
+        } catch (Exception e) {
           logger.error("Error when scanning DO repository " + e);
         }
 
@@ -92,13 +101,28 @@ public class StBeanDefinitionRegistrar implements ImportBeanDefinitionRegistrar 
     return candidates;
   }
 
-
-  private boolean isCandidateResource(MetadataReader reader,MetadataReaderFactory readerFactory,List<TypeFilter> includeFilter,List<TypeFilter> excludeFilter){
+  private boolean isCandidateResource(MetadataReader reader, MetadataReaderFactory readerFactory,
+      List<TypeFilter> includeFilter, List<TypeFilter> excludeFilter) {
     //todo impl
-    if(reader.getClassMetadata().isInterface()){
+    if (reader.getClassMetadata().isInterface()) {
       return true;
     }
     return false;
+  }
+
+  Class build(Class clazz) {
+    Class repoClazz = null;
+    try {
+      if (clazz.isInterface()) {
+        repoClazz = CGLibUtils.buildProxyClass(clazz, jpaRepositoryMethodInterceptor, jpaRepositoryMethodFilter);
+      } else {
+        repoClazz = clazz.getSuperclass();
+      }
+    } catch (Exception e) {
+      LogUtils.error(logger, e);
+      throw new KernelRuntimeException(e);
+    }
+    return repoClazz;
   }
 
 //  private void registerBeanDefinitions(List<Class<?>> internalClasses, BeanDefinitionRegistry registry) {

@@ -48,3 +48,5 @@ CREATE TABLE `goods` (
   `create_date` datetime DEFAULT NULL,
   PRIMARY KEY (`uuid`)
 );
+
+insert into my_order_item (uuid,name) values(-1,'GOOD_1');

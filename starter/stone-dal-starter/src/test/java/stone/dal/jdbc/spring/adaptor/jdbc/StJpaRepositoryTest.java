@@ -13,7 +13,7 @@ import stone.dal.jdbc.api.StJdbcTemplate;
 import stone.dal.jdbc.api.StJpaRepository;
 import stone.dal.jdbc.api.meta.SqlDmlDclMeta;
 import stone.dal.jdbc.api.meta.SqlQueryMeta;
-import stone.dal.jdbc.spring.adaptor.init.SpringJdbcAdaptorTestApplication;
+import stone.dal.jdbc.spring.adaptor.app.SpringJdbcAdaptorTestApplication;
 import stone.dal.models.Goods;
 import stone.dal.models.MyOrder;
 import stone.dal.models.MyOrderItem;

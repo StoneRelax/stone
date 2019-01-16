@@ -10,7 +10,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import stone.dal.jdbc.api.StJdbcTemplate;
 import stone.dal.jdbc.api.meta.SqlCondition;
 import stone.dal.jdbc.api.meta.SqlQueryMeta;
-import stone.dal.jdbc.spring.adaptor.autoconfigure.SpringJdbcAdaptorTestApplication;
+import stone.dal.jdbc.spring.adaptor.app.SpringJdbcAdaptorTestApplication;
 import stone.dal.models.MyOrder;
 import stone.dal.models.MyOrderItem;
 import stone.dal.models.data.Page;

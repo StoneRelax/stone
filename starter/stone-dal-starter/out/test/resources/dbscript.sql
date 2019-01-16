@@ -41,3 +41,12 @@ CREATE TABLE `person_order` (
   `person_uuid` decimal(18),
   `order_uuid` decimal(18)
 );
+
+CREATE TABLE `goods` (
+  `uuid` decimal(18),
+  `name` varchar(50) DEFAULT NULL,
+  `create_date` datetime DEFAULT NULL,
+  PRIMARY KEY (`uuid`)
+);
+
+insert into my_order_item (uuid,name) values(-1,'GOOD_1');

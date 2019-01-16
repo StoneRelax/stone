@@ -6,7 +6,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import org.springframework.context.annotation.Import;
-import stone.dal.impl.StBeanDefinitionRegistrar;
+import stone.dal.jdbc.spring.adaptor.aop.StBeanDefinitionRegistrar;
 
 @Documented
 @Target(ElementType.TYPE)

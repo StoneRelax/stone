@@ -1,17 +1,9 @@
-package stone.dal.impl;
+package stone.dal.jdbc.spring.adaptor.aop;
 
-import org.apache.commons.lang.ArrayUtils;
+import java.lang.reflect.Method;
 import org.springframework.cglib.proxy.CallbackFilter;
 
-import javax.persistence.CascadeType;
-import javax.persistence.FetchType;
-import javax.persistence.ManyToMany;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
-import java.lang.reflect.Method;
-
-public class DalMethodFilter implements CallbackFilter {
+public class StJpaRepositoryMethodFilter implements CallbackFilter {
     public int accept(Method method) {
 
 //        if (method.isAnnotationPresent(OneToMany.class)) {

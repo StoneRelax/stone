@@ -1,4 +1,4 @@
-package stone.dal.jdbc.spring.adaptor.aop.example;
+package stone.dal.jdbc.spring.adaptor.aop.example.repo;
 
 import java.util.List;
 import stone.dal.jdbc.api.StJpaRepository;
@@ -12,6 +12,6 @@ public interface UserRepository extends StJpaRepository<User, Long> {
    * @param manager If manager
    * @return User list
    */
-  List<User> findUserByManager(boolean manager);
+  List<User> findByManager(boolean manager);
 
 }

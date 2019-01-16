@@ -19,7 +19,7 @@ import stone.dal.models.annotation.Sequence;
 import stone.dal.models.data.BaseDo;
 
 @Entity
-@Table(name = "drone_user", uniqueConstraints = @UniqueConstraint(columnNames = { "uuid", "userId" }))
+@Table(name = "drone_user", uniqueConstraints = @UniqueConstraint(columnNames = { "uuid" }))
 public class User extends BaseDo {
 
   private Long uuid;
