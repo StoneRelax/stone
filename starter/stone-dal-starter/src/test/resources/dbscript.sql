@@ -31,6 +31,8 @@ insert into my_order_item (uuid,item_name,order_uuid) values(1,'ORDER1',1);
 insert into my_order_item (uuid,item_name,order_uuid) values(2,'ORDER2',1);
 insert into my_order_item (uuid,item_name,order_uuid) values(3,'ORDER3',1);
 
+delete from person;
+
 CREATE TABLE `person` (
   `uuid` decimal(18),
   `name` varchar(50) DEFAULT NULL,

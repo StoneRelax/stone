@@ -19,6 +19,7 @@ import org.springframework.core.type.classreading.MetadataReaderFactory;
 import org.springframework.core.type.classreading.SimpleMetadataReaderFactory;
 import org.springframework.core.type.filter.TypeFilter;
 import org.springframework.util.ClassUtils;
+import stone.dal.jdbc.api.StJpaRepository;
 import stone.dal.jdbc.spring.adaptor.annotation.StRepositoryScan;
 import stone.dal.kernel.utils.CGLibUtils;
 import stone.dal.kernel.utils.KernelRuntimeException;
@@ -82,10 +83,12 @@ public class StBeanDefinitionRegistrar implements ImportBeanDefinitionRegistrar 
       }
     }
 
-    for(Class<?> doRepository : doRepositories){
-      Class enhancedClass = build(doRepository);
-      RootBeanDefinition rootBeanDefinition = new RootBeanDefinition(enhancedClass);
-      registry.registerBeanDefinition(enhancedClass.getName(),rootBeanDefinition);
+    for (Class<?> repositoryClazz : doRepositories) {
+      if (StJpaRepository.class.isAssignableFrom(repositoryClazz)) {
+        Class enhancedClass = build(repositoryClazz);
+        RootBeanDefinition rootBeanDefinition = new RootBeanDefinition(enhancedClass);
+        registry.registerBeanDefinition(enhancedClass.getName(), rootBeanDefinition);
+      }
     }
   }
 

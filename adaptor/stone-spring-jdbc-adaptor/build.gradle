@@ -1,11 +1,9 @@
 dependencies {
     compile project(':jdbc:stone-dal-jdbc-spi')
-    compile project(':jdbc:stone-dal-jdbc-api')
-    compile project(':starter:stone-dal-starter')
+    compile project(':jdbc:stone-dal-jdbc-impl')
     compile project(':sequence-generator:stone-sequence-gen-autoconfigure')
     compile 'org.springframework.boot:spring-boot-starter-jdbc'
     compile 'org.springframework.data:spring-data-commons'
-    compile 'org.apache.tomcat:tomcat-jdbc'
     compile 'org.springframework:spring-jdbc'
     testCompile 'org.springframework.boot:spring-boot-starter-test'
 }
