@@ -38,7 +38,6 @@ import java.util.jar.JarFile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.Assert;
-import stone.dal.models.data.BaseDo;
 
 /**
  * The class <code>BeanUtils</code>  for class common operations
@@ -246,20 +245,4 @@ public abstract class ClassUtils {
     return isPrimitive;
   }
 
-
-  public static Class getDoClass(Class repoClazz) {
-    Class doClazz = null;
-      Type[] genTypes = repoClazz.getGenericInterfaces();
-      if (genTypes != null && genTypes.length != 0) {
-        Type genType = genTypes[0];
-        Type[] params = ((ParameterizedType) genType).getActualTypeArguments();
-        for (Type param : params) {
-          if (((Class) param).getSuperclass() == BaseDo.class) {
-            doClazz = (Class) param;
-            break;
-          }
-        }
-    }
-    return doClazz;
-  }
 }
