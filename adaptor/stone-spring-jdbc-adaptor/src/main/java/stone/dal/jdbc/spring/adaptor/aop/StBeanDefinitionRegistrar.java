@@ -1,6 +1,7 @@
 package stone.dal.jdbc.spring.adaptor.aop;
 
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import org.slf4j.Logger;
@@ -84,6 +85,10 @@ public class StBeanDefinitionRegistrar implements ImportBeanDefinitionRegistrar 
     }
 
     for (Class<?> repositoryClazz : doRepositories) {
+      Method[] methods = repositoryClazz.getMethods();
+      for(Method method : methods){
+        StJpaRepositoryMethodPartCache.getInstance().registMethod(method, stone.dal.kernel.utils.ClassUtils.getDoClass(repositoryClazz));
+      }
       if (StJpaRepository.class.isAssignableFrom(repositoryClazz)) {
         Class enhancedClass = build(repositoryClazz);
         RootBeanDefinition rootBeanDefinition = new RootBeanDefinition(enhancedClass);

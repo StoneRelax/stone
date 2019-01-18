@@ -5,6 +5,7 @@ dependencies {
     compile 'commons-collections:commons-collections'
     compile 'commons-lang:commons-lang'
     compile 'com.alibaba:fastjson'
+    compile project (':kernel:stone-dal-common')
 
     compile 'org.springframework:spring-beans'
     compile 'org.springframework:spring-context'

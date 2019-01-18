@@ -43,5 +43,4 @@ public class UserRepositoryTest {
     List<Person> users = personRepository.findByName("Xie Feng");
     Assert.assertEquals("Xie Feng", users.get(0).getName());
   }
-
 }

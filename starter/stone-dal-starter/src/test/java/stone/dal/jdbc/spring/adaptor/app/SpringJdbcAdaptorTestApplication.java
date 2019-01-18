@@ -12,7 +12,7 @@ import stone.dal.jdbc.spring.adaptor.annotation.StRepositoryScan;
  */
 @Configuration
 @EnableAutoConfiguration
-@ComponentScan(basePackages = {"stone.dal.starter.impl", "stone.dal.impl", "stone.dal.jdbc.spring.adaptor.init","stone.dal.jdbc.spring.adaptor.autoconfigure"})
+@ComponentScan(basePackages = {"stone.dal.jdbc.autoconfigure","stone.dal.jdbc.spring.adaptor.impl","stone.dal.starter.impl", "stone.dal.impl", "stone.dal.jdbc.spring.adaptor.init","stone.dal.jdbc.spring.adaptor.autoconfigure"})
 @StRepositoryScan("stone.dal.jdbc.spring.adaptor.aop.example.repo")
 @EntityScan("stone.dal.models")
 public class SpringJdbcAdaptorTestApplication {
