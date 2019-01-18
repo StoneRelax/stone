@@ -8,7 +8,7 @@ public abstract class FieldMeta {
 
 	protected String seqType;
 
-	protected int seqStartNum;
+	protected long seqStartNum;
 
 	protected String dbName;
 
@@ -62,7 +62,7 @@ public abstract class FieldMeta {
 		return seqType;
 	}
 
-	public int getSeqStartNum() {
+	public long getSeqStartNum() {
 		return seqStartNum;
 	}
 
@@ -276,7 +276,7 @@ public abstract class FieldMeta {
 			return this;
 		}
 
-		public Factory defaultStartSeq(int defaultStartSeq) {
+		public Factory defaultStartSeq(long defaultStartSeq) {
 			meta.seqStartNum = defaultStartSeq;
 			return this;
 		}

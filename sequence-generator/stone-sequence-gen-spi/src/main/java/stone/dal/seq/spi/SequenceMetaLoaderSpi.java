@@ -9,4 +9,5 @@ import stone.dal.seq.api.meta.SequenceMeta;
 public interface SequenceMetaLoaderSpi {
 
 	Collection<SequenceMeta> load();
+
 }

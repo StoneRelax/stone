@@ -29,4 +29,6 @@ public @interface Sequence {
   String key() default "";
 
   boolean overrideAllowed() default false;
+
+  long defaultStartSeq() default 0;
 }

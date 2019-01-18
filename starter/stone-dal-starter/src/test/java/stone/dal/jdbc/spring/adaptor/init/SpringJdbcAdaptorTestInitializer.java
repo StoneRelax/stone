@@ -1,11 +1,10 @@
 package stone.dal.jdbc.spring.adaptor.init;
 
+import java.io.InputStream;
+import javax.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import stone.dal.jdbc.api.StJdbcTemplate;
-import stone.dal.jdbc.spring.adaptor.aop.example.repo.PersonRepository;
-
-import javax.annotation.PostConstruct;
 
 /**
  * @author fengxie
@@ -15,10 +14,14 @@ public class SpringJdbcAdaptorTestInitializer {
 
   @Autowired
   private StJdbcTemplate stJdbcTemplate;
-
-  @Autowired
-  private PersonRepository userRepository;
-
-//userRepository
+//
+//  @Autowired
+//  private PersonRepository userRepository;
+//
+@PostConstruct
+public void dbInit() {
+  InputStream is = SpringJdbcAdaptorTestInitializer.class.getResourceAsStream("/dbscript.sql");
+  stJdbcTemplate.execSqlStream(is);
+}
 
 }

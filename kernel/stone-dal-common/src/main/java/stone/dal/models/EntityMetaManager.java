@@ -225,7 +225,7 @@ public class EntityMetaManager {
       if (StringUtils.isEmpty(key)) {
         key = entityName + "." + fieldName;
       }
-      fieldFactory.seqKey(seq.key());
+      fieldFactory.seqKey(key).defaultStartSeq(seq.defaultStartSeq());
     }
   }
 

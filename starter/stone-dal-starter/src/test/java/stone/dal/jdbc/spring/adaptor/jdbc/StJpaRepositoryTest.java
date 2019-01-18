@@ -91,7 +91,7 @@ public class StJpaRepositoryTest {
     Long uuid = goodsRepository.create(goods);
     Assert.assertEquals(new Long(1001), uuid);
 
-//    Goods _person = personRepository.get(goods);
+//    Per _person = personRepository.get(goods);
 //    Assert.assertEquals(new Long(1001l), _person.getUuid());
 //    Assert.assertEquals("jinny", _person.getName());
 //    Assert.assertEquals("M00001", _person.getMyOrders().get(0).getOrderNo());
