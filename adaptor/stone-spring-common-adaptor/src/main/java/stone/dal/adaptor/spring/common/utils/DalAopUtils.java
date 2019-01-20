@@ -1,4 +1,4 @@
-package stone.dal.adaptor.spring.utils;
+package stone.dal.adaptor.spring.common.utils;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;

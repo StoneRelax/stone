@@ -1,6 +1,6 @@
-package stone.dal.adaptor.spring.jdbc.impl;
+package stone.dal.adaptor.spring.common;
 
-import stone.dal.adaptor.spring.jdbc.spi.SequenceSpi;
+import stone.dal.common.spi.SequenceSpi;
 import stone.dal.kernel.utils.KernelRuntimeException;
 import stone.dal.models.data.BaseDo;
 import stone.dal.models.meta.FieldMeta;

@@ -1,6 +1,7 @@
 dependencies {
     compile project(':jdbc:stone-dal-jdbc-api')
     compile project(':jdbc:stone-dal-jdbc-spi')
+    compile project(':kernel:stone-dal-common-spi')
     compile 'org.springframework:spring-beans'
     compile 'org.springframework:spring-context'
     compile 'org.springframework:spring-jdbc'

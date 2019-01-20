@@ -10,7 +10,7 @@ import stone.dal.adaptor.spring.jdbc.api.StJpaRepository;
 import stone.dal.adaptor.spring.jdbc.api.meta.SqlDmlDclMeta;
 import stone.dal.adaptor.spring.jdbc.api.meta.SqlQueryMeta;
 import stone.dal.adaptor.spring.jdbc.impl.utils.RelationQueryBuilder;
-import stone.dal.adaptor.spring.jdbc.spi.SequenceSpi;
+import stone.dal.common.spi.SequenceSpi;
 import stone.dal.kernel.utils.KernelRuntimeException;
 import stone.dal.kernel.utils.LogUtils;
 import stone.dal.models.data.BaseDo;

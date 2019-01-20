@@ -6,32 +6,26 @@ import java.util.List;
 import org.springframework.data.mapping.PropertyPath;
 import org.springframework.data.repository.query.parser.Part;
 import org.springframework.data.repository.query.parser.PartTree;
-import stone.dal.adaptor.spring.autoconfigure.SpringContextHolder;
+import stone.dal.adaptor.spring.common.SpringContextHolder;
+import stone.dal.adaptor.spring.common.aop.StRepoQueryByMethodName;
 import stone.dal.adaptor.spring.jdbc.api.StJdbcTemplate;
 import stone.dal.adaptor.spring.jdbc.api.meta.SqlCondition;
 import stone.dal.adaptor.spring.jdbc.impl.RdbmsEntity;
 import stone.dal.adaptor.spring.jdbc.impl.RdbmsEntityManager;
-import stone.dal.adaptor.spring.utils.DalAopUtils;
 import stone.dal.kernel.utils.KernelUtils;
 import stone.dal.models.meta.FieldMeta;
 
-public class StJpaRepoIntfMethodQuery {
+public class StJpaRepoQueryByMethodName extends StRepoQueryByMethodName {
 
-    private PartTree tree;
-    private Class doClazz;
-    private RdbmsEntityManager entityMetaManager;
-    private RdbmsEntity meta ;
-    private Method method;
-
-    public StJpaRepoIntfMethodQuery(Method method) {
-        doClazz = DalAopUtils.getDoClass(method.getDeclaringClass());
-        tree = StJpaRepoMethodPartRegistry.getInstance().getMethodPartTree(method);
-        entityMetaManager = SpringContextHolder.getBean(RdbmsEntityManager.class);
-        meta = entityMetaManager.getEntity(doClazz);
-        this.method = method;
+    public StJpaRepoQueryByMethodName(Method method, PartTree tree) {
+        super(method, tree);
     }
 
-    public Object query(Object[] params, StJdbcTemplate jdbcTemplate) {
+    @Override
+    public Object query(Method method, Object[] params) {
+        RdbmsEntityManager entityMetaManager = SpringContextHolder.getBean(RdbmsEntityManager.class);
+        RdbmsEntity meta = entityMetaManager.getEntity(doClazz);
+        StJdbcTemplate jdbcTemplate = SpringContextHolder.getBean(StJdbcTemplate.class);
         Object result = null;
         SqlCondition condition = SqlCondition.create(doClazz);
         Iterator<PartTree.OrPart> orPartIterator = tree.iterator();
@@ -64,6 +58,5 @@ public class StJpaRepoIntfMethodQuery {
         }
         return result;
     }
-
 
 }

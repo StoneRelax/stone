@@ -5,8 +5,8 @@ import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import stone.dal.adaptor.spring.annotation.StRepositoryScan;
-import stone.dal.adaptor.spring.seq.EnableSequence;
+import stone.dal.adaptor.spring.common.annotation.EnableSequence;
+import stone.dal.adaptor.spring.common.annotation.StRepositoryScan;
 
 /**
  * @author fengxie

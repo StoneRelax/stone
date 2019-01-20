@@ -1,4 +1,4 @@
-package stone.dal.adaptor.spring.jdbc.spi;
+package stone.dal.common.spi;
 
 import stone.dal.models.data.BaseDo;
 import stone.dal.models.meta.FieldMeta;

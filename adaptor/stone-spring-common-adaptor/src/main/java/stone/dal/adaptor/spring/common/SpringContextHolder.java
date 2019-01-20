@@ -1,4 +1,4 @@
-package stone.dal.adaptor.spring.autoconfigure;
+package stone.dal.adaptor.spring.common;
 
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;

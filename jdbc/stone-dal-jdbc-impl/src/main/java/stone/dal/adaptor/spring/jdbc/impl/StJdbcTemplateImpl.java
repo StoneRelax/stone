@@ -6,7 +6,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
-import org.springframework.stereotype.Component;
 import stone.dal.adaptor.spring.jdbc.api.StJdbcTemplate;
 import stone.dal.adaptor.spring.jdbc.api.meta.ExecResult;
 import stone.dal.adaptor.spring.jdbc.api.meta.SqlCondition;
@@ -25,7 +24,6 @@ import static stone.dal.kernel.utils.KernelUtils.str2Arr;
 /**
  * @author fengxie
  */
-@Component
 public class StJdbcTemplateImpl implements StJdbcTemplate {
 
   private JdbcTemplateSpi jdbcTemplateSpi;

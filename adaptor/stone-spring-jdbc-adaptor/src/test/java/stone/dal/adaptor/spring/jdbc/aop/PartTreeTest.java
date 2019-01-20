@@ -1,4 +1,4 @@
-package stone.dal.adaptor.spring.jdbc.spring.adaptor;
+package stone.dal.adaptor.spring.jdbc.aop;
 
 import java.util.Date;
 import java.util.Iterator;

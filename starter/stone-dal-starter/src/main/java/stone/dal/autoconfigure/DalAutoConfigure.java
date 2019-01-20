@@ -4,29 +4,28 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
-import javax.annotation.PostConstruct;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.domain.EntityScanPackages;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import stone.dal.adaptor.spring.common.SequenceSpiImpl;
+import stone.dal.adaptor.spring.common.SpringContextHolder;
+import stone.dal.common.spi.SequenceSpi;
 import stone.dal.ex.DoParseException;
 import stone.dal.models.EntityMetaManager;
 import stone.dal.models.meta.EntityMeta;
 import stone.dal.models.meta.FieldMeta;
+import stone.dal.seq.api.SequenceManager;
 import stone.dal.seq.api.meta.SequenceMeta;
 import stone.dal.seq.spi.SequenceMetaLoaderSpi;
 
 @Configuration
-public class  DalAutoConfigure {
-
-  @Autowired
-  private EntityScanPackages entityScanPackages;
+public class DalAutoConfigure {
 
   private EntityMetaManager entityMetaManager;
 
-  @PostConstruct
-  public void init() throws DoParseException {
+  public DalAutoConfigure(@Autowired EntityScanPackages entityScanPackages) throws DoParseException {
     this.entityMetaManager = new EntityMetaManager(entityScanPackages.getPackageNames().toArray(new String[0]));
   }
 
@@ -52,4 +51,23 @@ public class  DalAutoConfigure {
       return Collections.unmodifiableCollection(sequenceMetaList);
     };
   }
+
+//  @Bean
+//  public SequenceSpiInitializer getSequenceSpiInitializer(){
+//    return new SequenceSpiInitializer();
+//  }
+
+  @Autowired
+  private SequenceManager sequenceManager;
+
+  @Bean
+  public SequenceSpi getSequence() {
+    return new SequenceSpiImpl(sequenceManager);
+  }
+
+  @Bean
+  public SpringContextHolder getSpringCtxHolder() {
+    return new SpringContextHolder();
+  }
 }
+

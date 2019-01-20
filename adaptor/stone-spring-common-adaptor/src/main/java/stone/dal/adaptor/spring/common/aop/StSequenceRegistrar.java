@@ -1,4 +1,4 @@
-package stone.dal.adaptor.spring.seq;
+package stone.dal.adaptor.spring.common.aop;
 
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
@@ -8,6 +8,7 @@ import org.springframework.context.annotation.ImportBeanDefinitionRegistrar;
 import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.util.Assert;
+import stone.dal.adaptor.spring.common.annotation.EnableSequence;
 import stone.dal.seq.autoconfigure.StSequenceConfig;
 
 public class StSequenceRegistrar implements ImportBeanDefinitionRegistrar {

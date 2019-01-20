@@ -16,7 +16,7 @@ import stone.dal.adaptor.spring.jdbc.impl.dialect.OracleDialect;
 import stone.dal.adaptor.spring.jdbc.impl.utils.RelationQueryBuilder;
 import stone.dal.adaptor.spring.jdbc.spi.DBDialectSpi;
 import stone.dal.adaptor.spring.jdbc.spi.JdbcTemplateSpi;
-import stone.dal.adaptor.spring.jdbc.spi.SequenceSpi;
+import stone.dal.common.spi.SequenceSpi;
 import stone.dal.models.EntityMetaManager;
 
 /**
@@ -50,13 +50,18 @@ public class DalJdbcAutoConfigure {
   @PostConstruct
   public void init() {
     if (dialectSpi == null) {
-      dialectSpi = getDialect();
+      dialectSpi = initDialect();
     }
     rdbmsEntityManager = new RdbmsEntityManager(entityMetaManager);
     RelationQueryBuilder relationQueryBuilder = new RelationQueryBuilder(rdbmsEntityManager);
     jdbcTemplate = new StJdbcTemplateImpl(jdbcTemplateSpi, dialectSpi, relationQueryBuilder, rdbmsEntityManager);
     jpaRepository = new StJpaRepositoryImpl(jdbcTemplate, rdbmsEntityManager, relationQueryBuilder, sequenceSpi);
   }
+
+//  @Bean
+//  public DBDialectSpi getDialectSpi(){
+//    return dialectSpi;
+//  }
 
   @Bean
   public StJpaRepository getJpaRepository() {
@@ -73,7 +78,7 @@ public class DalJdbcAutoConfigure {
     return  rdbmsEntityManager;
   }
 
-  private DBDialectSpi getDialect() {
+  private DBDialectSpi initDialect() {
     if ("mysql".equalsIgnoreCase(dialectType)) {
       //todo:configure mysql errors
       return new MysqlDialect(new HashMap<>());
