@@ -1,9 +1,9 @@
 package stone.dal.adaptor.spring.common;
 
+import stone.dal.common.models.data.BaseDo;
+import stone.dal.common.models.meta.FieldMeta;
 import stone.dal.common.spi.SequenceSpi;
 import stone.dal.kernel.utils.KernelRuntimeException;
-import stone.dal.models.data.BaseDo;
-import stone.dal.models.meta.FieldMeta;
 import stone.dal.seq.api.SequenceGenerator;
 import stone.dal.seq.api.SequenceManager;
 

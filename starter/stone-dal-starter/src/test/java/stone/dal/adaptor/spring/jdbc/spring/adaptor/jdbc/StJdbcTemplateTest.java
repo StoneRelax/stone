@@ -11,9 +11,9 @@ import stone.dal.adaptor.spring.jdbc.api.StJdbcTemplate;
 import stone.dal.adaptor.spring.jdbc.api.meta.SqlCondition;
 import stone.dal.adaptor.spring.jdbc.api.meta.SqlQueryMeta;
 import stone.dal.adaptor.spring.jdbc.spring.adaptor.app.SpringJdbcAdaptorTestApplication;
-import stone.dal.models.MyOrder;
-import stone.dal.models.MyOrderItem;
-import stone.dal.models.data.Page;
+import stone.dal.common.models.MyOrder;
+import stone.dal.common.models.MyOrderItem;
+import stone.dal.common.models.data.Page;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest(classes = SpringJdbcAdaptorTestApplication.class)

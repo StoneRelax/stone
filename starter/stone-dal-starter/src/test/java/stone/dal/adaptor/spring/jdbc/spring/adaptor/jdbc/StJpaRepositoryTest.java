@@ -14,10 +14,10 @@ import stone.dal.adaptor.spring.jdbc.api.StJpaRepository;
 import stone.dal.adaptor.spring.jdbc.api.meta.SqlDmlDclMeta;
 import stone.dal.adaptor.spring.jdbc.api.meta.SqlQueryMeta;
 import stone.dal.adaptor.spring.jdbc.spring.adaptor.app.SpringJdbcAdaptorTestApplication;
-import stone.dal.models.Goods;
-import stone.dal.models.MyOrder;
-import stone.dal.models.MyOrderItem;
-import stone.dal.models.Person;
+import stone.dal.common.models.Goods;
+import stone.dal.common.models.MyOrder;
+import stone.dal.common.models.MyOrderItem;
+import stone.dal.common.models.Person;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest(classes = SpringJdbcAdaptorTestApplication.class)

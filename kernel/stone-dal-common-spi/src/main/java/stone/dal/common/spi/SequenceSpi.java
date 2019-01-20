@@ -1,7 +1,7 @@
 package stone.dal.common.spi;
 
-import stone.dal.models.data.BaseDo;
-import stone.dal.models.meta.FieldMeta;
+import stone.dal.common.models.data.BaseDo;
+import stone.dal.common.models.meta.FieldMeta;
 
 public interface SequenceSpi {
 

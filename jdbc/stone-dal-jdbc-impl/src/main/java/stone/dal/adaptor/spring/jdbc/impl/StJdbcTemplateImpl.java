@@ -14,8 +14,8 @@ import stone.dal.adaptor.spring.jdbc.api.meta.SqlQueryMeta;
 import stone.dal.adaptor.spring.jdbc.impl.utils.RelationQueryBuilder;
 import stone.dal.adaptor.spring.jdbc.spi.DBDialectSpi;
 import stone.dal.adaptor.spring.jdbc.spi.JdbcTemplateSpi;
+import stone.dal.common.models.data.Page;
 import stone.dal.kernel.utils.KernelRuntimeException;
-import stone.dal.models.data.Page;
 
 import static stone.dal.kernel.utils.KernelUtils.isCollectionEmpty;
 import static stone.dal.kernel.utils.KernelUtils.replace;

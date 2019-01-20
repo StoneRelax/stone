@@ -5,7 +5,7 @@
  */
 package stone.dal.tools.meta;
 
-import stone.dal.models.meta.FieldMeta;
+import stone.dal.common.models.meta.FieldMeta;
 
 /**
  * Component scope: JBolt Data Dictionary

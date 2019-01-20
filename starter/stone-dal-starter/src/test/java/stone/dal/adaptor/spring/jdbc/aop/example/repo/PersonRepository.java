@@ -2,7 +2,7 @@ package stone.dal.adaptor.spring.jdbc.aop.example.repo;
 
 import java.util.List;
 import stone.dal.adaptor.spring.jdbc.api.StJpaRepository;
-import stone.dal.models.Person;
+import stone.dal.common.models.Person;
 
 public interface PersonRepository extends StJpaRepository<Person, Long> {
 
@@ -13,5 +13,7 @@ public interface PersonRepository extends StJpaRepository<Person, Long> {
    * @return User list
    */
   List<Person> findByName(String name);
+
+  Person findMale();
 
 }

@@ -9,12 +9,12 @@ import javax.persistence.JoinColumn;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
-import stone.dal.models.data.BaseDo;
-import stone.dal.models.annotation.Sequence;
-import stone.dal.models.annotation.FieldMapper;
-import stone.dal.models.annotation.Nosql;
-import stone.dal.models.annotation.UniqueIndex;
-import stone.dal.models.annotation.UniqueIndices;
+import stone.dal.common.models.data.BaseDo;
+import stone.dal.common.models.annotation.Sequence;
+import stone.dal.common.models.annotation.FieldMapper;
+import stone.dal.common.models.annotation.Nosql;
+import stone.dal.common.models.annotation.UniqueIndex;
+import stone.dal.common.models.annotation.UniqueIndices;
 import java.util.List;
 
 @Entity

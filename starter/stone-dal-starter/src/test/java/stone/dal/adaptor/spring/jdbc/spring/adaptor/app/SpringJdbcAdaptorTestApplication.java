@@ -17,7 +17,7 @@ import stone.dal.adaptor.spring.common.annotation.StRepositoryScan;
     "stone.dal.starter.impl", "stone.dal.impl", "stone.dal.adaptor.spring.jdbc.spring.adaptor.init",
     "stone.dal.adaptor.spring.autoconfigure" })
 @StRepositoryScan("stone.dal.adaptor.spring.jdbc.aop.example.repo")
-@EntityScan("stone.dal.models")
+@EntityScan("stone.dal.common.models")
 @EnableSequence()
 public class SpringJdbcAdaptorTestApplication {
   public static void main(String[] args) {

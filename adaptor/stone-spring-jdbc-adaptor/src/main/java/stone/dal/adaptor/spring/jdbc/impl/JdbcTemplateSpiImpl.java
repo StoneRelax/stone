@@ -8,7 +8,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import stone.dal.adaptor.spring.jdbc.api.meta.SqlDmlDclMeta;
 import stone.dal.adaptor.spring.jdbc.api.meta.SqlQueryMeta;
 import stone.dal.adaptor.spring.jdbc.spi.JdbcTemplateSpi;
-import stone.dal.models.data.Page;
+import stone.dal.common.models.data.Page;
 
 public class JdbcTemplateSpiImpl implements JdbcTemplateSpi {
 

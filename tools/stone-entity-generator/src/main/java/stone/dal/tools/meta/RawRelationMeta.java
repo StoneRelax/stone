@@ -1,7 +1,7 @@
 package stone.dal.tools.meta;
 
-import stone.dal.models.meta.RelationMeta;
-import stone.dal.models.meta.RelationTypes;
+import stone.dal.common.models.meta.RelationMeta;
+import stone.dal.common.models.meta.RelationTypes;
 
 public class RawRelationMeta extends RelationMeta {
   private String joinDomain;

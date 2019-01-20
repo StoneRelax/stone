@@ -1,13 +1,11 @@
 package stone.dal.tools.meta;
 
-import stone.dal.models.meta.EntityMeta;
-import stone.dal.models.meta.FieldMeta;
-import stone.dal.models.meta.UniqueIndexMeta;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import stone.dal.common.models.meta.EntityMeta;
+import stone.dal.common.models.meta.UniqueIndexMeta;
 
 public class RawEntityMeta extends EntityMeta {
 

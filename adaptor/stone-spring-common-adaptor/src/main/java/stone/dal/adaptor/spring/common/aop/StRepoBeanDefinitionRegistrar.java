@@ -3,11 +3,18 @@ package stone.dal.adaptor.spring.common.aop;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Enumeration;
+import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
+import java.util.Set;
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
@@ -43,8 +50,10 @@ public class StRepoBeanDefinitionRegistrar implements ImportBeanDefinitionRegist
       .getClassMetadata().isInterface();
 
   //todo: should consider not abstract case
-  private static final TypeFilter abstractClassFilter = (metadataReader, metadataReaderFactory) -> metadataReader
-      .getClassMetadata().isAbstract();
+  private static final TypeFilter abstractClassFilter = (metadataReader, metadataReaderFactory) ->
+      metadataReader
+          .getClassMetadata().isAbstract() && !metadataReader
+          .getClassMetadata().isInterface();
 
   private TypeFilter excludeFilter = (metadataReader, metadataReaderFactory) -> false;
 
@@ -73,27 +82,28 @@ public class StRepoBeanDefinitionRegistrar implements ImportBeanDefinitionRegist
     AnnotationAttributes annAttr = AnnotationAttributes.fromMap(importingClassMetadata.getAnnotationAttributes(
         StRepositoryScan.class.getName()));
     String[] basePackages = annAttr.getStringArray("value");
-    List<Class<?>> interfaceDoRepositories = scanPackages(basePackages, interfaceFilter, excludeFilter);
-    List<Class<?>> doRepositories = scanPackages(basePackages, abstractClassFilter, excludeFilter);
-    for (Class clazz : doRepositories) {
-      Class[] interfaces = clazz.getInterfaces();
-      for (Class intf : interfaces) {
-        if (interfaceDoRepositories.contains(intf)) {
-          doRepositories.remove(intf);
+    List<Class<?>> intfRepoClasses = scanPackages(basePackages, interfaceFilter, excludeFilter);
+    Set<Class> filterOutIntfClasses = new HashSet<>();
+    List<Class<?>> abstractRepoClazz = scanPackages(basePackages, abstractClassFilter, excludeFilter);
+    abstractRepoClazz.forEach(repoClazz -> {
+      for (Class intf : intfRepoClasses) {
+        if (intf.isAssignableFrom(repoClazz)) {
+          filterOutIntfClasses.add(intf);
         }
       }
-    }
-
-    for (Class<?> repositoryClazz : doRepositories) {
+    });
+    intfRepoClasses.removeAll(filterOutIntfClasses);
+    LinkedList<Class<?>> allRepoClasses = new LinkedList<>();
+    allRepoClasses.addAll(intfRepoClasses);
+    allRepoClasses.addAll(abstractRepoClazz);
+    for (Class<?> repositoryClazz : allRepoClasses) {
       for (AopConf conf : aopConfList) {
         if (conf.intfClazz.isAssignableFrom(repositoryClazz)) {
-          Method[] methods = repositoryClazz.getMethods();
-          for (Method method : methods) {
-            if (conf.methodFilter.accept(method) == 0) {
-              StRepoMethodPartRegistry.getInstance().registerMethod(method,
-                  DalAopUtils.getDoClass(repositoryClazz), conf.repoQueryByMethodNameClazz);
-            }
-          }
+          Collection<Method> methods = conf.filterParsableMethods(repositoryClazz.getMethods());
+          methods.forEach(method -> {
+            StRepoMethodPartRegistry.getInstance().registerMethod(method,
+                DalAopUtils.getDoClass(repositoryClazz), conf.repoQueryByMethodNameClazz);
+          });
           Class enhancedClass = build(repositoryClazz, conf.methodFilter, conf.methodInterceptor);
           RootBeanDefinition rootBeanDefinition = new RootBeanDefinition(enhancedClass);
           registry.registerBeanDefinition(enhancedClass.getName(), rootBeanDefinition);
@@ -159,6 +169,8 @@ public class StRepoBeanDefinitionRegistrar implements ImportBeanDefinitionRegist
 
     Class repoQueryByMethodNameClazz;
 
+    Set<Method> methodsOfSuperIntf = new HashSet<>();
+
     AopConf(Properties properties) {
       String interfaceClass = properties.getProperty("repo.interface.class");
       String methodInterceptorName = properties.getProperty("aop.methodInterceptor.class");
@@ -173,16 +185,24 @@ public class StRepoBeanDefinitionRegistrar implements ImportBeanDefinitionRegist
         methodFilter = (CallbackFilter) Class.forName(methodFilterName).newInstance();
         methodInterceptor = (MethodInterceptor) Class.forName(methodInterceptorName).newInstance();
         repoQueryByMethodNameClazz = Class.forName(repoQueryByMethodNameClass);
+        Collections.addAll(methodsOfSuperIntf, intfClazz.getMethods());
       } catch (Exception ex) {
         throw new KernelRuntimeException("Init Aop Configuration Fails!", ex);
       }
+    }
+
+    Collection<Method> filterParsableMethods(Method[] methods) {
+      Set<Method> classMethods = new HashSet<>();
+      Collections.addAll(classMethods, methods);
+      return classMethods.stream().filter(method ->
+          methodFilter.accept(method) == 0 && !methodsOfSuperIntf.contains(method)).collect(Collectors.toSet());
     }
   }
 
   Class build(Class clazz, CallbackFilter methodFilter, MethodInterceptor methodInterceptor) {
     Class repoClazz;
     try {
-      if (clazz.isInterface()) {
+      if (clazz.isInterface() || Modifier.isAbstract(clazz.getModifiers())) {
         repoClazz = CGLibUtils.buildProxyClass(clazz, methodInterceptor, methodFilter);
       } else {
         repoClazz = clazz.getSuperclass();

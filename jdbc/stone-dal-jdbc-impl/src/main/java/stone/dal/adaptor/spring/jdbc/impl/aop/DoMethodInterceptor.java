@@ -10,8 +10,8 @@ import stone.dal.adaptor.spring.jdbc.impl.RdbmsEntityManager;
 import stone.dal.adaptor.spring.jdbc.impl.utils.RelationQueryBuilder;
 import stone.dal.adaptor.spring.jdbc.spi.DBDialectSpi;
 import stone.dal.adaptor.spring.jdbc.spi.JdbcTemplateSpi;
+import stone.dal.common.models.data.BaseDo;
 import stone.dal.kernel.utils.StringUtils;
-import stone.dal.models.data.BaseDo;
 
 import static stone.dal.kernel.utils.KernelUtils.isCollectionEmpty;
 

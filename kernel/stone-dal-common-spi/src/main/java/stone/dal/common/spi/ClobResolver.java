@@ -1,7 +1,7 @@
 package stone.dal.common.spi;
 
-import stone.dal.models.data.BaseDo;
-import stone.dal.models.meta.EntityMeta;
+import stone.dal.common.models.data.BaseDo;
+import stone.dal.common.models.meta.EntityMeta;
 
 public interface ClobResolver {
 

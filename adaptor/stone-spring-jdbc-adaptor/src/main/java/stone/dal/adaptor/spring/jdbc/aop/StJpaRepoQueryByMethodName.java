@@ -12,8 +12,8 @@ import stone.dal.adaptor.spring.jdbc.api.StJdbcTemplate;
 import stone.dal.adaptor.spring.jdbc.api.meta.SqlCondition;
 import stone.dal.adaptor.spring.jdbc.impl.RdbmsEntity;
 import stone.dal.adaptor.spring.jdbc.impl.RdbmsEntityManager;
+import stone.dal.common.models.meta.FieldMeta;
 import stone.dal.kernel.utils.KernelUtils;
-import stone.dal.models.meta.FieldMeta;
 
 public class StJpaRepoQueryByMethodName extends StRepoQueryByMethodName {
 

@@ -2,8 +2,8 @@ package stone.dal.adaptor.spring.jdbc.impl;
 
 import java.util.Map;
 import java.util.stream.Collectors;
-import stone.dal.models.EntityMetaManager;
-import stone.dal.models.meta.EntityMeta;
+import stone.dal.common.models.EntityMetaManager;
+import stone.dal.common.models.meta.EntityMeta;
 
 /**
  * @author fengxie

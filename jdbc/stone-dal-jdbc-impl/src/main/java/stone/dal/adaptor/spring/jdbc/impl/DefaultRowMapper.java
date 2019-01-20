@@ -17,13 +17,13 @@ import stone.dal.adaptor.spring.jdbc.impl.aop.DoMethodInterceptor;
 import stone.dal.adaptor.spring.jdbc.impl.utils.RelationQueryBuilder;
 import stone.dal.adaptor.spring.jdbc.spi.DBDialectSpi;
 import stone.dal.adaptor.spring.jdbc.spi.JdbcTemplateSpi;
-import stone.dal.ex.CreateRowObjectException;
+import stone.dal.common.ex.CreateRowObjectException;
+import stone.dal.common.models.meta.FieldMeta;
 import stone.dal.kernel.utils.CGLibUtils;
 import stone.dal.kernel.utils.ClassUtils;
 import stone.dal.kernel.utils.DateUtils;
 import stone.dal.kernel.utils.KernelRuntimeException;
 import stone.dal.kernel.utils.StringUtils;
-import stone.dal.models.meta.FieldMeta;
 
 import static stone.dal.kernel.utils.KernelUtils.replace;
 import static stone.dal.kernel.utils.KernelUtils.setPropVal;

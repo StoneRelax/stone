@@ -6,7 +6,7 @@ import stone.dal.adaptor.spring.jdbc.api.meta.ExecResult;
 import stone.dal.adaptor.spring.jdbc.api.meta.SqlCondition;
 import stone.dal.adaptor.spring.jdbc.api.meta.SqlDmlDclMeta;
 import stone.dal.adaptor.spring.jdbc.api.meta.SqlQueryMeta;
-import stone.dal.models.data.Page;
+import stone.dal.common.models.data.Page;
 
 /**
  * @author fengxie

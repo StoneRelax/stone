@@ -8,7 +8,9 @@ import stone.dal.adaptor.spring.jdbc.api.StJpaRepository;
 public class StJpaRepoMethodFilter implements CallbackFilter {
 
     public int accept(Method method) {
-        if (Modifier.isPublic(method.getModifiers()) && !Modifier.isStatic(method.getModifiers())) {
+        if (Modifier.isPublic(method.getModifiers())
+            && !Modifier.isStatic(method.getModifiers())
+            && Modifier.isAbstract(method.getModifiers())) {
             if (StJpaRepository.class.isAssignableFrom(method.getDeclaringClass())) {
                 return 0;
             }

@@ -16,8 +16,8 @@ import stone.dal.adaptor.spring.jdbc.impl.dialect.OracleDialect;
 import stone.dal.adaptor.spring.jdbc.impl.utils.RelationQueryBuilder;
 import stone.dal.adaptor.spring.jdbc.spi.DBDialectSpi;
 import stone.dal.adaptor.spring.jdbc.spi.JdbcTemplateSpi;
+import stone.dal.common.models.EntityMetaManager;
 import stone.dal.common.spi.SequenceSpi;
-import stone.dal.models.EntityMetaManager;
 
 /**
  * @author fengxie

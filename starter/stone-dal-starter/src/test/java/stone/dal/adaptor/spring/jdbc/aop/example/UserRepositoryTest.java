@@ -11,7 +11,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import stone.dal.adaptor.spring.jdbc.aop.example.repo.PersonRepository;
 import stone.dal.adaptor.spring.jdbc.api.StJdbcTemplate;
 import stone.dal.adaptor.spring.jdbc.spring.adaptor.app.SpringJdbcAdaptorTestApplication;
-import stone.dal.models.Person;
+import stone.dal.common.models.Person;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest(classes = SpringJdbcAdaptorTestApplication.class)
@@ -23,10 +23,6 @@ public class UserRepositoryTest {
   @Autowired
   private StJdbcTemplate jdbcTemplate;
 
-//  @Autowired
-//  private PersonRepository userJpaRepository;
-
-  //todo:call user repository
 
   @Before
   public void setup() {
@@ -42,5 +38,8 @@ public class UserRepositoryTest {
 
     List<Person> users = personRepository.findByName("Xie Feng");
     Assert.assertEquals("Xie Feng", users.get(0).getName());
+
+    Person person = personRepository.findMale();
+    Assert.assertEquals("MaleA", person.getName());
   }
 }

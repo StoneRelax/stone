@@ -1,11 +1,12 @@
 package stone.dal.adaptor.spring.jdbc.api;
 
-import stone.dal.models.data.BaseDo;
+import stone.dal.common.StRepository;
+import stone.dal.common.models.data.BaseDo;
 
 /**
  * @author fengxie
  */
-public interface StJpaRepository<T extends BaseDo, K> {
+public interface StJpaRepository<T extends BaseDo, K> extends StRepository {
 
   /**
    * @param obj
