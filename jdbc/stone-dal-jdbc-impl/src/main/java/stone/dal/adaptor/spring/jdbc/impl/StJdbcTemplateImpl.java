@@ -6,6 +6,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
+
+import stone.dal.common.spi.ResultSetClobHandler;
 import stone.dal.adaptor.spring.jdbc.api.StJdbcTemplate;
 import stone.dal.adaptor.spring.jdbc.api.meta.ExecResult;
 import stone.dal.adaptor.spring.jdbc.api.meta.SqlCondition;
@@ -26,6 +28,7 @@ import static stone.dal.kernel.utils.KernelUtils.str2Arr;
  */
 public class StJdbcTemplateImpl implements StJdbcTemplate {
 
+  private ResultSetClobHandler resultSetClobHandler;
   private JdbcTemplateSpi jdbcTemplateSpi;
 
   private DBDialectSpi dbDialectSpi;
@@ -36,17 +39,30 @@ public class StJdbcTemplateImpl implements StJdbcTemplate {
 
   public StJdbcTemplateImpl(JdbcTemplateSpi jdbcTemplateSpi, DBDialectSpi dbDialectSpi,
       RelationQueryBuilder relationQueryBuilder,
-      RdbmsEntityManager entityMetaManager) {
+      RdbmsEntityManager entityMetaManager,ResultSetClobHandler resultSetClobHandler) {
     this.dbDialectSpi = dbDialectSpi;
     this.entityMetaManager = entityMetaManager;
     this.jdbcTemplateSpi = jdbcTemplateSpi;
+    this.resultSetClobHandler = resultSetClobHandler;
     this.rowMapper = new DefaultRowMapper(dbDialectSpi, entityMetaManager, relationQueryBuilder, jdbcTemplateSpi);
   }
 
   @Override
   @SuppressWarnings("unchecked")
   public <T> List<T> query(SqlQueryMeta queryMeta) {
-    return jdbcTemplateSpi.query(queryMeta, this.rowMapper);
+    //todo:resultSetClobHandler process
+    List<T> res =  jdbcTemplateSpi.query(queryMeta, this.rowMapper);
+    handleClob(res, queryMeta);
+    return res;
+  }
+
+  private void handleClob(List res, SqlQueryMeta queryMeta){
+    if (queryMeta.getMappingClazz()!=null){
+      RdbmsEntity entity = entityMetaManager.getEntity(queryMeta.getMappingClazz());
+      if (entity!=null){
+        resultSetClobHandler.handle(res, entity.getMeta());
+      }
+    }
   }
 
   public <T> List<T> query(SqlCondition condition) {

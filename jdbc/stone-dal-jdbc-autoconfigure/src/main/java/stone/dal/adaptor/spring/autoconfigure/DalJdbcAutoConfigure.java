@@ -8,6 +8,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import stone.dal.adaptor.spring.jdbc.api.StJdbcTemplate;
 import stone.dal.adaptor.spring.jdbc.api.StJpaRepository;
+import stone.dal.adaptor.spring.jdbc.impl.DefaultClobResolverImpl;
+import stone.dal.adaptor.spring.jdbc.impl.DefaultResultSetClobHandler;
 import stone.dal.adaptor.spring.jdbc.impl.RdbmsEntityManager;
 import stone.dal.adaptor.spring.jdbc.impl.StJdbcTemplateImpl;
 import stone.dal.adaptor.spring.jdbc.impl.StJpaRepositoryImpl;
@@ -17,6 +19,8 @@ import stone.dal.adaptor.spring.jdbc.impl.utils.RelationQueryBuilder;
 import stone.dal.adaptor.spring.jdbc.spi.DBDialectSpi;
 import stone.dal.adaptor.spring.jdbc.spi.JdbcTemplateSpi;
 import stone.dal.common.models.EntityMetaManager;
+import stone.dal.common.spi.ClobResolverSpi;
+import stone.dal.common.spi.ResultSetClobHandler;
 import stone.dal.common.spi.SequenceSpi;
 
 /**
@@ -41,11 +45,17 @@ public class DalJdbcAutoConfigure {
   @Autowired(required = false)
   private DBDialectSpi dialectSpi;
 
+  @Autowired(required = false)
+  private ClobResolverSpi clobResolverSpi;
+
   private StJpaRepository jpaRepository;
 
   private StJdbcTemplate jdbcTemplate;
 
   RdbmsEntityManager rdbmsEntityManager;
+
+  @Autowired(required = false)
+  private ResultSetClobHandler resultSetClobHandler;
 
   @PostConstruct
   public void init() {
@@ -54,8 +64,14 @@ public class DalJdbcAutoConfigure {
     }
     rdbmsEntityManager = new RdbmsEntityManager(entityMetaManager);
     RelationQueryBuilder relationQueryBuilder = new RelationQueryBuilder(rdbmsEntityManager);
-    jdbcTemplate = new StJdbcTemplateImpl(jdbcTemplateSpi, dialectSpi, relationQueryBuilder, rdbmsEntityManager);
-    jpaRepository = new StJpaRepositoryImpl(jdbcTemplate, rdbmsEntityManager, relationQueryBuilder, sequenceSpi);
+    if (clobResolverSpi ==null){
+      clobResolverSpi = new DefaultClobResolverImpl();
+    }
+    if(resultSetClobHandler == null){
+      resultSetClobHandler = new DefaultResultSetClobHandler();
+    }
+    jdbcTemplate = new StJdbcTemplateImpl(jdbcTemplateSpi, dialectSpi, relationQueryBuilder, rdbmsEntityManager,resultSetClobHandler);
+    jpaRepository = new StJpaRepositoryImpl(jdbcTemplate, rdbmsEntityManager, relationQueryBuilder, sequenceSpi, clobResolverSpi);
   }
 
 //  @Bean

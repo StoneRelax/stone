@@ -15,6 +15,7 @@ import stone.dal.common.models.meta.EntityMeta;
 import stone.dal.common.models.meta.FieldMeta;
 import stone.dal.common.models.meta.RelationMeta;
 import stone.dal.common.models.meta.RelationTypes;
+import stone.dal.common.spi.ClobResolverSpi;
 import stone.dal.common.spi.SequenceSpi;
 import stone.dal.kernel.utils.KernelRuntimeException;
 import stone.dal.kernel.utils.LogUtils;
@@ -37,16 +38,19 @@ public class StJpaRepositoryImpl<T extends BaseDo, K>
 
   private SequenceSpi sequenceSpi;
 
+  private ClobResolverSpi clobResolverSpi;
+
   private static Logger logger = LoggerFactory.getLogger(StJpaRepositoryImpl.class);
 
   public StJpaRepositoryImpl(StJdbcTemplate jdbcTemplate,
       RdbmsEntityManager entityMetaManager,
       RelationQueryBuilder relationQueryBuilder,
-      SequenceSpi sequenceSpi) {
+      SequenceSpi sequenceSpi, ClobResolverSpi clobResolverSpi) {
     this.jdbcTemplate = jdbcTemplate;
     this.entityMetaManager = entityMetaManager;
     this.relationQueryBuilder = relationQueryBuilder;
     this.sequenceSpi = sequenceSpi;
+    this.clobResolverSpi = clobResolverSpi;
   }
 
   @Override
@@ -101,13 +105,21 @@ public class StJpaRepositoryImpl<T extends BaseDo, K>
   private void runCreate(BaseDo obj) {
     RdbmsEntity entity = entityMetaManager.getEntity(obj.getClass());
     bindSeqVals(obj, entity);
+    //todo:call clob resolver,get clob key
+    //todo:example, fieldName=content, dbFieldName=contentClobId
+    //todo:write clob key to contentClobId
     jdbcTemplate.execDml(entity.getInsertMeta(obj));
+
     cascadeInsert(entity, obj);
   }
 
   private void runUpdate(BaseDo obj) {
     if (BaseDo.States.UPDATED == obj.get_state()) {
       RdbmsEntity entity = entityMetaManager.getEntity(obj.getClass());
+      //todo:call clob resolver,get clob key
+//todo: if clob key exists in obj.get_changes()
+      //todo:example, fieldName=content, dbFieldName=contentClobId
+      //todo:write clob key to contentClobId
       jdbcTemplate.execDml(entity.getUpdateMeta(obj));
       cascadeUpdate(entity, obj);
     } else if (BaseDo.States.DELETED == obj.get_state()) {
@@ -119,6 +131,7 @@ public class StJpaRepositoryImpl<T extends BaseDo, K>
 
   private void runDel(BaseDo pkObj) {
     RdbmsEntity entity = entityMetaManager.getEntity(pkObj.getClass());
+    //todo:call clob resolver,get clob key
     cascadeDel(entity, pkObj);
     SqlDmlDclMeta sqlMeta = entity.getDeleteMeta(pkObj);
     jdbcTemplate.execDml(sqlMeta);

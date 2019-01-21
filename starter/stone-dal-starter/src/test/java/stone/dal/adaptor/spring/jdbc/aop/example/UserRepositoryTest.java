@@ -8,6 +8,7 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 import stone.dal.adaptor.spring.jdbc.aop.example.repo.PersonRepository;
 import stone.dal.adaptor.spring.jdbc.api.StJdbcTemplate;
 import stone.dal.adaptor.spring.jdbc.spring.adaptor.app.SpringJdbcAdaptorTestApplication;
@@ -15,6 +16,7 @@ import stone.dal.common.models.Person;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest(classes = SpringJdbcAdaptorTestApplication.class)
+@EnableTransactionManagement
 public class UserRepositoryTest {
 
   @Autowired
@@ -29,6 +31,9 @@ public class UserRepositoryTest {
     jdbcTemplate.execDcl("delete from person");
   }
 
+  @Autowired
+  private TransactionTest transactionTest;
+
   @Test
   public void testFindUserByManager() {
     Person user = new Person();
@@ -41,5 +46,16 @@ public class UserRepositoryTest {
 
     Person person = personRepository.findMale();
     Assert.assertEquals("MaleA", person.getName());
+
+
+      transactionTest.save();
+
+    List<Person> userJacob = personRepository.findByName("Jacob");
+     Assert.assertEquals(null, userJacob);
+    List<Person> usersStone = personRepository.findByName("Stone");
+    Assert.assertEquals(null, usersStone);
   }
+
+
+
 }

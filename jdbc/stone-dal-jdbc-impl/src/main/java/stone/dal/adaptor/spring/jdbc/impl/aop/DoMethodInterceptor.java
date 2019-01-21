@@ -91,6 +91,7 @@ public class DoMethodInterceptor implements MethodInterceptor {
             result = resultSet.iterator().next();
           }
         }
+
         methodProxy.invokeSuper(obj, objects);
         ((BaseDo) obj).markLazyLoadedField(propertyName);
       }
