@@ -83,10 +83,21 @@ public class DoGenerator {
     classTypeMap.put("time", String.class);
   }
 
-  public void build(File file, String packageName) throws Exception {
-    List<RawEntityMeta> entityMetas = parseFile(file);
+  public void build(File sourceExcelFile, String packageName) throws Exception {
+    List<RawEntityMeta> entityMetas = parseFile(sourceExcelFile);
     String pojoPath = "pojo-src/";
+    generateGradleFile(pojoPath);
     generateJavaFiles(entityMetas, pojoPath, packageName);
+  }
+
+  private void generateGradleFile(String pojoPath) {
+    String gradleTemplate =
+        "dependencies {\n" +
+            "    compile project(':kernel:stone-dal-common')\n" +
+            "    testCompile 'org.springframework.boot:spring-boot-starter-test'\n" +
+            "}";
+    String gradleFile =  pojoPath + "build.gradle";
+    ExcelUtils.writeFile(gradleFile, gradleTemplate.getBytes(StandardCharsets.UTF_8));
   }
 
   private void generateJavaFiles(List<RawEntityMeta> entityMetas, String pojoPath, String packageName)
@@ -96,7 +107,7 @@ public class DoGenerator {
     String javaFile;
     for (int i = 0; i < contents.size(); i++) {
       String content = contents.get(i);
-      javaFile = pojoPath + replace(packageName, ".", "/")
+      javaFile = pojoPath + "src/main/java/" +replace(packageName, ".", "/")
           + "/" + ExcelUtils.convertFirstAlphetUpperCase(entityMetas.get(i).getName()) + ".java";
       ExcelUtils.writeFile(javaFile, content.getBytes(StandardCharsets.UTF_8));
     }

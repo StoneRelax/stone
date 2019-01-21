@@ -6,4 +6,5 @@ out
 *.iml
 *.class
 pojo-src
-
+test-results
+build
