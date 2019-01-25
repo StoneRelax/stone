@@ -39,10 +39,14 @@ public class UserRepositoryTest {
     Person user = new Person();
     user.setUuid(1002l);
     user.setName("Xie Feng");
+    user.setDescription("A very weisuo person");
     personRepository.create(user);
 
     List<Person> users = personRepository.findByName("Xie Feng");
     Assert.assertEquals("Xie Feng", users.get(0).getName());
+    String description= users.get(0).getDescription();
+    Assert.assertEquals("A very weisuo person",description);
+
 
     Person person = personRepository.findMale();
     Assert.assertEquals("MaleA", person.getName());
@@ -54,6 +58,11 @@ public class UserRepositoryTest {
      Assert.assertEquals(null, userJacob);
     List<Person> usersStone = personRepository.findByName("Stone");
     Assert.assertEquals(null, usersStone);
+
+    Person userXF = new Person();
+    userXF.setUuid(1002l);
+    personRepository.del(userXF);
+    System.out.println("DONE");
   }
 
 

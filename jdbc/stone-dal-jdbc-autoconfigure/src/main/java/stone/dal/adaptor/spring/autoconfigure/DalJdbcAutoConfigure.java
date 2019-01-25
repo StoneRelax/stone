@@ -65,10 +65,10 @@ public class DalJdbcAutoConfigure {
     rdbmsEntityManager = new RdbmsEntityManager(entityMetaManager);
     RelationQueryBuilder relationQueryBuilder = new RelationQueryBuilder(rdbmsEntityManager);
     if (clobResolverSpi ==null){
-      clobResolverSpi = new DefaultClobResolverImpl();
+      clobResolverSpi = new DefaultClobResolverImpl("clobs");
     }
     if(resultSetClobHandler == null){
-      resultSetClobHandler = new DefaultResultSetClobHandler();
+      resultSetClobHandler = new DefaultResultSetClobHandler(clobResolverSpi);
     }
     jdbcTemplate = new StJdbcTemplateImpl(jdbcTemplateSpi, dialectSpi, relationQueryBuilder, rdbmsEntityManager,resultSetClobHandler);
     jpaRepository = new StJpaRepositoryImpl(jdbcTemplate, rdbmsEntityManager, relationQueryBuilder, sequenceSpi, clobResolverSpi);

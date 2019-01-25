@@ -1,5 +1,6 @@
 package stone.dal.adaptor.spring.jdbc.impl;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
@@ -18,6 +19,7 @@ import stone.dal.common.models.meta.RelationTypes;
 import stone.dal.common.spi.ClobResolverSpi;
 import stone.dal.common.spi.SequenceSpi;
 import stone.dal.kernel.utils.KernelRuntimeException;
+import stone.dal.kernel.utils.KernelUtils;
 import stone.dal.kernel.utils.LogUtils;
 
 import static stone.dal.kernel.utils.KernelUtils.getPropVal;
@@ -105,21 +107,38 @@ public class StJpaRepositoryImpl<T extends BaseDo, K>
   private void runCreate(BaseDo obj) {
     RdbmsEntity entity = entityMetaManager.getEntity(obj.getClass());
     bindSeqVals(obj, entity);
-    //todo:call clob resolver,get clob key
-    //todo:example, fieldName=content, dbFieldName=contentClobId
-    //todo:write clob key to contentClobId
+    bindClobs(entity,obj);
     jdbcTemplate.execDml(entity.getInsertMeta(obj));
-
     cascadeInsert(entity, obj);
   }
 
+  private void bindClobs(RdbmsEntity entity,BaseDo obj){
+    for(FieldMeta fieldMeta : entity.getMeta().getFields()){
+      if(fieldMeta.getClob()){
+        String fieldName = fieldMeta.getName();
+        String uuid = clobResolverSpi.create(obj,entity.getMeta(),fieldName);
+        KernelUtils.setPropVal(obj,fieldMeta.getName(),uuid);
+      }
+    }
+  }
+
+
+  private void bindOneClob(FieldMeta fieldMeta,BaseDo obj,RdbmsEntity entity ){
+    if(fieldMeta.getClob()){
+      String fieldName = fieldMeta.getName();
+      String uuid = clobResolverSpi.create(obj,entity.getMeta(),fieldName);
+      KernelUtils.setPropVal(obj,fieldMeta.getName(),uuid);
+    }
+  }
+
   private void runUpdate(BaseDo obj) {
+
     if (BaseDo.States.UPDATED == obj.get_state()) {
       RdbmsEntity entity = entityMetaManager.getEntity(obj.getClass());
-      //todo:call clob resolver,get clob key
-//todo: if clob key exists in obj.get_changes()
-      //todo:example, fieldName=content, dbFieldName=contentClobId
-      //todo:write clob key to contentClobId
+      obj.get_changes().forEach(change->{
+        FieldMeta fieldMeta = entity.getField(change);
+        bindOneClob(fieldMeta,obj,entity);
+      });
       jdbcTemplate.execDml(entity.getUpdateMeta(obj));
       cascadeUpdate(entity, obj);
     } else if (BaseDo.States.DELETED == obj.get_state()) {
@@ -131,10 +150,34 @@ public class StJpaRepositoryImpl<T extends BaseDo, K>
 
   private void runDel(BaseDo pkObj) {
     RdbmsEntity entity = entityMetaManager.getEntity(pkObj.getClass());
-    //todo:call clob resolver,get clob key
+    deleteClobs(entity,pkObj);
     cascadeDel(entity, pkObj);
     SqlDmlDclMeta sqlMeta = entity.getDeleteMeta(pkObj);
     jdbcTemplate.execDml(sqlMeta);
+  }
+
+  private void deleteClobs(RdbmsEntity entity,BaseDo obj){
+    boolean clobFlag = false;
+    List<FieldMeta> clobFields = new ArrayList<>();
+    for(FieldMeta fieldMeta : entity.getMeta().getFields()){
+      if(fieldMeta.getClob()){
+        clobFlag = true;
+        clobFields.add(fieldMeta);
+      }
+    }
+    if(clobFlag){
+      List<T> res = jdbcTemplate.queryClobKey(entity.getFindMeta(obj));
+      if (!isCollectionEmpty(res)) {
+        obj = res.get(0);
+        cascadeFind(entity, obj, true);
+      }
+      for(FieldMeta fieldMeta : clobFields){
+        if(fieldMeta.getClob()){
+          String fieldName = fieldMeta.getName();
+          clobResolverSpi.delete(obj,entity.getMeta(),fieldName);
+        }
+      }
+    }
   }
 
   private void saveJoinTable(BaseDo obj, RelationMeta many2many) {
@@ -245,4 +288,6 @@ public class StJpaRepositoryImpl<T extends BaseDo, K>
       }
     }
   }
+
+
 }
