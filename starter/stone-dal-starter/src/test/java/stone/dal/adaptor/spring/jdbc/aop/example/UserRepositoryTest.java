@@ -25,46 +25,46 @@ public class UserRepositoryTest {
   @Autowired
   private StJdbcTemplate jdbcTemplate;
 
-
   @Before
   public void setup() {
     jdbcTemplate.execDcl("delete from person");
   }
 
   @Autowired
-  private TransactionTest transactionTest;
+  private PersonService personService;
 
   @Test
   public void testFindUserByManager() {
     Person user = new Person();
     user.setUuid(1002l);
     user.setName("Xie Feng");
-    user.setDescription("A very weisuo person");
     personRepository.create(user);
 
     List<Person> users = personRepository.findByName("Xie Feng");
     Assert.assertEquals("Xie Feng", users.get(0).getName());
-    String description= users.get(0).getDescription();
-    Assert.assertEquals("A very weisuo person",description);
-
 
     Person person = personRepository.findMale();
     Assert.assertEquals("MaleA", person.getName());
-
-
-      transactionTest.save();
-
-    List<Person> userJacob = personRepository.findByName("Jacob");
-     Assert.assertEquals(null, userJacob);
-    List<Person> usersStone = personRepository.findByName("Stone");
-    Assert.assertEquals(null, usersStone);
-
-    Person userXF = new Person();
-    userXF.setUuid(1002l);
-    personRepository.del(userXF);
-    System.out.println("DONE");
   }
 
+  @Test
+  public void testRollback() {
+    try {
+      personService.testTx(10003l, "Stone", true);
+    } catch (Exception ex) {
+    }
+    List<Person> usersStone = personRepository.findByName("Stone");
+    Assert.assertNull(usersStone);
+  }
 
+  @Test
+  public void testCommit() {
+    try {
+      personService.testTx(10003l, "Stone", false);
+    } catch (Exception ex) {
+    }
+    List<Person> usersStone = personRepository.findByName("Stone");
+    Assert.assertEquals("Stone", usersStone.get(0).getName());
+  }
 
 }

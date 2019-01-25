@@ -14,6 +14,10 @@ public interface PersonRepository extends StJpaRepository<Person, Long> {
    */
   List<Person> findByName(String name);
 
+  void testTxRollback(Long uuid, String name);
+
+  void textTxCommit(Long uuid, String name);
+
   Person findMale();
 
 }

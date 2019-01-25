@@ -69,7 +69,10 @@ public class FileUtils {
       if (!infoFile.exists()) {
         File dir = infoFile.getParentFile();
         if (dir != null && !dir.exists()) {
-          dir.mkdirs();
+          boolean success = dir.mkdirs();
+          if (!success) {
+            throw new KernelRuntimeException(String.format("Can't create folder (%s)!", filePath));
+          }
         }
       }
       try {
