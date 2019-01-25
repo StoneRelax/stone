@@ -25,14 +25,13 @@ public class UserRepositoryTest {
   @Autowired
   private StJdbcTemplate jdbcTemplate;
 
-
   @Before
   public void setup() {
     jdbcTemplate.execDcl("delete from person");
   }
 
   @Autowired
-  private TransactionTest transactionTest;
+  private PersonService personService;
 
   @Test
   public void testFindUserByManager() {
@@ -46,16 +45,26 @@ public class UserRepositoryTest {
 
     Person person = personRepository.findMale();
     Assert.assertEquals("MaleA", person.getName());
-
-
-      transactionTest.save();
-
-    List<Person> userJacob = personRepository.findByName("Jacob");
-     Assert.assertEquals(null, userJacob);
-    List<Person> usersStone = personRepository.findByName("Stone");
-    Assert.assertEquals(null, usersStone);
   }
 
+  @Test
+  public void testRollback() {
+    try {
+      personService.testTx(10003l, "Stone", true);
+    } catch (Exception ex) {
+    }
+    List<Person> usersStone = personRepository.findByName("Stone");
+    Assert.assertNull(usersStone);
+  }
 
+  @Test
+  public void testCommit() {
+    try {
+      personService.testTx(10003l, "Stone", false);
+    } catch (Exception ex) {
+    }
+    List<Person> usersStone = personRepository.findByName("Stone");
+    Assert.assertEquals("Stone", usersStone.get(0).getName());
+  }
 
 }
