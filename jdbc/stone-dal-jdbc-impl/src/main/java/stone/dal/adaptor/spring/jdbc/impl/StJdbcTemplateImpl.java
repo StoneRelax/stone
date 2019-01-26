@@ -50,7 +50,6 @@ public class StJdbcTemplateImpl implements StJdbcTemplate {
   @Override
   @SuppressWarnings("unchecked")
   public <T> List<T> query(SqlQueryMeta queryMeta) {
-    //todo:resultSetClobHandler process
     List<T> res =  jdbcTemplateSpi.query(queryMeta, this.rowMapper);
     handleClob(res, queryMeta);
     return res;
@@ -152,5 +151,13 @@ public class StJdbcTemplateImpl implements StJdbcTemplate {
       }
     }
     return results;
+  }
+
+
+  @Override
+  @SuppressWarnings("unchecked")
+  public <T> List<T> queryClobKey(SqlQueryMeta queryMeta) {
+    List<T> res =  jdbcTemplateSpi.query(queryMeta, this.rowMapper);
+    return res;
   }
 }

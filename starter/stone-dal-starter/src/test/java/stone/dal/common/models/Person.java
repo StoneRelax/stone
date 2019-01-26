@@ -12,6 +12,8 @@ import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
+
+import stone.dal.common.models.annotation.Clob;
 import stone.dal.common.models.data.BaseDo;
 
 /**
@@ -26,6 +28,8 @@ public class Person extends BaseDo {
 
   private List<MyOrder> myOrders = new ArrayList<>();
 
+  private String description;
+
   @Id
   @Column(name = "uuid", precision = 18, scale = 0)
   public Long getUuid() {
@@ -35,6 +39,19 @@ public class Person extends BaseDo {
   public void setUuid(Long uuid) {
     this.uuid = uuid;
   }
+
+  @Clob
+  @Column(name = "descriptionuuid")
+  public String getDescription() {
+    return description;
+  }
+
+  public void setDescription(String description) {
+    this.description = description;
+  }
+
+
+
 
   @Column(name = "name", length = 50, nullable = false)
   public String getName() {

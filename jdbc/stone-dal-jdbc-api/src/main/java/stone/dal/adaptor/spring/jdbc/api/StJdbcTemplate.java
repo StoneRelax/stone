@@ -85,4 +85,13 @@ public interface StJdbcTemplate {
    */
   List<ExecResult> execSqlScript(String sqlScripts);
 
+  /**
+   * Execute query with a specified <code>stone.dal.adaptor.spring.jdbc.api.meta.SqlQueryMeta</code> and don't map clob object , this is used for clob deleting
+   *
+   * @param queryMeta query meta
+   * @return result list, if query meta has mapping class, then the result contains instances of mapping class. Clob filed won't be handled and Clob Resolver
+   * contains map instances.
+   */
+  <T> List<T> queryClobKey(SqlQueryMeta queryMeta);
+
 }

@@ -36,6 +36,7 @@ delete from person;
 CREATE TABLE `person` (
   `uuid` decimal(18),
   `name` varchar(50) DEFAULT NULL,
+  `descriptionUuid` varchar(64) DEFAULT NULL,
   PRIMARY KEY (`uuid`)
 );
 
