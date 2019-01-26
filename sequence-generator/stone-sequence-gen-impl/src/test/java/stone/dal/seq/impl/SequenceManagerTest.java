@@ -30,7 +30,8 @@ public class SequenceManagerTest {
     SequenceMeta mixSeq = SequenceMeta.factory().id("mix").type("mix")
         .format("${date} ${sequence} $F{data}").datePattern("yyyy-MM-dd").start(0l).end(10l).step(1).circle(true)
         .build();
-    SequenceMeta seedSeq = SequenceMeta.factory().id("seed").type("seed").start(0l).step(1).circle(false).build();
+    SequenceMeta seedSeq = SequenceMeta.factory().id("sequence").type("sequence").start(0l).step(1).circle(false)
+        .build();
     SequenceMeta uuidSeq = SequenceMeta.factory().id("uuid").type("uuid").build();
 
     Set<SequenceMeta> sequenceMetaSet = new HashSet<>();
@@ -51,7 +52,7 @@ public class SequenceManagerTest {
     }
     //test for seed
     for (int i = 0; i < 100; i++) {
-      Assert.assertEquals((long) (i + 1), sequenceManager.getGenerator("seed").next("seed", null));
+      Assert.assertEquals((long) (i + 1), sequenceManager.getGenerator("sequence").next("sequence", null));
     }
     //test for uuid
     String res = (String) sequenceManager.getGenerator("uuid").next("uuid", null);

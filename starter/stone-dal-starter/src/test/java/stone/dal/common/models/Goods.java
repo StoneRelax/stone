@@ -22,7 +22,7 @@ public class Goods extends BaseDo {
 
   @Id
   @Column(name = "uuid", precision = 18, scale = 0)
-  @Sequence(generator = "seed", defaultStartSeq = 1000)
+  @Sequence(generator = "sequence", defaultStartSeq = 1000)
   public Long getUuid() {
     return uuid;
   }

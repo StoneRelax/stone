@@ -14,7 +14,7 @@ public class SequenceSeedGeneratorImpl implements SequenceGenerator<Long> {
 	private HashMap<String, SequenceSeed> registry = new HashMap<>();
 
 	SequenceSeedGeneratorImpl(String storePath, Collection<SequenceMeta> definitions) {
-		definitions.stream().filter(meta -> meta.getType().equals("seed")).forEach(meta -> {
+    definitions.stream().filter(meta -> meta.getType().equals("sequence")).forEach(meta -> {
 			registry.put(meta.getId(), new SequenceSeed(storePath, meta));
 		});
 	}

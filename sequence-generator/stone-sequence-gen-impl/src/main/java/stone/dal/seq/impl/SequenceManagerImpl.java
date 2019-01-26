@@ -21,7 +21,7 @@ public class SequenceManagerImpl implements SequenceManager {
 		seqs.forEach(seqMeta -> {
 			if ("mix".equals(seqMeta.getType())) {
 				seqGeneratorMap.put(seqMeta.getId(), mixGenerator);
-			} else if ("seed".equals(seqMeta.getType())) {
+      } else if ("sequence".equals(seqMeta.getType())) {
 				seqGeneratorMap.put(seqMeta.getId(), seedGenerator);
 			} else {
 				seqGeneratorMap.put(seqMeta.getId(), uuidGenerator);

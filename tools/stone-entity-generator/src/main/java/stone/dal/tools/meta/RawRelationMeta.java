@@ -12,7 +12,7 @@ public class RawRelationMeta extends RelationMeta {
 
   protected String joinProperty;
 
-  public String joinPropertyType;
+  public String joinPropertyTypeName;
   private String joinTable;
 
   private RelationTypes relationType;
@@ -22,7 +22,7 @@ public class RawRelationMeta extends RelationMeta {
   }
 
   public String getJoinPropertyTypeName() {
-    return joinPropertyType;
+    return joinPropertyTypeName;
   }
 
   public String getJoinTable() {
@@ -50,8 +50,8 @@ public class RawRelationMeta extends RelationMeta {
     this.joinProperty = joinProperty;
   }
 
-  public void setJoinPropertyType(String joinPropertyType) {
-    this.joinPropertyType = joinPropertyType;
+  public void setJoinPropertyTypeName(String joinPropertyTypeName) {
+    this.joinPropertyTypeName = joinPropertyTypeName;
   }
 
   public String getJoinColumnName() {

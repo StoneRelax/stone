@@ -20,7 +20,70 @@ public class RawFieldMeta extends FieldMeta {
 
   private String unique;
 
-  private Boolean addOn;
+  private String seqDesc;
+
+  private String mapperDesc;
+
+  private String fieldProperty;
+
+  private String label;
+
+  private Boolean notNull;
+
+  private String remarks;
+
+  public String getRemarks() {
+    return remarks;
+  }
+
+  public void setRemarks(String remarks) {
+    this.remarks = remarks;
+  }
+
+  @Override
+  public Boolean getNullable() {
+    return !notNull;
+  }
+
+  public Boolean getNotNull() {
+    return notNull;
+  }
+
+  public void setNotNull(Boolean notNull) {
+    this.notNull = notNull;
+  }
+
+  public String getLabel() {
+    return label;
+  }
+
+  public void setLabel(String label) {
+    this.label = label;
+  }
+
+  public String getFieldProperty() {
+    return fieldProperty;
+  }
+
+  public void setFieldProperty(String fieldProperty) {
+    this.fieldProperty = fieldProperty;
+  }
+
+  public void setMapperBy(String mapperBy) {
+    this.mappedBy = mapperBy;
+  }
+
+  public void setMapper(String mapper) {
+    this.mapper = mapper;
+  }
+
+  public String getMapperDesc() {
+    return mapperDesc;
+  }
+
+  public void setMapperDesc(String mapperDesc) {
+    this.mapperDesc = mapperDesc;
+  }
 
   public String getUnique() {
     return unique;
@@ -38,12 +101,16 @@ public class RawFieldMeta extends FieldMeta {
     this.typeName = typeName;
   }
 
-  public void setSeqKey(String seqKey) {
-    this.seqKey = seqKey;
-  }
-
   public void setSeqType(String seqType) {
     this.seqType = seqType;
+  }
+
+  public String getSeqDesc() {
+    return seqDesc;
+  }
+
+  public void setSeqDesc(String seqDesc) {
+    this.seqDesc = seqDesc;
   }
 
   public void setSeqStartNum(int defaultStartSeq) {
@@ -74,20 +141,8 @@ public class RawFieldMeta extends FieldMeta {
     this.precision = precision;
   }
 
-  public void setMapper(String mapper) {
-    this.mapper = mapper;
-  }
-
-  public void setMappedBy(String mappedBy) {
-    this.mappedBy = mappedBy;
-  }
-
   public void setOrder(String order) {
     this.order = order;
-  }
-
-  public void setGroupByAllowed(Boolean groupByAllowed) {
-    this.groupByAllowed = groupByAllowed;
   }
 
   public void setNotPersist(Boolean notPersist) {
@@ -98,16 +153,8 @@ public class RawFieldMeta extends FieldMeta {
     this.index = index;
   }
 
-  public void setWriteWhenNotEmpty(Boolean writeWhenNotEmpty) {
-    this.writeWhenNotEmpty = writeWhenNotEmpty;
-  }
-
   public void setFile(Boolean file) {
     this.file = file;
-  }
-
-  public void setConstraints(String constraints) {
-    this.constraints = constraints;
   }
 
   public void setClob(Boolean clob) {
@@ -118,11 +165,4 @@ public class RawFieldMeta extends FieldMeta {
     this.updatable = updatable;
   }
 
-  public Boolean getAddOn() {
-    return addOn;
-  }
-
-  public void setAddOn(Boolean addOn) {
-    this.addOn = addOn;
-  }
 }

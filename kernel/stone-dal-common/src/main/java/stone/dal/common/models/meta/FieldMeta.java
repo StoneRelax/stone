@@ -34,21 +34,15 @@ public abstract class FieldMeta {
 
 	protected String order;
 
-	protected Boolean groupByAllowed;
-
-	protected Boolean notPersist;
+  protected Boolean notPersist = false;
 
 	protected String index;
 
-	protected Boolean writeWhenNotEmpty; //used by seq only
+  protected Boolean file = false;
 
-	protected Boolean file;
+  protected Boolean clob = false;
 
-	protected String constraints;
-
-	protected Boolean clob;
-
-	protected Boolean updatable;
+  protected Boolean updatable = true;
 
 	public void setMaxLength(Integer maxLength) {
 		this.maxLength = maxLength;
@@ -71,6 +65,9 @@ public abstract class FieldMeta {
 	}
 
 	public Boolean getNullable() {
+    if (pk) {
+      return false;
+    }
 		return nullable;
 	}
 
@@ -118,28 +115,16 @@ public abstract class FieldMeta {
 		return order;
 	}
 
-	public Boolean getGroupByAllowed() {
-		return groupByAllowed;
-	}
-
 	public Boolean getNotPersist() {
-		return notPersist;
+    return notPersist || clob;
 	}
 
 	public String getIndex() {
 		return index;
 	}
 
-	public Boolean getWriteWhenNotEmpty() {
-		return writeWhenNotEmpty;
-	}
-
 	public Boolean getFile() {
 		return file;
-	}
-
-	public String getConstraints() {
-		return constraints;
 	}
 
 	public Boolean getClob() {
@@ -148,32 +133,6 @@ public abstract class FieldMeta {
 
 	public static Factory factory() {
 		return new Factory();
-	}
-
-	@Override
-	public String toString() {
-		return "FieldMeta{" +
-				"dbName='" + dbName + '\'' +
-				",name='" + name + '\'' +
-				", type=" + type +
-				",seqKey='" + seqKey + '\'' +
-				", seqType='" + seqType + '\'' +
-				", nullable=" + nullable +
-				", pk=" + pk +
-				", maxLength=" + maxLength +
-				", scale=" + scale +
-				", precision=" + precision +
-				", mapper='" + mapper + '\'' +
-				", mappedBy='" + mappedBy + '\'' +
-				", order='" + order + '\'' +
-				", groupByAllowed=" + groupByAllowed +
-				", index='" + index + '\'' +
-				", writeWhenNotEmpty=" + writeWhenNotEmpty +
-				", file=" + file +
-				", constraints='" + constraints + '\'' +
-				", clob=" + clob +
-				", updatable=" + updatable +
-				'}';
 	}
 
 	public static class Factory {
@@ -241,20 +200,16 @@ public abstract class FieldMeta {
 			return this;
 		}
 
-		public Factory mappedBy(String mappedBy) {
-			meta.mappedBy = mappedBy;
+    public Factory mapperBy(String mapperBy) {
+      meta.mappedBy = mapperBy;
 			return this;
 		}
 
-		public Factory order(String order) {
+    public Factory order(String order) {
 			meta.order = order;
 			return this;
 		}
 
-		public Factory groupByAllowed(Boolean groupByAllowed) {
-			meta.groupByAllowed = groupByAllowed;
-			return this;
-		}
 
 		public Factory notPersist(Boolean notPersist) {
 			meta.notPersist = notPersist;
@@ -266,11 +221,6 @@ public abstract class FieldMeta {
 			return this;
 		}
 
-		public Factory writeWhenNotEmpty(Boolean writeWhenNotEmpty) {
-			meta.writeWhenNotEmpty = writeWhenNotEmpty;
-			return this;
-		}
-
 		public Factory file(Boolean file) {
 			meta.file = file;
 			return this;
@@ -278,11 +228,6 @@ public abstract class FieldMeta {
 
 		public Factory defaultStartSeq(long defaultStartSeq) {
 			meta.seqStartNum = defaultStartSeq;
-			return this;
-		}
-
-		public Factory constraints(String constraints) {
-			meta.constraints = constraints;
 			return this;
 		}
 

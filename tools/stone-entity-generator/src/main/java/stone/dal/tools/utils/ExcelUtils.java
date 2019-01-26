@@ -1,15 +1,14 @@
 package stone.dal.tools.utils;
 
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.ss.usermodel.WorkbookFactory;
-import stone.dal.kernel.utils.StringUtils;
-
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
+import stone.dal.kernel.utils.StringUtils;
 
 import static stone.dal.kernel.utils.StringUtils.replaceNull;
 
@@ -52,7 +51,7 @@ public class ExcelUtils {
         return sV;
       }
     }
-    return null;
+    return "";
   }
 
   public static String combineString(List<String> strsInput, String strToken) {

@@ -15,8 +15,6 @@ public class RawEntityMeta extends EntityMeta {
 
   private String delFlag;
 
-  private String fileFieldTags;
-
   private String clazzName;
 
   private List<RawFieldMeta> fields = new ArrayList<>();
@@ -61,14 +59,6 @@ public class RawEntityMeta extends EntityMeta {
 
   public void setDelFlag(String delFlag) {
     this.delFlag = delFlag;
-  }
-
-  public String getFileFieldTags() {
-    return fileFieldTags;
-  }
-
-  public void setFileFieldTags(String fileFieldTags) {
-    this.fileFieldTags = fileFieldTags;
   }
 
   public List<RawFieldMeta> getRawFields() {

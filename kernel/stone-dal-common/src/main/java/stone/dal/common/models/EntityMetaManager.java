@@ -25,7 +25,6 @@ import org.slf4j.LoggerFactory;
 import stone.dal.common.ex.DoParseException;
 import stone.dal.common.models.annotation.Clob;
 import stone.dal.common.models.annotation.FileField;
-import stone.dal.common.models.annotation.GroupByAllowed;
 import stone.dal.common.models.annotation.Sequence;
 import stone.dal.common.models.annotation.UniqueIndex;
 import stone.dal.common.models.annotation.UniqueIndices;
@@ -129,8 +128,7 @@ public class EntityMetaManager {
               .pk(readMethod.isAnnotationPresent(Id.class))
               .type(propertyType)
               .file(readMethod.isAnnotationPresent(FileField.class))
-              .clob(readMethod.isAnnotationPresent(Clob.class))
-              .groupByAllowed(readMethod.isAnnotationPresent(GroupByAllowed.class));
+              .clob(readMethod.isAnnotationPresent(Clob.class));
           if (readMethod.isAnnotationPresent(OrderBy.class)) {
             OrderBy orderBy = readMethod.getAnnotation(OrderBy.class);
             fieldFactory.order(orderBy.value());
