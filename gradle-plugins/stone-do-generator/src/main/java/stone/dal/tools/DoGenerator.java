@@ -1,13 +1,11 @@
 package stone.dal.tools;
 
 import de.hunsicker.jalopy.Jalopy;
-//import freemarker.cache.TemplateLoader;
 import freemarker.cache.URLTemplateLoader;
 import freemarker.template.Configuration;
 import freemarker.template.DefaultObjectWrapper;
 import freemarker.template.SimpleHash;
 import freemarker.template.Template;
-//import freemarker.cache.URLTemplateLoader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -94,10 +92,16 @@ public class DoGenerator {
     File sourceExcelFile = new File(sourcePath);
     List<RawEntityMeta> entityMetas = parseFile(sourceExcelFile);
     String pojoPath = "pojo-src/";
-    generateJavaFiles(entityMetas, pojoPath, packageName);
+    writeDoFiles(entityMetas, pojoPath, packageName);
+    writeRepositoryFiles(entityMetas, pojoPath, packageName);
   }
 
-  private void generateJavaFiles(List<RawEntityMeta> entityMetas, String pojoPath, String packageName)
+  private void writeRepositoryFiles(List<RawEntityMeta> entityMetas, String pojoPath, String packageName) {
+    //todo:1. write a template sample, stone.dal.adaptor.spring.jdbc.aop.example.repo.PersonRepository
+    //todo:2. write a rest controller sample, stone.dal.adaptor.spring.jdbc.aop.example.PersonService
+  }
+
+  private void writeDoFiles(List<RawEntityMeta> entityMetas, String pojoPath, String packageName)
       throws Exception {
     packageName = packageName == null ? "stone.dal.pojo" : packageName;
     List<String> contents = createJavaSource(entityMetas, packageName);
@@ -107,12 +111,12 @@ public class DoGenerator {
       javaFile = pojoPath + "src/main/java/" + replace(packageName, ".", "/")
           + "/" + ExcelUtils.convertFirstAlphetUpperCase(entityMetas.get(i).getName()) + ".java";
       ExcelUtils.writeFile(javaFile, content.getBytes());
-//      Jalopy codeFormatter = new Jalopy();
-//      StringBuffer output = new StringBuffer();
-//      codeFormatter.setInput(new File(javaFile));
-//      codeFormatter.setOutput(output);
-//      codeFormatter.format();
-//      ExcelUtils.writeFile(javaFile, output.toString().getBytes());
+      Jalopy codeFormatter = new Jalopy();
+      StringBuffer output = new StringBuffer();
+      codeFormatter.setInput(new File(javaFile));
+      codeFormatter.setOutput(output);
+      codeFormatter.format();
+      ExcelUtils.writeFile(javaFile, output.toString().getBytes());
     }
   }
 
