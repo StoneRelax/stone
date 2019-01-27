@@ -97,30 +97,62 @@ public class DoGenerator {
     writeControllerFiles(entityMetas, pojoPath, rootPackage + ".controller");
   }
 
-  private void writeControllerFiles(List<RawEntityMeta> entityMetas, String pojoPath, String packageName) {
+  private void writeControllerFiles(List<RawEntityMeta> entityMetas, String pojoPath, String packageName) throws Exception {
     //todo:2. write a rest controller sample, stone.dal.adaptor.spring.jdbc.aop.example.PersonService
+    packageName = packageName == null ? "stone.dal.pojo" : packageName;
+    List<String> contents = createContollerJavaSource(entityMetas, packageName);
+    String javaFile;
+    for (int i = 0; i < contents.size(); i++) {
+      String content = contents.get(i);
+      javaFile = pojoPath + "src/main/java/" + replace(packageName, ".", "/")
+              + "/" + ExcelUtils.convertFirstAlphetUpperCase(entityMetas.get(i).getName())+"Controller" + ".java";
+      ExcelUtils.writeFile(javaFile, content.getBytes());
+//      Jalopy codeFormatter = new Jalopy();
+//      StringBuffer output = new StringBuffer();
+//      codeFormatter.setInput(new File(javaFile));
+//      codeFormatter.setOutput(output);
+//      codeFormatter.format();
+//      ExcelUtils.writeFile(javaFile, output.toString().getBytes());
+    }
   }
 
-  private void writeRepositoryFiles(List<RawEntityMeta> entityMetas, String pojoPath, String packageName) {
+  private void writeRepositoryFiles(List<RawEntityMeta> entityMetas, String pojoPath, String packageName) throws Exception{
     //todo:1. write a template sample, stone.dal.adaptor.spring.jdbc.aop.example.repo.PersonRepository
+    packageName = packageName == null ? "stone.dal.pojo" : packageName;
+    List<String> contents = createRepoJavaSource(entityMetas, packageName);
+    String javaFile;
+    for (int i = 0; i < contents.size(); i++) {
+      String content = contents.get(i);
+      javaFile = pojoPath + "src/main/java/" + replace(packageName, ".", "/")
+              + "/" + ExcelUtils.convertFirstAlphetUpperCase(entityMetas.get(i).getName())+"Repository" + ".java";
+      ExcelUtils.writeFile(javaFile, content.getBytes());
+//      Jalopy codeFormatter = new Jalopy();
+//      StringBuffer output = new StringBuffer();
+//      codeFormatter.setInput(new File(javaFile));
+//      codeFormatter.setOutput(output);
+//      codeFormatter.format();
+//      ExcelUtils.writeFile(javaFile, output.toString().getBytes());
+    }
   }
+
+
 
   private void writeDoFiles(List<RawEntityMeta> entityMetas, String pojoPath, String packageName)
       throws Exception {
     packageName = packageName == null ? "stone.dal.pojo" : packageName;
-    List<String> contents = createJavaSource(entityMetas, packageName);
+    List<String> contents = createDoJavaSource(entityMetas, packageName);
     String javaFile;
     for (int i = 0; i < contents.size(); i++) {
       String content = contents.get(i);
       javaFile = pojoPath + "src/main/java/" + replace(packageName, ".", "/")
           + "/" + ExcelUtils.convertFirstAlphetUpperCase(entityMetas.get(i).getName()) + ".java";
       ExcelUtils.writeFile(javaFile, content.getBytes());
-      Jalopy codeFormatter = new Jalopy();
-      StringBuffer output = new StringBuffer();
-      codeFormatter.setInput(new File(javaFile));
-      codeFormatter.setOutput(output);
-      codeFormatter.format();
-      ExcelUtils.writeFile(javaFile, output.toString().getBytes());
+//      Jalopy codeFormatter = new Jalopy();
+//      StringBuffer output = new StringBuffer();
+//      codeFormatter.setInput(new File(javaFile));
+//      codeFormatter.setOutput(output);
+//      codeFormatter.format();
+//      ExcelUtils.writeFile(javaFile, output.toString().getBytes());
     }
   }
 
@@ -249,18 +281,96 @@ public class DoGenerator {
     return meta;
   }
 
-  public List<String> createJavaSource(List<RawEntityMeta> entities, String packageName) throws Exception {
+  public List<String> createDoJavaSource(List<RawEntityMeta> entities, String packageName) throws Exception {
     Map<String, RawEntityMeta> mapper = entities.stream()
         .collect(Collectors.toMap(RawEntityMeta::getName, entityMeta -> entityMeta));
     List<String> javaContents = new ArrayList<>();
     for (RawEntityMeta entityMeta : entities) {
-      String javaContent = genJavaClass(entityMeta, packageName, mapper);
+      String javaContent = genDoJavaClass(entityMeta, packageName, mapper);
       javaContents.add(javaContent);
     }
     return javaContents;
   }
 
-  private String genJavaClass(RawEntityMeta entityMeta, String packageName, Map<String, RawEntityMeta> mapper)
+  public List<String> createRepoJavaSource(List<RawEntityMeta> entities, String packageName) throws Exception {
+    List<String> javaContents = new ArrayList<>();
+    for (RawEntityMeta entityMeta : entities) {
+      String javaContent = genRepoJavaClass(entityMeta, packageName);
+      javaContents.add(javaContent);
+    }
+    return javaContents;
+  }
+
+  public List<String> createContollerJavaSource(List<RawEntityMeta> entities, String packageName) throws Exception {
+    List<String> javaContents = new ArrayList<>();
+    for (RawEntityMeta entityMeta : entities) {
+      String javaContent = genControllerJavaClass(entityMeta, packageName);
+      javaContents.add(javaContent);
+    }
+    return javaContents;
+  }
+
+  private String genControllerJavaClass(RawEntityMeta entityMeta, String packageName) throws Exception{
+    Configuration cfg = new Configuration();
+    cfg.setTemplateLoader(
+            new URLTemplateLoader() {
+              protected URL getURL(String name) {
+                Locale locale = Locale.getDefault();
+                String urlName =
+                        "stone/dal/tools/template/" + StringUtils.replace(name, "_" + locale.toString(), "");
+                return Thread.currentThread().getContextClassLoader().getResource(urlName);
+              }
+            });
+    cfg.setObjectWrapper(new DefaultObjectWrapper());
+    try {
+      Template temp = cfg.getTemplate("controller_java.ftl");
+      ByteArrayOutputStream bos = new ByteArrayOutputStream();
+      Writer out = new OutputStreamWriter(bos);
+      SimpleHash params = new SimpleHash();
+      params.put("className", entityMeta.getName()+"Controller");
+      params.put("packageName", stone.dal.kernel.utils.StringUtils.replaceNull(packageName));
+      params.put("repoClass", entityMeta.getName()+"Repository");
+      temp.process(params, out);
+      out.flush();
+      return new String(bos.toByteArray(), StandardCharsets.UTF_8);
+    } catch (Exception e) {
+      s_logger.error(e.getMessage());
+      throw new Exception(e);
+    }
+  }
+
+
+  private String genRepoJavaClass(RawEntityMeta entityMeta, String packageName) throws Exception{
+    Configuration cfg = new Configuration();
+    cfg.setTemplateLoader(
+            new URLTemplateLoader() {
+              protected URL getURL(String name) {
+                Locale locale = Locale.getDefault();
+                String urlName =
+                        "stone/dal/tools/template/" + StringUtils.replace(name, "_" + locale.toString(), "");
+                return Thread.currentThread().getContextClassLoader().getResource(urlName);
+              }
+            });
+    cfg.setObjectWrapper(new DefaultObjectWrapper());
+    try {
+      Template temp = cfg.getTemplate("repo_java.ftl");
+      ByteArrayOutputStream bos = new ByteArrayOutputStream();
+      Writer out = new OutputStreamWriter(bos);
+      SimpleHash params = new SimpleHash();
+      params.put("className", entityMeta.getName()+"Repository");
+      params.put("packageName", stone.dal.kernel.utils.StringUtils.replaceNull(packageName));
+      params.put("doClass", entityMeta.getName());
+      temp.process(params, out);
+      out.flush();
+      return new String(bos.toByteArray(), StandardCharsets.UTF_8);
+    } catch (Exception e) {
+      s_logger.error(e.getMessage());
+      throw new Exception(e);
+    }
+  }
+
+
+  private String genDoJavaClass(RawEntityMeta entityMeta, String packageName, Map<String, RawEntityMeta> mapper)
       throws Exception {
     List<RawFieldMeta> fields = entityMeta.getRawFields();
     List<String> pkFields = new ArrayList<>();
