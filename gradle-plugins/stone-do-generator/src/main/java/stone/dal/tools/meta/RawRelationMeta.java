@@ -5,14 +5,19 @@ import stone.dal.common.models.meta.RelationTypes;
 
 public class RawRelationMeta extends RelationMeta {
   private String joinDomain;
+
   private String joinColumnName;
+
   private String refColumn;
+
   private Boolean nullable;
+
   private Boolean updatable = true;
 
   protected String joinProperty;
 
   public String joinPropertyTypeName;
+
   private String joinTable;
 
   private RelationTypes relationType;
@@ -85,7 +90,6 @@ public class RawRelationMeta extends RelationMeta {
   public void setUpdatable(Boolean updatable) {
     this.updatable = updatable;
   }
-
 
   public void setJoinTable(String joinTable) {
     this.joinTable = joinTable;
