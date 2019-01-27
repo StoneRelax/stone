@@ -20,7 +20,7 @@ public abstract class FieldMeta {
 
 	transient Class type;
 
-	protected Boolean pk;
+	protected Boolean pk = false;
 
 	protected Integer maxLength;
 

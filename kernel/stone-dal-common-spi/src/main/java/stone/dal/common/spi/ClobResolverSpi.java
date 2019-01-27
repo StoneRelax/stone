@@ -5,10 +5,10 @@ import stone.dal.common.models.meta.EntityMeta;
 
 public interface ClobResolverSpi {
 
-  String create(BaseDo obj, EntityMeta meta, String field);
+  void create(BaseDo obj, EntityMeta meta, String clobField);
 
-  void delete(BaseDo obj, EntityMeta meta, String field);
+  void delete(BaseDo obj, EntityMeta meta, String clobField);
 
-  String read(BaseDo obj,EntityMeta meta,String field);
+  String read(BaseDo obj, EntityMeta meta, String clobField);
 
 }

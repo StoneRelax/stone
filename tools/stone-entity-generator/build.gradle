@@ -3,6 +3,7 @@ dependencies {
     compile project(':kernel:stone-dal-utils')
     compile 'org.apache.poi:poi'
     compile "org.apache.poi:poi-ooxml:3.17"
-    compile 'org.freemarker:freemarker:2.3.20'
+    compile 'org.freemarker:freemarker:2.3.28'
+    compile group: 'jalopy', name: 'jalopy', version: '1.5rc3'
     testCompile 'org.springframework.boot:spring-boot-starter-test'
 }

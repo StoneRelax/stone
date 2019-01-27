@@ -114,8 +114,7 @@ public class StJpaRepositoryImpl<T extends BaseDo, K>
   private void bindClobs(RdbmsEntity entity, BaseDo obj) {
     for (FieldMeta fieldMeta : entity.getMeta().getFields()) {
       if (fieldMeta.getClob()) {
-        String fieldName = fieldMeta.getName();
-        clobResolverSpi.create(obj, entity.getMeta(), fieldName);
+        bindOneClobColumn(fieldMeta, obj, entity);
       }
     }
   }

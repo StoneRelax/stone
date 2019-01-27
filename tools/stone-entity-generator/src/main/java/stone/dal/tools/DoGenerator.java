@@ -1,5 +1,6 @@
 package stone.dal.tools;
 
+import de.hunsicker.jalopy.Jalopy;
 import freemarker.cache.URLTemplateLoader;
 import freemarker.template.Configuration;
 import freemarker.template.DefaultObjectWrapper;
@@ -102,7 +103,13 @@ public class DoGenerator {
       String content = contents.get(i);
       javaFile = pojoPath + "src/main/java/" + replace(packageName, ".", "/")
           + "/" + ExcelUtils.convertFirstAlphetUpperCase(entityMetas.get(i).getName()) + ".java";
-      ExcelUtils.writeFile(javaFile, content.getBytes(StandardCharsets.UTF_8));
+      ExcelUtils.writeFile(javaFile, content.getBytes());
+      Jalopy codeFormatter = new Jalopy();
+      StringBuffer output = new StringBuffer();
+      codeFormatter.setInput(new File(javaFile));
+      codeFormatter.setOutput(output);
+      codeFormatter.format();
+      ExcelUtils.writeFile(javaFile, output.toString().getBytes());
     }
   }
 
@@ -178,10 +185,6 @@ public class DoGenerator {
               meta.getRawRelations().add(relation);
             } else if (beginFieldRead && !replaceNull(ExcelUtils.cellStr(sfRow.getCell(0))).equals("Name")) {
               RawFieldMeta fieldMeta = readField(entityName, sfRow);
-//              if (boolValue(fieldMeta.getFile())) {
-//                fieldMeta = createFileDBField(entityName, fieldMeta);
-//              }
-//              fieldMeta.setAddOn(true);
               meta.getRawFields().add(fieldMeta);
             }
           }
@@ -195,10 +198,25 @@ public class DoGenerator {
         }
         row++;
       }
+      resolveFileFields(meta);
       entities.add(buildUniqueIndices(meta));
       i++;
     }
     return entities;
+  }
+
+  private void resolveFileFields(RawEntityMeta meta) {
+    List<RawFieldMeta> fileUuidFields = meta.getRawFields().stream().filter(rawFieldMeta -> rawFieldMeta.getFile()).map(
+        rawFieldMeta -> {
+          RawFieldMeta fileUuidField = new RawFieldMeta();
+          fileUuidField.setTypeName("string");
+          fileUuidField.setMaxLength(64);
+          fileUuidField.setDbName(rawFieldMeta.getName() + "_uuid");
+          fileUuidField.setName(rawFieldMeta.getName() + "Uuid");
+          return fileUuidField;
+        }
+    ).collect(Collectors.toList());
+    meta.getRawFields().addAll(fileUuidFields);
   }
 
   private RawEntityMeta buildUniqueIndices(RawEntityMeta meta) {

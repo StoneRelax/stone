@@ -101,7 +101,7 @@ public class MysqlDialect implements DBDialectSpi {
 		if (type.contains("string")) {
 			sb.append("varchar");
 			sb.append("(").append(dataField.getMaxlength()).append(")");
-		} else if (type.contains("integer") || type.equals("int") || type.contains("long") || type.contains("long")
+		} else if (type.contains("integer") || type.equals("int") || type.contains("long")
 				|| type.contains("double")) {
 			sb.append("decimal");
 			String precisionScale = "";

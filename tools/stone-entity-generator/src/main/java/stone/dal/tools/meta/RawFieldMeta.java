@@ -28,7 +28,7 @@ public class RawFieldMeta extends FieldMeta {
 
   private String label;
 
-  private Boolean notNull;
+  private Boolean notNull = false;
 
   private String remarks;
 
