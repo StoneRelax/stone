@@ -88,17 +88,21 @@ public class DoGenerator {
     classTypeMap.put("time", String.class);
   }
 
-  public void build(String sourcePath, String packageName) throws Exception {
-    File sourceExcelFile = new File(sourcePath);
+  public void build(String xlsxPath, String targetSource, String rootPackage) throws Exception {
+    File sourceExcelFile = new File(xlsxPath);
     List<RawEntityMeta> entityMetas = parseFile(sourceExcelFile);
-    String pojoPath = "pojo-src/";
-    writeDoFiles(entityMetas, pojoPath, packageName);
-    writeRepositoryFiles(entityMetas, pojoPath, packageName);
+    String pojoPath = targetSource != null ? targetSource : "gen-src/";
+    writeDoFiles(entityMetas, pojoPath, rootPackage + ".jpa");
+    writeRepositoryFiles(entityMetas, pojoPath, rootPackage + ".repo");
+    writeControllerFiles(entityMetas, pojoPath, rootPackage + ".controller");
+  }
+
+  private void writeControllerFiles(List<RawEntityMeta> entityMetas, String pojoPath, String packageName) {
+    //todo:2. write a rest controller sample, stone.dal.adaptor.spring.jdbc.aop.example.PersonService
   }
 
   private void writeRepositoryFiles(List<RawEntityMeta> entityMetas, String pojoPath, String packageName) {
     //todo:1. write a template sample, stone.dal.adaptor.spring.jdbc.aop.example.repo.PersonRepository
-    //todo:2. write a rest controller sample, stone.dal.adaptor.spring.jdbc.aop.example.PersonService
   }
 
   private void writeDoFiles(List<RawEntityMeta> entityMetas, String pojoPath, String packageName)

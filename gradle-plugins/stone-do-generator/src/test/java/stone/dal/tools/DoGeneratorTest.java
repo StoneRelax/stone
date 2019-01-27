@@ -18,7 +18,7 @@ public class DoGeneratorTest {
 
   @Test
   public void testBuild() throws Exception {
-//    doGenerator.build(file, "stone.dal.pojo");
+    doGenerator.build("do-meta.xlsx", null, "stone.dal.pojo");
     System.out.println("in test");
   }
 }
