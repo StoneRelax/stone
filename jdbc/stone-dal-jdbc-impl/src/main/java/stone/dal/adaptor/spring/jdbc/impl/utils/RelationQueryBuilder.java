@@ -22,7 +22,7 @@ public class RelationQueryBuilder {
 	}
 
 	public SqlQueryMeta.Factory buildMetaFactory(RdbmsEntity entity, Object mainObj, String propertyName) {
-		Class relClazz = entity.readRelType(propertyName);
+		Class relClazz = entity.getRelMeta(propertyName).getJoinPropertyType();
 		RdbmsEntity relEntity = entityManager.getEntity(relClazz);
 
 		String sql = entity.buildRelFindSql(propertyName, relEntity);

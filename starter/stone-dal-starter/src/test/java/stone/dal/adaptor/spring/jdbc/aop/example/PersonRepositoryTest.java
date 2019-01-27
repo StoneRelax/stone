@@ -17,7 +17,7 @@ import stone.dal.common.models.Person;
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest(classes = SpringJdbcAdaptorTestApplication.class)
 @EnableTransactionManagement
-public class UserRepositoryTest {
+public class PersonRepositoryTest {
 
   @Autowired
   private PersonRepository personRepository;
@@ -27,7 +27,7 @@ public class UserRepositoryTest {
 
   @Before
   public void setup() {
-    jdbcTemplate.execDcl("delete from person");
+    jdbcTemplate.exec("delete from person");
   }
 
   @Autowired

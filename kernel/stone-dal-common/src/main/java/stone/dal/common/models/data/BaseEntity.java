@@ -17,8 +17,6 @@ import stone.dal.kernel.utils.ObjectUtils;
 public abstract class BaseEntity {
   protected EntityMeta meta;
 
-  protected HashMap<String, List<String>> uniqueKeys = new HashMap<>();
-
   protected HashMap<String, FieldMeta> fieldMapper = new HashMap<>();
 
   protected HashSet<String> pks = new HashSet<>();
@@ -26,8 +24,6 @@ public abstract class BaseEntity {
   protected HashSet<String> seqFields = new HashSet<>();
 
   protected HashSet<String> seqGenerators = new HashSet<>();
-
-  protected HashMap<String, List<String>> indices = new HashMap<>();
 
   protected Class pkClass;
 

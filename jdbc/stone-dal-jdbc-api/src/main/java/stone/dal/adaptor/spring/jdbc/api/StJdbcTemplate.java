@@ -3,8 +3,8 @@ package stone.dal.adaptor.spring.jdbc.api;
 import java.io.InputStream;
 import java.util.List;
 import stone.dal.adaptor.spring.jdbc.api.meta.ExecResult;
+import stone.dal.adaptor.spring.jdbc.api.meta.SqlBaseMeta;
 import stone.dal.adaptor.spring.jdbc.api.meta.SqlCondition;
-import stone.dal.adaptor.spring.jdbc.api.meta.SqlDmlDclMeta;
 import stone.dal.adaptor.spring.jdbc.api.meta.SqlQueryMeta;
 import stone.dal.common.models.data.Page;
 
@@ -55,19 +55,19 @@ public interface StJdbcTemplate {
   <T> Page<T> pagination(SqlQueryMeta queryMeta);
 
   /**
-   * Execute execDml operation
+   * Execute exec operation
    *
    * @param baseMeta jdbc meta
    * @return Update rows
    */
-  int execDml(SqlDmlDclMeta baseMeta);
+  int exec(SqlBaseMeta baseMeta);
 
   /**
    * Execute dml
    *
    * @param sql Sql
    */
-  int execDcl(String sql);
+  int exec(String sql);
 
   /**
    * Execute sql file

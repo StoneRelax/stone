@@ -16,12 +16,12 @@ package stone.dal.adaptor.spring.jdbc.api.meta;
 import java.util.Map;
 
 /**
- * The class <code>SqlDmlDclMeta</code> is responsible for storing sql statement and parameters
+ * The class <code>SqlBaseMeta</code> is responsible for storing sql statement and parameters
  *
  * @author feng.xie
  * @version $Revision: 1.4 $
  */
-public abstract class SqlDmlDclMeta {
+public abstract class SqlBaseMeta {
 	/**
 	 * Sql statement
 	 */
@@ -53,7 +53,8 @@ public abstract class SqlDmlDclMeta {
 
 	public static class Factory {
 		private static Factory single = new Factory();
-		private SqlDmlDclMeta meta = new SqlDmlDclMeta() {
+
+		private SqlBaseMeta meta = new SqlBaseMeta() {
 		};
 
 		public Factory sql(String sql) {
@@ -71,7 +72,7 @@ public abstract class SqlDmlDclMeta {
 			return this;
 		}
 
-		public SqlDmlDclMeta build() {
+		public SqlBaseMeta build() {
 			return meta;
 		}
 	}

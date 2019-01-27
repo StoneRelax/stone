@@ -24,8 +24,10 @@ public class DefaultClobResolverImpl implements ClobResolverSpi {
   @Override
   public void create(BaseDo obj, EntityMeta meta, String clobField) {
     String content = KernelUtils.getPropVal(obj, clobField);
-    FileUtils.writeFile(getPath(obj, meta, clobField), content.getBytes(
-        StandardCharsets.UTF_8));
+    if (!StringUtils.isEmpty(content)) {
+      FileUtils.writeFile(getPath(obj, meta, clobField), content.getBytes(
+          StandardCharsets.UTF_8));
+    }
   }
 
   @Override
@@ -37,7 +39,11 @@ public class DefaultClobResolverImpl implements ClobResolverSpi {
   @Override
   public String read(BaseDo obj, EntityMeta meta, String clobField) {
     String path = getPath(obj, meta, clobField);
-    return new String(FileUtils.readFile(path));
+    byte[] content = FileUtils.readFile(path);
+    if (content != null) {
+      return new String(content, StandardCharsets.UTF_8);
+    }
+    return null;
   }
 
   private void init() {

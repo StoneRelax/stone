@@ -1,4 +1,4 @@
-package stone.dal.adaptor.spring.jdbc.spring.adaptor.init;
+package stone.dal.tools.rdbms.init;
 
 import java.io.InputStream;
 import javax.annotation.PostConstruct;
@@ -10,14 +10,14 @@ import stone.dal.adaptor.spring.jdbc.api.StJdbcTemplate;
  * @author fengxie
  */
 @Component
-public class SpringJdbcAdaptorTestInitializer {
+public class RdbmsSyncTestInitializer {
 
   @Autowired
   private StJdbcTemplate stJdbcTemplate;
 
   @PostConstruct
   public void dbInit() {
-    InputStream is = SpringJdbcAdaptorTestInitializer.class.getResourceAsStream("/dbscript.sql");
+    InputStream is = RdbmsSyncTestInitializer.class.getResourceAsStream("/dbscript.sql");
     stJdbcTemplate.execSqlStream(is);
   }
 

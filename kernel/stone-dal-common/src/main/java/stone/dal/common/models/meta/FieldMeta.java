@@ -22,11 +22,11 @@ public abstract class FieldMeta {
 
 	protected Boolean pk = false;
 
-	protected Integer maxLength;
+	protected Integer maxLength = 0;
 
-	protected Integer scale;
+	protected Integer scale = 0;
 
-	protected Integer precision;
+	protected Integer precision = 0;
 
 	protected String mapper;
 

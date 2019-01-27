@@ -1,7 +1,7 @@
 package stone.dal.adaptor.spring.jdbc.spi;
 
 import java.util.List;
-import stone.dal.adaptor.spring.jdbc.api.meta.SqlDmlDclMeta;
+import stone.dal.adaptor.spring.jdbc.api.meta.SqlBaseMeta;
 import stone.dal.adaptor.spring.jdbc.api.meta.SqlQueryMeta;
 import stone.dal.common.models.data.BaseDo;
 import stone.dal.common.models.data.Page;
@@ -11,7 +11,7 @@ import stone.dal.common.models.data.Page;
  */
 public interface JdbcTemplateSpi<T extends BaseDo> {
 
-  int exec(SqlDmlDclMeta meta);
+  int exec(SqlBaseMeta meta);
 
   List<T> query(SqlQueryMeta queryMeta, SqlQueryMeta.RowMapper rowMapper);
 

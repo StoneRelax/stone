@@ -31,6 +31,7 @@ include 'jdbc:stone-dal-jdbc-autoconfigure'
 include 'jdbc:stone-dal-jdbc-impl'
 include 'adaptor:stone-spring-common-adaptor'
 include 'adaptor:stone-spring-jdbc-adaptor'
-include 'tools:stone-entity-generator'
+include 'tools:stone-rdbms-sync'
+include 'gradle-plugins:stone-do-generator'
 
 include 'starter:stone-dal-starter'

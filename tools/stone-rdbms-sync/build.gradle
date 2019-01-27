@@ -1,0 +1,10 @@
+dependencies {
+    compile project(':jdbc:stone-dal-jdbc-autoconfigure')
+    compile project(':adaptor:stone-spring-common-adaptor')
+    compile project(':adaptor:stone-spring-jdbc-adaptor')
+    compile project(':jdbc:stone-dal-jdbc-autoconfigure')
+    compile project(':sequence-generator:stone-sequence-gen-autoconfigure')
+    compile project(':starter:stone-dal-starter')
+    testCompile 'mysql:mysql-connector-java'
+    testCompile 'org.springframework.boot:spring-boot-starter-test'
+}

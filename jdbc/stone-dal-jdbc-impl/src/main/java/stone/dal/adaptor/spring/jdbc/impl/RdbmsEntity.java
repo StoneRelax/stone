@@ -1,18 +1,22 @@
 package stone.dal.adaptor.spring.jdbc.impl;
 
+import java.math.BigDecimal;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
-import stone.dal.adaptor.spring.jdbc.api.meta.SqlDmlDclMeta;
+import stone.dal.adaptor.spring.jdbc.api.meta.SqlBaseMeta;
 import stone.dal.adaptor.spring.jdbc.api.meta.SqlQueryMeta;
 import stone.dal.common.models.data.BaseDo;
 import stone.dal.common.models.data.BaseEntity;
+import stone.dal.common.models.meta.ColumnInfo;
 import stone.dal.common.models.meta.EntityMeta;
 import stone.dal.common.models.meta.FieldMeta;
 import stone.dal.common.models.meta.JoinColumn;
@@ -88,6 +92,41 @@ public class RdbmsEntity extends BaseEntity {
     findSqlNoCondition = buildSelectSql(meta.getTableName(), false);
   }
 
+  public List<ColumnInfo> getColumns() {
+    return meta.getFields().stream().filter(fieldMeta -> !fieldMeta.getNotPersist())
+        .map(fieldMeta -> getColumnInfo(fieldMeta.getDbName())).collect(Collectors.toList());
+  }
+
+  public ColumnInfo getColumnInfo(String dbFieldName) {
+    FieldMeta fieldMeta = dbFieldNameMapper.get(dbFieldName);
+    String property = null;
+    ColumnInfo.DBType type = ColumnInfo.DBType.varchar;
+    if (fieldMeta.getType() == String.class) {
+      property = Integer.toString(fieldMeta.getMaxLength());
+    } else if (fieldMeta.getType() == Boolean.class) {
+      type = ColumnInfo.DBType.decimal;
+      property = "1,0";
+    } else if (fieldMeta.getType() == long.class
+        || fieldMeta.getType() == Long.class
+        || fieldMeta.getType() == int.class
+        || fieldMeta.getType() == Integer.class
+        || fieldMeta.getType() == BigDecimal.class
+        || fieldMeta.getType() == Float.class
+        || fieldMeta.getType() == float.class
+        || fieldMeta.getType() == Double.class
+        || fieldMeta.getType() == double.class) {
+      type = ColumnInfo.DBType.decimal;
+      property = fieldMeta.getPrecision() + "," + fieldMeta.getScale();
+    } else if (fieldMeta.getType() == Date.class) {
+      type = ColumnInfo.DBType.date;
+    } else if (fieldMeta.getType() == Timestamp.class) {
+      type = ColumnInfo.DBType.datetime;
+    }
+    return new ColumnInfo(
+        fieldMeta.getDbName(), fieldMeta.getNullable(), type,
+        property, fieldMeta.getPk());
+  }
+
   private void readRelation(RelationMeta relation) {
     relationMapper.put(relation.getJoinProperty(), relation);
     RelationTypes relationType = relation.getRelationType();
@@ -103,23 +142,8 @@ public class RdbmsEntity extends BaseEntity {
     }
   }
 
-  private void parseReleation(RelationMeta relation) {
-    relationMapper.put(relation.getJoinProperty(), relation);
-    RelationTypes relationType = relation.getRelationType();
-    if (RelationTypes.MANY_2_MANY == relationType) {
-      insertRelSqls.put(relation.getJoinProperty(), buildMany2ManyInsertSql(relation));
-      delRelSqls.put(relation.getJoinProperty() + DEL_REL_WHEN_SAVE_SUFFIX, buildMany2ManyDelSql(relation, true));
-      delRelSqls.put(relation.getJoinProperty() + DEL_REL_WHEN_DEL_SUFFIX, buildMany2ManyDelSql(relation, false));
-    } else if (RelationTypes.MANY_2_ONE == relationType) {
-      relation.getJoinColumns().forEach(joinColumn -> {
-        dbFieldRelationRefMapper
-            .put(joinColumn.getName(), relation.getJoinProperty() + "." + joinColumn.getReferencedColumnName());
-      });
-    }
-  }
-
-  public Class readRelType(String propertyName) {
-    return relationMapper.get(propertyName).getJoinPropertyType();
+  public RelationMeta getRelMeta(String propertyName) {
+    return relationMapper.get(propertyName);
   }
 
   public boolean isCollection(String propertyName) {
@@ -128,15 +152,15 @@ public class RdbmsEntity extends BaseEntity {
         relationMeta.getRelationType() == RelationTypes.MANY_2_MANY;
   }
 
-  public FieldMeta getFieldByDbName(String dbName) {
-    return dbFieldNameMapper.get(dbName);
+  public FieldMeta getFieldByDbName(String dbFieldName) {
+    return dbFieldNameMapper.get(dbFieldName);
   }
 
-  public String getRelationRefDbName(String dbName) {
-    return dbFieldRelationRefMapper.get(dbName);
+  public String getRelationRefDbName(String dbFieldName) {
+    return dbFieldRelationRefMapper.get(dbFieldName);
   }
 
-  public SqlDmlDclMeta getInsertMeta(BaseDo obj) {
+  public SqlBaseMeta getInsertMeta(BaseDo obj) {
     List<Object> params = new ArrayList<>();
     meta.getFields().stream().filter(field -> !KernelUtils.boolValue(field.getNotPersist())).forEach(field -> {
       bindDmlParams(obj, field, params);
@@ -154,7 +178,7 @@ public class RdbmsEntity extends BaseEntity {
         params.add(v);
       });
     });
-    return SqlDmlDclMeta.factory().sql(insertDml).params(params.toArray(new Object[0]))
+    return SqlBaseMeta.factory().sql(insertDml).params(params.toArray(new Object[0]))
         .build();
   }
 
@@ -165,7 +189,7 @@ public class RdbmsEntity extends BaseEntity {
     return factory.build();
   }
 
-  public SqlDmlDclMeta getUpdateMeta(BaseDo obj) {
+  public SqlBaseMeta getUpdateMeta(BaseDo obj) {
     Set<String> changes = obj.get_changes();
     List<String> changeFieldsName = new ArrayList<>();
     List<Object> params = new ArrayList<>();
@@ -179,14 +203,14 @@ public class RdbmsEntity extends BaseEntity {
     });
     bindPkParams(params, obj);
     String sql = replace(updateDml, UPDATE_SET_HOLDER, list2Str(changeFieldsName, ","));
-    SqlDmlDclMeta.Factory factory = SqlDmlDclMeta.factory().sql(sql)
+    SqlBaseMeta.Factory factory = SqlBaseMeta.factory().sql(sql)
         .params(params.toArray(new Object[0]));
     return factory.build();
   }
 
-  public SqlDmlDclMeta getDeleteMeta(BaseDo obj) {
+  public SqlBaseMeta getDeleteMeta(BaseDo obj) {
     List<Object> params = new ArrayList<>();
-    SqlDmlDclMeta.Factory factory = SqlDmlDclMeta.factory().sql(deleteDml);
+    SqlBaseMeta.Factory factory = SqlBaseMeta.factory().sql(deleteDml);
     Collection<String> pks = getPks();
     pks.forEach(pk -> {
       Object value = getPropVal(obj, pk);
@@ -203,14 +227,14 @@ public class RdbmsEntity extends BaseEntity {
     return findSqlNoCondition;
   }
 
-  public SqlDmlDclMeta getDelJoinTableMeta(BaseDo obj, String joinProperty) {
+  public SqlBaseMeta getDelJoinTableMeta(BaseDo obj, String joinProperty) {
     RelationMeta relation = relationMapper.get(joinProperty);
     List<Object> params = new ArrayList<>();
     relation.getJoinColumns().forEach(joinColumn -> {
       params.add(getPropVal(obj, joinColumn.getReferencedColumnName()));
     });
     String delSql = delRelSqls.get(relation.getJoinProperty() + DEL_REL_WHEN_DEL_SUFFIX);
-    return SqlDmlDclMeta.factory().sql(delSql).params(params.toArray(new Object[0])).build();
+    return SqlBaseMeta.factory().sql(delSql).params(params.toArray(new Object[0])).build();
   }
 
   @SuppressWarnings("unchecked")
@@ -413,10 +437,10 @@ public class RdbmsEntity extends BaseEntity {
     return innerJoinExp.toString();
   }
 
-  Collection<SqlDmlDclMeta> buildMany2ManySaveMeta(
+  Collection<SqlBaseMeta> buildMany2ManySaveMeta(
       BaseDo obj, String joinProperty) {
-    List<SqlDmlDclMeta> insertSqlMetaList = new ArrayList<>();
-    List<SqlDmlDclMeta> delSqlMetaList = new ArrayList<>();
+    List<SqlBaseMeta> insertSqlMetaList = new ArrayList<>();
+    List<SqlBaseMeta> delSqlMetaList = new ArrayList<>();
     Collection<BaseDo> records = getPropVal(obj, joinProperty);
     RelationMeta relationMeta = relationMapper.get(joinProperty);
     if (records != null) {
@@ -429,17 +453,17 @@ public class RdbmsEntity extends BaseEntity {
           params.add(getPropVal(record, joinColumn.getReferencedColumnName()));
         });
         if (BaseDo.States.DELETED == record.get_state()) {
-          SqlDmlDclMeta meta = SqlDmlDclMeta.factory().sql(delRelSqls.get(joinProperty + DEL_REL_WHEN_SAVE_SUFFIX))
+          SqlBaseMeta meta = SqlBaseMeta.factory().sql(delRelSqls.get(joinProperty + DEL_REL_WHEN_SAVE_SUFFIX))
               .params(params.toArray(new Object[0])).build();
           delSqlMetaList.add(meta);
         } else {
-          SqlDmlDclMeta meta = SqlDmlDclMeta.factory().sql(insertRelSqls.get(joinProperty))
+          SqlBaseMeta meta = SqlBaseMeta.factory().sql(insertRelSqls.get(joinProperty))
               .params(params.toArray(new Object[0])).build();
           insertSqlMetaList.add(meta);
         }
       });
     }
-    List<SqlDmlDclMeta> metaList = new ArrayList<>();
+    List<SqlBaseMeta> metaList = new ArrayList<>();
     metaList.addAll(delSqlMetaList);
     metaList.addAll(insertSqlMetaList);
     return Collections.unmodifiableCollection(metaList);
@@ -487,6 +511,10 @@ public class RdbmsEntity extends BaseEntity {
 
   private List<FieldMeta> getPkMeta() {
     return meta.getFields().stream().filter(FieldMeta::getPk).collect(Collectors.toList());
+  }
+
+  public Set<String> getJoinProperties() {
+    return Collections.unmodifiableSet(relationMapper.keySet());
   }
 
   private void bindPkParams(List<Object> params, BaseDo obj) {

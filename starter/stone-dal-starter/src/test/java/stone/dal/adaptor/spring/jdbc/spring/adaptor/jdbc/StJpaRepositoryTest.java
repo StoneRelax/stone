@@ -11,7 +11,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import stone.dal.adaptor.spring.jdbc.api.StJdbcTemplate;
 import stone.dal.adaptor.spring.jdbc.api.StJpaRepository;
-import stone.dal.adaptor.spring.jdbc.api.meta.SqlDmlDclMeta;
+import stone.dal.adaptor.spring.jdbc.api.meta.SqlBaseMeta;
 import stone.dal.adaptor.spring.jdbc.api.meta.SqlQueryMeta;
 import stone.dal.adaptor.spring.jdbc.spring.adaptor.app.SpringJdbcAdaptorTestApplication;
 import stone.dal.common.models.Goods;
@@ -37,25 +37,25 @@ public class StJpaRepositoryTest {
 
   @Before
   public void before() {
-    SqlDmlDclMeta baseMeta = SqlDmlDclMeta.factory()
+    SqlBaseMeta baseMeta = SqlBaseMeta.factory()
         .sql("delete from my_order where uuid>?")
         .params(new Object[] { 100L }).build();
-    stJdbcTemplate.execDml(baseMeta);
+    stJdbcTemplate.exec(baseMeta);
 
-    baseMeta = SqlDmlDclMeta.factory()
+    baseMeta = SqlBaseMeta.factory()
         .sql("delete from my_order_item where uuid>?")
         .params(new Object[] { 100L }).build();
-    stJdbcTemplate.execDml(baseMeta);
+    stJdbcTemplate.exec(baseMeta);
 
-    baseMeta = SqlDmlDclMeta.factory()
+    baseMeta = SqlBaseMeta.factory()
         .sql("delete from person_order where person_uuid>? and order_uuid>?")
         .params(new Object[] { 100L, 100L }).build();
-    stJdbcTemplate.execDml(baseMeta);
+    stJdbcTemplate.exec(baseMeta);
 
-    baseMeta = SqlDmlDclMeta.factory()
+    baseMeta = SqlBaseMeta.factory()
         .sql("delete from person where uuid>?")
         .params(new Object[] { 100L }).build();
-    stJdbcTemplate.execDml(baseMeta);
+    stJdbcTemplate.exec(baseMeta);
   }
 
   @Test

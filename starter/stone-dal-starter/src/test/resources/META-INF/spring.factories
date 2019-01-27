@@ -1,1 +1,0 @@
-org.springframework.boot.autoconfigure.EnableAutoConfiguration=stone.dal.adaptor.spring.autoconfigure.SpringJdbcAdaptorTestAutoConfigure

@@ -6,17 +6,16 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
-
-import stone.dal.common.spi.ResultSetClobHandler;
 import stone.dal.adaptor.spring.jdbc.api.StJdbcTemplate;
 import stone.dal.adaptor.spring.jdbc.api.meta.ExecResult;
+import stone.dal.adaptor.spring.jdbc.api.meta.SqlBaseMeta;
 import stone.dal.adaptor.spring.jdbc.api.meta.SqlCondition;
-import stone.dal.adaptor.spring.jdbc.api.meta.SqlDmlDclMeta;
 import stone.dal.adaptor.spring.jdbc.api.meta.SqlQueryMeta;
 import stone.dal.adaptor.spring.jdbc.impl.utils.RelationQueryBuilder;
 import stone.dal.adaptor.spring.jdbc.spi.DBDialectSpi;
 import stone.dal.adaptor.spring.jdbc.spi.JdbcTemplateSpi;
 import stone.dal.common.models.data.Page;
+import stone.dal.common.spi.ResultSetClobHandler;
 import stone.dal.kernel.utils.KernelRuntimeException;
 
 import static stone.dal.kernel.utils.KernelUtils.isCollectionEmpty;
@@ -110,13 +109,13 @@ public class StJdbcTemplateImpl implements StJdbcTemplate {
   }
 
   @Override
-  public int execDml(SqlDmlDclMeta meta) {
+  public int exec(SqlBaseMeta meta) {
     return jdbcTemplateSpi.exec(meta);
   }
 
   @Override
-  public int execDcl(String sql) {
-    return jdbcTemplateSpi.exec(SqlDmlDclMeta.factory().sql(sql).build());
+  public int exec(String sql) {
+    return jdbcTemplateSpi.exec(SqlBaseMeta.factory().sql(sql).build());
   }
 
   @Override
@@ -144,7 +143,7 @@ public class StJdbcTemplateImpl implements StJdbcTemplate {
     String[] sqls = str2Arr(sqlScripts, ";");
     for (String sql : sqls) {
       try {
-        int rows = execDcl(sql);
+        int rows = exec(sql);
         results.add(ExecResult.factory().sql(sql).rows(rows).build());
       } catch (Exception ex) {
         results.add(ExecResult.factory().sql(sql).error(ex.getMessage()).build());
