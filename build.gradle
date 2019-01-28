@@ -8,11 +8,13 @@
  */
 plugins {
     id "io.spring.dependency-management" version "1.0.0.RC1"
+    id 'maven'
 }
 
 allprojects {
     apply plugin: 'java'
     apply plugin: 'io.spring.dependency-management'
+    apply plugin: 'maven'
 
     //versions
     ext['stone.version'] = '2.0'

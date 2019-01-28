@@ -12,9 +12,12 @@ import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.util.Assert;
 import stone.dal.adaptor.spring.jdbc.api.StJdbcTemplate;
+import stone.dal.adaptor.spring.jdbc.api.meta.ExecResult;
 import stone.dal.adaptor.spring.jdbc.api.meta.SqlQueryMeta;
 import stone.dal.adaptor.spring.jdbc.impl.RdbmsEntity;
 import stone.dal.adaptor.spring.jdbc.impl.RdbmsEntityManager;
@@ -41,13 +44,29 @@ public class DBSync {
   @Autowired(required = false)
   private DBDialectSpi dialectSpi;
 
+  @Value("${spring.datasource.url}")
+  private String dbUrl;
+
   @Autowired
   private RdbmsEntityManager rdbmsEntityManager;
 
+  @Autowired
+  @Qualifier("adminJdbcTemplate")
+  private JdbcTemplate adminJdbcTemplate;
+
   private static Logger s_logger = LoggerFactory.getLogger(DBSync.class);
 
-  public void syncDb() {
-
+  public List<ExecResult> syncDb(boolean delta) {
+    String[] dbInfos = StringUtils.splitString2Array(dbUrl, "/");
+    String dbNameInfo = dbInfos[dbInfos.length - 1];
+    if (dbNameInfo.contains("?")) {
+      dbNameInfo = dbNameInfo.substring(0, dbNameInfo.indexOf("?"));
+    }
+    String sql = String
+        .format("CREATE DATABASE IF NOT EXISTS %s DEFAULT CHARSET UTF8 COLLATE UTF8_GENERAL_CI", dbNameInfo);
+    adminJdbcTemplate.execute(sql);
+    List<String> lines = getDbScript(delta);
+    return stJdbcTemplate.execSqlScript(StringUtils.combineString(lines, ";\n"));
   }
 
   public List<String> getDbScript(boolean delta) {
