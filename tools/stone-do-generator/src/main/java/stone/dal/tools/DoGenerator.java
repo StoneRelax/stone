@@ -58,16 +58,15 @@ import static stone.dal.kernel.utils.KernelUtils.str2Arr;
 
 public class DoGenerator {
   private static Map<String, Class> classTypeMap = new ConcurrentHashMap<>();
-  private static Map<String,String> pkTypemap = new ConcurrentHashMap<>();
+
+  private static Map<String, String> pkTypemap = new ConcurrentHashMap<>();
 
   private static Logger s_logger = LoggerFactory.getLogger(DoGenerator.class);
 
-
-
   static {
-    pkTypemap.put("long","Long");
-    pkTypemap.put("string","String");
-    pkTypemap.put("int","Integer");
+    pkTypemap.put("long", "Long");
+    pkTypemap.put("string", "String");
+    pkTypemap.put("int", "Integer");
     classTypeMap.put(String.class.getName(), String.class);
     classTypeMap.put(BigDecimal.class.getName(), BigDecimal.class);
     classTypeMap.put(Double.class.getName(), Double.class);
@@ -94,57 +93,57 @@ public class DoGenerator {
     classTypeMap.put("time", String.class);
   }
 
-  public void build(String xlsxPath, String targetSource, String rootPackage) throws Exception {
+  public void build(String xlsxPath, String targetSource, String rootPackage, String basePath) throws Exception {
     File sourceExcelFile = new File(xlsxPath);
     List<RawEntityMeta> entityMetas = parseFile(sourceExcelFile);
-    String pojoPath = targetSource != null ? targetSource : "gen-src/";
+    String rootPath = targetSource != null ? targetSource : "gen-src";
     String jpaPackage = rootPackage == null ? "stone.dal.pojo.jpa" : rootPackage + ".jpa";
     String repoPackage = rootPackage == null ? "stone.dal.pojo.jpa" : rootPackage + ".repo";
     String controllerPackage = rootPackage == null ? "stone.dal.pojo.jpa" : rootPackage + ".controller";
-    writeDoFiles(entityMetas, pojoPath, jpaPackage);
-    writeRepositoryFiles(entityMetas, pojoPath, repoPackage,jpaPackage);
-    writeControllerFiles(entityMetas, pojoPath, controllerPackage,jpaPackage,repoPackage);
+    basePath = basePath == null ? "/api" : basePath;
+    writeDoFiles(entityMetas, rootPath, jpaPackage);
+    writeRepositoryFiles(entityMetas, rootPath, repoPackage, jpaPackage);
+    writeControllerFiles(entityMetas, basePath, rootPath, controllerPackage, jpaPackage, repoPackage);
   }
 
-  private void writeControllerFiles(List<RawEntityMeta> entityMetas, String pojoPath, String packageName,String doPackage,String repoPackage) throws Exception {
-    List<String> contents = createControllerJavaSource(entityMetas, packageName,doPackage,repoPackage);
+  private void writeControllerFiles(List<RawEntityMeta> entityMetas, String basePath, String rootPath,
+      String packageName,
+      String doPackage, String repoPackage) throws Exception {
+    List<String> contents = createControllerJavaSource(entityMetas, basePath, packageName, doPackage, repoPackage);
     String javaFile;
     for (int i = 0; i < contents.size(); i++) {
       String content = contents.get(i);
-      javaFile = pojoPath + "src/main/java/" + replace(packageName, ".", "/")
-              + "/" + ExcelUtils.convertFirstAlphetUpperCase(entityMetas.get(i).getName())+"Controller" + ".java";
-      if(!FileUtils.isExisted(javaFile)){
+      javaFile = rootPath + "/main/java/" + replace(packageName, ".", "/")
+          + "/" + ExcelUtils.convertFirstAlphetUpperCase(entityMetas.get(i).getName()) + "Controller" + ".java";
+      if (!FileUtils.isExisted(javaFile)) {
         ExcelUtils.writeFile(javaFile, content.getBytes());
       }
     }
   }
 
-  private void writeRepositoryFiles(List<RawEntityMeta> entityMetas, String pojoPath, String packageName,String jpaPackageName) throws Exception{
-    List<String> contents = createRepoJavaSource(entityMetas, packageName,jpaPackageName);
+  private void writeRepositoryFiles(List<RawEntityMeta> entityMetas, String rootPath, String packageName,
+      String jpaPackageName) throws Exception {
+    List<String> contents = createRepoJavaSource(entityMetas, packageName, jpaPackageName);
     String javaFile;
     for (int i = 0; i < contents.size(); i++) {
       String content = contents.get(i);
-      javaFile = pojoPath + "src/main/java/" + replace(packageName, ".", "/")
-              + "/" + ExcelUtils.convertFirstAlphetUpperCase(entityMetas.get(i).getName())+"Repository" + ".java";
-      if(!FileUtils.isExisted(javaFile)){
+      javaFile = rootPath + "/main/java/" + replace(packageName, ".", "/")
+          + "/" + ExcelUtils.convertFirstAlphetUpperCase(entityMetas.get(i).getName()) + "Repository" + ".java";
+      if (!FileUtils.isExisted(javaFile)) {
         ExcelUtils.writeFile(javaFile, content.getBytes());
       }
     }
   }
 
-
-
-  private void writeDoFiles(List<RawEntityMeta> entityMetas, String pojoPath, String packageName)
-          throws Exception {
+  private void writeDoFiles(List<RawEntityMeta> entityMetas, String rootPath, String packageName)
+      throws Exception {
     List<String> contents = createDoJavaSource(entityMetas, packageName);
     String javaFile;
     for (int i = 0; i < contents.size(); i++) {
       String content = contents.get(i);
-      javaFile = pojoPath + "src/main/java/" + replace(packageName, ".", "/")
-              + "/" + ExcelUtils.convertFirstAlphetUpperCase(entityMetas.get(i).getName()) + ".java";
-      if(!FileUtils.isExisted(javaFile)){
-        ExcelUtils.writeFile(javaFile, content.getBytes());
-      }
+      javaFile = rootPath + "/main/java/" + replace(packageName, ".", "/")
+          + "/" + ExcelUtils.convertFirstAlphetUpperCase(entityMetas.get(i).getName()) + ".java";
+      ExcelUtils.writeFile(javaFile, content.getBytes());
     }
   }
 
@@ -158,7 +157,7 @@ public class DoGenerator {
 
   public String[] getUniqueColumns(EntityMeta entityMeta, String idxName) {
     Optional<UniqueIndexMeta> optional = entityMeta.getUniqueIndices().stream()
-            .filter(index -> idxName.equals(index.getName())).findFirst();
+        .filter(index -> idxName.equals(index.getName())).findFirst();
     return optional.map(UniqueIndexMeta::getColumnNames).orElse(null);
   }
 
@@ -192,6 +191,8 @@ public class DoGenerator {
       RawEntityMeta meta = new RawEntityMeta();
       Row headRow = sheet.getRow(0);
       meta.setName(entityName);
+      String tableName = stone.dal.kernel.utils.StringUtils.canonicalPropertyName2DBField(entityName);
+      meta.setTableName(tableName);
       meta.setNosql(ExcelUtils.cellBool(headRow.getCell(3)));
       String delInd = ExcelUtils.cellStr(headRow.getCell(9));
       if (!isStrEmpty(delInd)) {
@@ -242,14 +243,14 @@ public class DoGenerator {
 
   private void resolveFileFields(RawEntityMeta meta) {
     List<RawFieldMeta> fileUuidFields = meta.getRawFields().stream().filter(rawFieldMeta -> rawFieldMeta.getFile()).map(
-            rawFieldMeta -> {
-              RawFieldMeta fileUuidField = new RawFieldMeta();
-              fileUuidField.setTypeName("string");
-              fileUuidField.setMaxLength(64);
-              fileUuidField.setDbName(rawFieldMeta.getName() + "_uuid");
-              fileUuidField.setName(rawFieldMeta.getName() + "Uuid");
-              return fileUuidField;
-            }
+        rawFieldMeta -> {
+          RawFieldMeta fileUuidField = new RawFieldMeta();
+          fileUuidField.setTypeName("string");
+          fileUuidField.setMaxLength(64);
+          fileUuidField.setDbName(rawFieldMeta.getName() + "_uuid");
+          fileUuidField.setName(rawFieldMeta.getName() + "Uuid");
+          return fileUuidField;
+        }
     ).collect(Collectors.toList());
     meta.getRawFields().addAll(fileUuidFields);
   }
@@ -275,7 +276,7 @@ public class DoGenerator {
 
   public List<String> createDoJavaSource(List<RawEntityMeta> entities, String packageName) throws Exception {
     Map<String, RawEntityMeta> mapper = entities.stream()
-            .collect(Collectors.toMap(RawEntityMeta::getName, entityMeta -> entityMeta));
+        .collect(Collectors.toMap(RawEntityMeta::getName, entityMeta -> entityMeta));
     List<String> javaContents = new ArrayList<>();
     for (RawEntityMeta entityMeta : entities) {
       String javaContent = genDoJavaClass(entityMeta, packageName, mapper);
@@ -284,35 +285,40 @@ public class DoGenerator {
     return javaContents;
   }
 
-  public List<String> createRepoJavaSource(List<RawEntityMeta> entities, String packageName,String jpaPackageName) throws Exception {
+  public List<String> createRepoJavaSource(List<RawEntityMeta> entities, String packageName, String jpaPackageName)
+      throws Exception {
     List<String> javaContents = new ArrayList<>();
     for (RawEntityMeta entityMeta : entities) {
-      String javaContent = genRepoJavaClass(entityMeta, packageName,jpaPackageName);
+      String javaContent = genRepoJavaClass(entityMeta, packageName, jpaPackageName);
       javaContents.add(javaContent);
     }
     return javaContents;
   }
 
-  public List<String> createControllerJavaSource(List<RawEntityMeta> entities, String packageName,String doPackage,String repoPackage) throws Exception {
+  public List<String> createControllerJavaSource(List<RawEntityMeta> entities,
+      String basePath, String packageName, String doPackage, String repoPackage) throws Exception {
     List<String> javaContents = new ArrayList<>();
     for (RawEntityMeta entityMeta : entities) {
-      String javaContent = genControllerJavaClass(entityMeta, packageName, doPackage, repoPackage);
+      String javaContent = genControllerJavaClass(entityMeta,
+          basePath, packageName, doPackage, repoPackage);
       javaContents.add(javaContent);
     }
     return javaContents;
   }
 
-  private String genControllerJavaClass(RawEntityMeta entityMeta, String packageName,String doPackage,String repoPackage) throws Exception{
+  private String genControllerJavaClass(RawEntityMeta entityMeta,
+      String basePath,
+      String packageName, String doPackage, String repoPackage) throws Exception {
     Configuration cfg = new Configuration();
     cfg.setTemplateLoader(
-            new URLTemplateLoader() {
-              protected URL getURL(String name) {
-                Locale locale = Locale.getDefault();
-                String urlName =
-                        "stone/dal/tools/template/" + StringUtils.replace(name, "_" + locale.toString(), "");
-                return Thread.currentThread().getContextClassLoader().getResource(urlName);
-              }
-            });
+        new URLTemplateLoader() {
+          protected URL getURL(String name) {
+            Locale locale = Locale.getDefault();
+            String urlName =
+                "stone/dal/tools/template/" + StringUtils.replace(name, "_" + locale.toString(), "");
+            return Thread.currentThread().getContextClassLoader().getResource(urlName);
+          }
+        });
     cfg.setObjectWrapper(new DefaultObjectWrapper());
     try {
       RawFieldMeta pkField = getPKField(entityMeta);
@@ -321,15 +327,17 @@ public class DoGenerator {
       ByteArrayOutputStream bos = new ByteArrayOutputStream();
       Writer out = new OutputStreamWriter(bos);
       SimpleHash params = new SimpleHash();
-      params.put("className", entityMeta.getName()+"Controller");
+      params.put("className", entityMeta.getName() + "Controller");
       params.put("packageName", stone.dal.kernel.utils.StringUtils.replaceNull(packageName));
-      params.put("repoName", entityMeta.getName()+"Repository");
-      params.put("doPackage",doPackage);
-      params.put("repoPackage",repoPackage);
+      params.put("repoName", entityMeta.getName() + "Repository");
+      params.put("basePath", basePath);
+      params.put("doPackage", doPackage);
+      params.put("repoPackage", repoPackage);
       params.put("doName", entityMeta.getName());
-      params.put("lowerDoName",entityMeta.getName().toLowerCase());
-      params.put("pkType",pkTypemap.get(pkType));
-      params.put("pkName",upperCase(pkField.getName()));
+      String tableName = stone.dal.kernel.utils.StringUtils.canonicalPropertyName2DBField(entityMeta.getName());
+      params.put("lowerDoName", StringUtils.replace(tableName, "_", "-").toLowerCase());
+      params.put("pkType", pkTypemap.get(pkType));
+      params.put("pkName", upperCase(pkField.getName()));
       temp.process(params, out);
       out.flush();
       return new String(bos.toByteArray(), StandardCharsets.UTF_8);
@@ -339,18 +347,18 @@ public class DoGenerator {
     }
   }
 
-
-  private String genRepoJavaClass(RawEntityMeta entityMeta, String packageName,String jpaPackageName) throws Exception{
+  private String genRepoJavaClass(RawEntityMeta entityMeta, String packageName, String jpaPackageName)
+      throws Exception {
     Configuration cfg = new Configuration();
     cfg.setTemplateLoader(
-            new URLTemplateLoader() {
-              protected URL getURL(String name) {
-                Locale locale = Locale.getDefault();
-                String urlName =
-                        "stone/dal/tools/template/" + StringUtils.replace(name, "_" + locale.toString(), "");
-                return Thread.currentThread().getContextClassLoader().getResource(urlName);
-              }
-            });
+        new URLTemplateLoader() {
+          protected URL getURL(String name) {
+            Locale locale = Locale.getDefault();
+            String urlName =
+                "stone/dal/tools/template/" + StringUtils.replace(name, "_" + locale.toString(), "");
+            return Thread.currentThread().getContextClassLoader().getResource(urlName);
+          }
+        });
     cfg.setObjectWrapper(new DefaultObjectWrapper());
     try {
       RawFieldMeta pkField = getPKField(entityMeta);
@@ -359,12 +367,12 @@ public class DoGenerator {
       ByteArrayOutputStream bos = new ByteArrayOutputStream();
       Writer out = new OutputStreamWriter(bos);
       SimpleHash params = new SimpleHash();
-      params.put("className", entityMeta.getName()+"Repository");
+      params.put("className", entityMeta.getName() + "Repository");
       params.put("packageName", stone.dal.kernel.utils.StringUtils.replaceNull(packageName));
-      params.put("jpaPackageName",jpaPackageName);
+      params.put("jpaPackageName", jpaPackageName);
       params.put("doName", entityMeta.getName());
-      params.put("pkType",pkTypemap.get(pkType));
-      params.put("pkName",upperCase(pkField.getName()));
+      params.put("pkType", pkTypemap.get(pkType));
+      params.put("pkName", upperCase(pkField.getName()));
       temp.process(params, out);
       out.flush();
       return new String(bos.toByteArray(), StandardCharsets.UTF_8);
@@ -382,11 +390,11 @@ public class DoGenerator {
     return new String(ch);
   }
 
-  private RawFieldMeta getPKField(RawEntityMeta entityMeta){
+  private RawFieldMeta getPKField(RawEntityMeta entityMeta) {
     RawFieldMeta pkField = null;
     List<RawFieldMeta> fields = entityMeta.getRawFields();
-    for(RawFieldMeta fieldMeta : fields){
-      if(fieldMeta.getPk()){
+    for (RawFieldMeta fieldMeta : fields) {
+      if (fieldMeta.getPk()) {
         pkField = fieldMeta;
         break;
       }
@@ -394,9 +402,8 @@ public class DoGenerator {
     return pkField;
   }
 
-
   private String genDoJavaClass(RawEntityMeta entityMeta, String packageName, Map<String, RawEntityMeta> mapper)
-          throws Exception {
+      throws Exception {
     List<RawFieldMeta> fields = entityMeta.getRawFields();
     List<String> pkFields = new ArrayList<>();
     for (FieldMeta field : fields) {
@@ -417,14 +424,14 @@ public class DoGenerator {
     }
     Configuration cfg = new Configuration();
     cfg.setTemplateLoader(
-            new URLTemplateLoader() {
-              protected URL getURL(String name) {
-                Locale locale = Locale.getDefault();
-                String urlName =
-                        "stone/dal/tools/template/" + StringUtils.replace(name, "_" + locale.toString(), "");
-                return Thread.currentThread().getContextClassLoader().getResource(urlName);
-              }
-            });
+        new URLTemplateLoader() {
+          protected URL getURL(String name) {
+            Locale locale = Locale.getDefault();
+            String urlName =
+                "stone/dal/tools/template/" + StringUtils.replace(name, "_" + locale.toString(), "");
+            return Thread.currentThread().getContextClassLoader().getResource(urlName);
+          }
+        });
     cfg.setObjectWrapper(new DefaultObjectWrapper());
     try {
       Template temp = cfg.getTemplate("entity_java.ftl");
@@ -454,14 +461,14 @@ public class DoGenerator {
   }
 
   public String many2manyAnnotation(RawEntityMeta entityMeta, RawRelationMeta relation,
-                                    Map<String, RawEntityMeta> entityDict) {
+      Map<String, RawEntityMeta> entityDict) {
     String joinTable = relation.getJoinTable();
     HashSet<String> pks = entityMeta.pks();
     List<String> joinColumns = new ArrayList<>();
     for (String pk : pks) {
       String joinColumn =
-              "@JoinColumn(name = \"" + entityMeta.getName().toLowerCase() + "_" + pk + "\", referencedColumnName = \"" +
-                      pk + "\")";
+          "@JoinColumn(name = \"" + entityMeta.getName().toLowerCase() + "_" + pk + "\", referencedColumnName = \"" +
+              pk + "\")";
       joinColumns.add(joinColumn);
     }
     RawEntityMeta relatedEntity = entityDict.get(relation.getJoinDomain());
@@ -469,13 +476,13 @@ public class DoGenerator {
     List<String> inverseJoinColumns = new ArrayList<>();
     for (String pk : inversePks) {
       String joinColumn =
-              "@JoinColumn(name = \"" + relatedEntity.getName().toLowerCase() + "_" + pk + "\", referencedColumnName = \"" +
-                      pk + "\")";
+          "@JoinColumn(name = \"" + relatedEntity.getName().toLowerCase() + "_" + pk + "\", referencedColumnName = \"" +
+              pk + "\")";
       inverseJoinColumns.add(joinColumn);
     }
     return "@javax.persistence.JoinTable(name = \"" + joinTable + "\", " +
-            "joinColumns = {" + StringUtils.join(joinColumns, ",") + "},\n" +
-            "    inverseJoinColumns = {" + StringUtils.join(inverseJoinColumns, ",") + "})";
+        "joinColumns = {" + StringUtils.join(joinColumns, ",") + "},\n" +
+        "    inverseJoinColumns = {" + StringUtils.join(inverseJoinColumns, ",") + "})";
   }
 
   public String getFieldType(RawEntityMeta meta, RawFieldMeta fieldMeta) {
@@ -486,7 +493,7 @@ public class DoGenerator {
       }
     }
     if ("file".equalsIgnoreCase(fieldMeta.getTypeName())
-            || "clob".equalsIgnoreCase(fieldMeta.getTypeName())) {
+        || "clob".equalsIgnoreCase(fieldMeta.getTypeName())) {
       classType = "string";
     }
     return classTypeMap.get(classType).getName();
@@ -506,7 +513,7 @@ public class DoGenerator {
     }
     if (!StringUtils.isEmpty(fieldMeta.getMappedBy()) && !StringUtils.isEmpty(fieldMeta.getMapper())) {
       annotations.add(
-              "@FieldMapper(mapper = \"" + fieldMeta.getMapper() + "\", mappedBy = \"" + fieldMeta.getMappedBy() + "\")");
+          "@FieldMapper(mapper = \"" + fieldMeta.getMapper() + "\", mappedBy = \"" + fieldMeta.getMappedBy() + "\")");
     }
     if (!boolValue(fieldMeta.getNotPersist())) {
       annotations.add("@Column(" + getColumnAnnotation(fieldMeta) + ")");
@@ -544,7 +551,6 @@ public class DoGenerator {
       }
       if (dataFieldMeta.getMaxLength() != null) {
         annotation += ", length=" + dataFieldMeta.getMaxLength();
-
       }
     }
     if ("string".equalsIgnoreCase(typeName)) {
@@ -574,8 +580,8 @@ public class DoGenerator {
     String property = fieldMeta.getFieldProperty();
     if (!isStrEmpty(property)) {
       if (fieldMeta.getTypeName().equalsIgnoreCase("double")
-              || fieldMeta.getTypeName().equalsIgnoreCase("long")
-              || fieldMeta.getTypeName().equalsIgnoreCase("int")) {
+          || fieldMeta.getTypeName().equalsIgnoreCase("long")
+          || fieldMeta.getTypeName().equalsIgnoreCase("int")) {
         if (property.endsWith(".0")) {
           property = StringUtils.replace(property, ".0", "");
         }
@@ -586,6 +592,14 @@ public class DoGenerator {
         }
       } else {
         fieldMeta.setMaxLength(new Integer(str2Arr(property, ".")[0]));
+      }
+    } else {
+      if (fieldMeta.getTypeName().equalsIgnoreCase("long")) {
+        fieldMeta.setPrecision(18);
+      } else if (fieldMeta.getTypeName().equalsIgnoreCase("int")) {
+        fieldMeta.setPrecision(7);
+      } else if (fieldMeta.getTypeName().equalsIgnoreCase("string")){
+        fieldMeta.setMaxLength(128);
       }
     }
     String seq = fieldMeta.getSeqDesc();
@@ -686,11 +700,11 @@ public class DoGenerator {
       throw new Exception("Entity:" + entityName + " Field:" + meta.getName() + "'type can not be null!");
     }
     if (!"file".equalsIgnoreCase(meta.getTypeName())
-            && !"clob".equalsIgnoreCase(meta.getTypeName())) {
+        && !"clob".equalsIgnoreCase(meta.getTypeName())) {
       if (!classTypeMap.containsKey(meta.getTypeName())) {
         throw new Exception("Entity:" + entityName + " Field:" + meta.getName() + "'type is invalid!\n" +
-                "Please use one of the following type" +
-                "string,date,datetime,int,long,double,boolean,time");
+            "Please use one of the following type" +
+            "string,date,datetime,int,long,double,boolean,time");
       }
     }
   }

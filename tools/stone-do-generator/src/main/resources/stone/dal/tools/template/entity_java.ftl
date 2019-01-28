@@ -19,7 +19,7 @@ import java.util.List;
 
 @Entity
 <#if gen.nosql(entity)>@Nosql</#if>
-@Table(name = "${entity.name}")
+@Table(name = "${entity.tableName}")
 <#if gen.hasUniqueKeys(entity)>
 @UniqueIndices(indices =
 {<#list gen.uniqueIndices(entity) as idxName>

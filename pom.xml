@@ -35,7 +35,7 @@
         <ehcache.version>2.9.0</ehcache.version>
         <guava.version>20.0</guava.version>
         <javax.persistence.version>1.0</javax.persistence.version>
-        <mysql.connector.java.version>5.1.23</mysql.connector.java.version>
+        <mysql.connector.java.version>8.0.13</mysql.connector.java.version>
         <commons.dbcp2.version>2.1.1</commons.dbcp2.version>
         <kafka.version>1.1.0.RELEASE</kafka.version>
         <jersey.test.version>2.25.1</jersey.test.version>
@@ -47,7 +47,8 @@
         <mysql.jdbc.version>8.0.13</mysql.jdbc.version>
         <poi.version>3.17</poi.version>
         <freemaker.version>2.3.20</freemaker.version>
-        <junit.version>4.9</junit.version>
+        <junit.version>4.12</junit.version>
+        <swagger.version>1.5.21</swagger.version>
         <spring.data.commons.version>1.12.2.RELEASE</spring.data.commons.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <java.version>1.8</java.version>
@@ -303,11 +304,6 @@
                 <version>${jackson.databind.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.wordnik</groupId>
-                <artifactId>swagger-annotations</artifactId>
-                <version>${swagger.version}</version>
-            </dependency>
-            <dependency>
                 <groupId>javax.ws.rs</groupId>
                 <artifactId>javax.ws.rs-api</artifactId>
                 <version>${javax.ws.rs.api.version}</version>
@@ -388,6 +384,11 @@
                 <version>${junit.version}</version>
                 <scope>test</scope>
             </dependency>
+            <dependency>
+                <groupId>io.swagger</groupId>
+                <artifactId>swagger-annotations</artifactId>
+                <version>${swagger.version}</version>
+            </dependency>
 
             <dependency>
                 <groupId>stone</groupId>
@@ -461,7 +462,12 @@
             </dependency>
             <dependency>
                 <groupId>stone</groupId>
-                <artifactId>stone-dal-start</artifactId>
+                <artifactId>stone-dal-starter</artifactId>
+                <version>${stone.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>stone</groupId>
+                <artifactId>stone-rdbms-sync</artifactId>
                 <version>${stone.version}</version>
             </dependency>
         </dependencies>

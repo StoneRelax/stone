@@ -18,8 +18,8 @@ import ${repoPackage}.${repoName};
 
 
 @RestController
-@RequestMapping("/${lowerDoName}")
-@Api(value = "/${lowerDoName}",description="${className}")
+@RequestMapping("${basePath}/repo/${lowerDoName}")
+@Api(value = "${basePath}/repo/${lowerDoName}",description="${className}")
 public class ${className} {
   @Autowired
   private ${repoName} repository;
@@ -42,20 +42,17 @@ public class ${className} {
     @Transactional
     @RequestMapping(value="/",method=RequestMethod.PUT)
     @ApiOperation(httpMethod="PUT",value="Update ${doName}",notes="Update ${doName}")
-    public @ResponseBody void update(@RequestBody ${doName} entity){
+    public void update(@RequestBody ${doName} entity){
       repository.update(entity);
     }
 
     @Transactional
     @RequestMapping(value="/{id}",method=RequestMethod.DELETE)
-    @ApiOperation(httpMethod="DELETE",value="Delete ${doName}",notes="Delete ${doName} by uuid")
-    public @ResponseBody void delete(@ApiParam(value = "id") @PathVariable("id") ${pkType} id){
+    @ApiOperation(httpMethod="DELETE",value="Delete ${doName}",notes="Delete ${doName} by id")
+    public void delete(@ApiParam(value = "id") @PathVariable("id") ${pkType} id){
       ${doName} entity = new ${doName}();
       entity.set${pkName}(id);
       repository.del(entity);
     }
-
-
-
 
 }

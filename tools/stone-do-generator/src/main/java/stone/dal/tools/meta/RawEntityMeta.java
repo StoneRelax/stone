@@ -45,6 +45,10 @@ public class RawEntityMeta extends EntityMeta {
     this.name = name;
   }
 
+  public void setTableName(String tableName) {
+    this.tableName = tableName;
+  }
+
   public String getLabel() {
     return label;
   }
