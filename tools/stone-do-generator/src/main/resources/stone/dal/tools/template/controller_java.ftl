@@ -1,36 +1,58 @@
 package ${packageName};
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import stone.dal.pojo.repo.${repoClass};
-import stone.dal.pojo.jpa.${doName};
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
+import ${doPackage}.${doName}
+import ${repoPackage}.${repoName}
 
-@Controller
-@RequestMapping("/${doName}")
-@Api(value="${className}",description="${className}")
+
+@RestController
+@RequestMapping("/${lowerDoName}")
+@Api(value = "/${lowerDoName}",description="${className}")
 public class ${className} {
   @Autowired
-  private ${repoClass} repository;
+  private ${repoName} repository;
 
-   @Transactional
-   @ApiOperation(httpMethod="GET",value="Query ${doName}",notes="Find ${doName} by uuid")
-   @RequestMapping(value="/get${doName}ById/{userId}",method=RequestMethod.GET)
-   public @ResponseBody ${doName} get(Long uuid){
-        ${doName} object = new ${doName}();
-        object.setUuid(uuid);
-        return repository.get(object);
-   }
+    @RequestMapping(value="/{id}",method=RequestMethod.GET)
+    @ApiOperation(httpMethod="GET",value="Query ${doName}",notes="Find ${doName} by uuid")
+    public @ResponseBody ${doName} get(@ApiParam(value = "id") @PathVariable("id") ${pkType} id){
+      ${doName} entity = new ${doName}();
+      entity.set${pkName}(id);
+      return repository.get(entity);
+    }
 
-   @Transactional
-   @ApiOperation(httpMethod="POST",value="Create ${doName}",notes="Create ${doName}")
-   @RequestMapping(value="/",method=RequestMethod.POST)
-   public Long ${doName} create(@RequestBody ${doName} entity){
-        return repository.create(entity);
-   }
+    @Transactional
+    @RequestMapping(value="/",method=RequestMethod.POST)
+    @ApiOperation(httpMethod="POST",value="Create ${doName}",notes="Create ${doName}")
+    public @ResponseBody ${pkType} create(@RequestBody ${doName} entity){
+      return repository.create(entity);
+    }
+
+    @Transactional
+    @RequestMapping(value="/",method=RequestMethod.PUT)
+    @ApiOperation(httpMethod="PUT",value="Update ${doName}",notes="Update ${doName}")
+    public @ResponseBody void update(@RequestBody ${doName} entity){
+      repository.update(entity);
+    }
+
+    @Transactional
+    @RequestMapping(value="/{id}",method=RequestMethod.DELETE)
+    @ApiOperation(httpMethod="DELETE",value="Delete ${doName}",notes="Delete ${doName} by uuid")
+    public @ResponseBody void delete(@ApiParam(value = "id") @PathVariable("id") ${pkType} id){
+      ${doName} entity = new ${doName}();
+      entity.set${pkName}(id);
+      repository.del(entity);
+    }
 
 
 
