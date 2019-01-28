@@ -46,6 +46,7 @@
         <tomcat.jdbc.version>8.5.23</tomcat.jdbc.version>
         <mysql.jdbc.version>8.0.13</mysql.jdbc.version>
         <poi.version>3.17</poi.version>
+        <freemaker.version>2.3.20</freemaker.version>
         <junit.version>4.9</junit.version>
         <spring.data.commons.version>1.12.2.RELEASE</spring.data.commons.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -372,6 +373,16 @@
                 <version>${poi.version}</version>
             </dependency>
             <dependency>
+                <groupId>org.apache.poi</groupId>
+                <artifactId>poi-ooxml</artifactId>
+                <version>${poi.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.freemarker</groupId>
+                <artifactId>freemarker</artifactId>
+                <version>${freemaker.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>junit</groupId>
                 <artifactId>junit</artifactId>
                 <version>${junit.version}</version>
@@ -408,6 +419,11 @@
                 <artifactId>stone-sequence-gen-impl</artifactId>
                 <version>${stone.version}</version>
             </dependency>
+            <dependency>
+                <groupId>stone</groupId>
+                <artifactId>stone-do-generator</artifactId>
+                <version>${stone.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -415,6 +431,8 @@
         <module>kernel/stone-dal-utils</module>
         <module>kernel/stone-dal-common</module>
         <module>kernel/stone-dal-common-spi</module>
+        <module>tools/stone-do-generator</module>
+        <!--<module>tools/stone-rdbms-sync</module>-->
         <module>sequence-generator/stone-sequence-gen-autoconfigure</module>
         <module>sequence-generator/stone-sequence-gen-api</module>
         <module>sequence-generator/stone-sequence-gen-spi</module>
