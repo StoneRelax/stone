@@ -449,6 +449,16 @@
                 <artifactId>stone-do-generator</artifactId>
                 <version>${stone.version}</version>
             </dependency>
+            <dependency>
+                <groupId>stone</groupId>
+                <artifactId>stone-spring-jdbc-adaptor</artifactId>
+                <version>${stone.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>stone</groupId>
+                <artifactId>stone-spring-common-adaptor</artifactId>
+                <version>${stone.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -466,6 +476,8 @@
         <module>jdbc/stone-dal-jdbc-api</module>
         <module>jdbc/stone-dal-jdbc-spi</module>
         <module>jdbc/stone-dal-jdbc-impl</module>
+        <module>adaptor/stone-spring-jdbc-adaptor</module>
+        <module>adaptor/stone-spring-common-adaptor</module>
     </modules>
 
 </project>

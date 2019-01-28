@@ -1,9 +1,0 @@
-dependencies {
-    compile project(':adaptor:stone-spring-common-adaptor')
-    compile project(':jdbc:stone-dal-jdbc-spi')
-    compile project(':jdbc:stone-dal-jdbc-impl')
-    compile 'org.springframework.boot:spring-boot-starter-jdbc'
-    compile 'org.springframework.data:spring-data-commons'
-    compile 'org.springframework:spring-jdbc'
-    testCompile 'org.springframework.boot:spring-boot-starter-test'
-}
