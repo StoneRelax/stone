@@ -53,7 +53,8 @@ allprojects {
     ext['tomcat.jdbc.version'] = '8.5.23'
     ext['mysql.jdbc.version'] = '8.0.13'
     ext['poi.version'] = '3.17'
-    ext['spring.data.commons.version'] = '2.1.4.RELEASE'
+//    ext['spring.data.commons.version'] = '2.1.4.RELEASE'
+    ext['spring.data.commons.version'] = '1.12.2.RELEASE'
 
     group = 'stone'
     version = ext['stone.version']

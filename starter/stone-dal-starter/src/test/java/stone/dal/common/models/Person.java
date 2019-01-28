@@ -14,6 +14,7 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 import stone.dal.common.models.annotation.Clob;
+import stone.dal.common.models.annotation.Sequence;
 import stone.dal.common.models.data.BaseDo;
 
 /**
@@ -32,6 +33,7 @@ public class Person extends BaseDo {
 
   @Id
   @Column(name = "uuid", precision = 18, scale = 0)
+  @Sequence(generator="sequence")
   public Long getUuid() {
     return uuid;
   }
