@@ -466,6 +466,7 @@
         <module>kernel/stone-dal-utils</module>
         <module>kernel/stone-dal-common</module>
         <module>kernel/stone-dal-common-spi</module>
+        <module>starter/stone-dal-starter</module>
         <module>tools/stone-do-generator</module>
         <!--<module>tools/stone-rdbms-sync</module>-->
         <module>sequence-generator/stone-sequence-gen-autoconfigure</module>
