@@ -394,6 +394,7 @@
     <modules>
         <module>kernel/stone-dal-utils</module>
         <module>kernel/stone-dal-common</module>
+        <module>kernel/stone-dal-spi</module>
     </modules>
 
 </project>
