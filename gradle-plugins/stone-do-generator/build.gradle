@@ -2,8 +2,8 @@ group 'gradle-plugins'
 version '1.0.2'
 
 apply plugin: 'groovy'
-apply plugin: 'maven'
-apply plugin: 'java'
+//apply plugin: 'maven'
+//apply plugin: 'java'
 
 
 dependencies {
@@ -14,14 +14,13 @@ dependencies {
     compile 'org.apache.poi:poi'
     compile "org.apache.poi:poi-ooxml:3.17"
     compile 'org.freemarker:freemarker:2.3.20'
-    compile group: 'jalopy', name: 'jalopy', version: '1.5rc3'
     testCompile 'org.springframework.boot:spring-boot-starter-test'
 }
 
 
-uploadArchives{
-    repositories {
-        mavenLocal()
-
-    }
-}
+//uploadArchives{
+//    repositories {
+//        mavenLocal()
+//
+//    }
+//}
