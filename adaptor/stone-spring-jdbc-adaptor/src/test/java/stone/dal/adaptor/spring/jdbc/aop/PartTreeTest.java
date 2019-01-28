@@ -5,7 +5,6 @@ import java.util.Iterator;
 import org.junit.Test;
 import org.springframework.data.repository.query.parser.Part;
 import org.springframework.data.repository.query.parser.PartTree;
-import org.springframework.data.util.Streamable;
 
 public class PartTreeTest {
 
@@ -13,7 +12,6 @@ public class PartTreeTest {
   public void testMethod() {
     PartTree tree = new PartTree("findByContactPersonAndAddressOrCreateDate", Contact.class);
 //    tree.hasPredicate()
-    Streamable<Part> parts = tree.getParts();
     Iterator<PartTree.OrPart> orPartIterator = tree.iterator();
     while (orPartIterator.hasNext()) {
       PartTree.OrPart orPart = orPartIterator.next();

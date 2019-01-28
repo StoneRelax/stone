@@ -459,6 +459,11 @@
                 <artifactId>stone-spring-common-adaptor</artifactId>
                 <version>${stone.version}</version>
             </dependency>
+            <dependency>
+                <groupId>stone</groupId>
+                <artifactId>stone-dal-start</artifactId>
+                <version>${stone.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -468,7 +473,7 @@
         <module>kernel/stone-dal-common-spi</module>
         <module>starter/stone-dal-starter</module>
         <module>tools/stone-do-generator</module>
-        <!--<module>tools/stone-rdbms-sync</module>-->
+        <module>tools/stone-rdbms-sync</module>
         <module>sequence-generator/stone-sequence-gen-autoconfigure</module>
         <module>sequence-generator/stone-sequence-gen-api</module>
         <module>sequence-generator/stone-sequence-gen-spi</module>

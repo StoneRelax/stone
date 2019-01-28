@@ -14,23 +14,33 @@
     <dependencies>
         <dependency>
             <groupId>stone</groupId>
-            <artifactId>stone-dal-common</artifactId>
+            <artifactId>stone-dal-jdbc-autoconfigure</artifactId>
         </dependency>
         <dependency>
             <groupId>stone</groupId>
-            <artifactId>stone-dal-utils</artifactId>
+            <artifactId>stone-spring-common-adaptor</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.apache.poi</groupId>
-            <artifactId>poi</artifactId>
+            <groupId>stone</groupId>
+            <artifactId>stone-spring-jdbc-adaptor</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.apache.poi</groupId>
-            <artifactId>poi-ooxml</artifactId>
+            <groupId>stone</groupId>
+            <artifactId>stone-sequence-gen-autoconfigure</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.freemarker</groupId>
-            <artifactId>freemarker</artifactId>
+            <groupId>stone</groupId>
+            <artifactId>stone-dal-start</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
