@@ -401,6 +401,11 @@
             </dependency>
             <dependency>
                 <groupId>stone</groupId>
+                <artifactId>stone-dal-common-spi</artifactId>
+                <version>${stone.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>stone</groupId>
                 <artifactId>stone-sequence-gen-autoconfigure</artifactId>
                 <version>${stone.version}</version>
             </dependency>
@@ -421,6 +426,26 @@
             </dependency>
             <dependency>
                 <groupId>stone</groupId>
+                <artifactId>stone-dal-jdbc-autoconfigure</artifactId>
+                <version>${stone.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>stone</groupId>
+                <artifactId>stone-dal-jdbc-api</artifactId>
+                <version>${stone.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>stone</groupId>
+                <artifactId>stone-dal-jdbc-spi</artifactId>
+                <version>${stone.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>stone</groupId>
+                <artifactId>stone-dal-jdbc-impl</artifactId>
+                <version>${stone.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>stone</groupId>
                 <artifactId>stone-do-generator</artifactId>
                 <version>${stone.version}</version>
             </dependency>
@@ -437,6 +462,8 @@
         <module>sequence-generator/stone-sequence-gen-api</module>
         <module>sequence-generator/stone-sequence-gen-spi</module>
         <module>sequence-generator/stone-sequence-gen-impl</module>
+        <!--<module>jdbc/stone-dal-jdbc-autoconfigure</module>-->
+        <!--<module>jdbc/stone-dal-jdbc-api</module>-->
     </modules>
 
 </project>
