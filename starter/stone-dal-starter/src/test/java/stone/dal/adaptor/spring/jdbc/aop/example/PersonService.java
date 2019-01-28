@@ -4,6 +4,8 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
+
+import io.swagger.annotations.ApiParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -33,6 +35,7 @@ public class PersonService {
     }
   }
 
+  @ApiParam
   @RequestMapping(value="/{id}",method=RequestMethod.GET)
   @ApiOperation(httpMethod="GET",value="Query ${doName}",notes="Find ${doName} by uuid")
   @ApiImplicitParams(

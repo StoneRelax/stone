@@ -43,6 +43,7 @@ import stone.dal.common.models.meta.RelationMeta;
 import stone.dal.common.models.meta.RelationTypes;
 import stone.dal.common.models.meta.UniqueIndexMeta;
 import stone.dal.kernel.utils.ClassUtils;
+import stone.dal.kernel.utils.FileUtils;
 import stone.dal.tools.meta.ExcelSpecColumnEnu;
 import stone.dal.tools.meta.RawEntityMeta;
 import stone.dal.tools.meta.RawFieldMeta;
@@ -57,10 +58,16 @@ import static stone.dal.kernel.utils.KernelUtils.str2Arr;
 
 public class DoGenerator {
   private static Map<String, Class> classTypeMap = new ConcurrentHashMap<>();
+  private static Map<String,String> pkTypemap = new ConcurrentHashMap<>();
 
   private static Logger s_logger = LoggerFactory.getLogger(DoGenerator.class);
 
+
+
   static {
+    pkTypemap.put("long","Long");
+    pkTypemap.put("string","String");
+    pkTypemap.put("int","Integer");
     classTypeMap.put(String.class.getName(), String.class);
     classTypeMap.put(BigDecimal.class.getName(), BigDecimal.class);
     classTypeMap.put(Double.class.getName(), Double.class);
@@ -106,7 +113,9 @@ public class DoGenerator {
       String content = contents.get(i);
       javaFile = pojoPath + "src/main/java/" + replace(packageName, ".", "/")
               + "/" + ExcelUtils.convertFirstAlphetUpperCase(entityMetas.get(i).getName())+"Controller" + ".java";
-      ExcelUtils.writeFile(javaFile, content.getBytes());
+      if(!FileUtils.isExisted(javaFile)){
+        ExcelUtils.writeFile(javaFile, content.getBytes());
+      }
     }
   }
 
@@ -117,7 +126,9 @@ public class DoGenerator {
       String content = contents.get(i);
       javaFile = pojoPath + "src/main/java/" + replace(packageName, ".", "/")
               + "/" + ExcelUtils.convertFirstAlphetUpperCase(entityMetas.get(i).getName())+"Repository" + ".java";
-      ExcelUtils.writeFile(javaFile, content.getBytes());
+      if(!FileUtils.isExisted(javaFile)){
+        ExcelUtils.writeFile(javaFile, content.getBytes());
+      }
     }
   }
 
@@ -131,7 +142,9 @@ public class DoGenerator {
       String content = contents.get(i);
       javaFile = pojoPath + "src/main/java/" + replace(packageName, ".", "/")
               + "/" + ExcelUtils.convertFirstAlphetUpperCase(entityMetas.get(i).getName()) + ".java";
-      ExcelUtils.writeFile(javaFile, content.getBytes());
+      if(!FileUtils.isExisted(javaFile)){
+        ExcelUtils.writeFile(javaFile, content.getBytes());
+      }
     }
   }
 
@@ -315,7 +328,7 @@ public class DoGenerator {
       params.put("repoPackage",repoPackage);
       params.put("doName", entityMeta.getName());
       params.put("lowerDoName",entityMeta.getName().toLowerCase());
-      params.put("pkType",pkType);
+      params.put("pkType",pkTypemap.get(pkType));
       params.put("pkName",upperCase(pkField.getName()));
       temp.process(params, out);
       out.flush();
@@ -350,7 +363,7 @@ public class DoGenerator {
       params.put("packageName", stone.dal.kernel.utils.StringUtils.replaceNull(packageName));
       params.put("jpaPackageName",jpaPackageName);
       params.put("doName", entityMeta.getName());
-      params.put("pkType",pkType);
+      params.put("pkType",pkTypemap.get(pkType));
       params.put("pkName",upperCase(pkField.getName()));
       temp.process(params, out);
       out.flush();
