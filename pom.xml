@@ -462,8 +462,10 @@
         <module>sequence-generator/stone-sequence-gen-api</module>
         <module>sequence-generator/stone-sequence-gen-spi</module>
         <module>sequence-generator/stone-sequence-gen-impl</module>
-        <!--<module>jdbc/stone-dal-jdbc-autoconfigure</module>-->
-        <!--<module>jdbc/stone-dal-jdbc-api</module>-->
+        <module>jdbc/stone-dal-jdbc-autoconfigure</module>
+        <module>jdbc/stone-dal-jdbc-api</module>
+        <module>jdbc/stone-dal-jdbc-spi</module>
+        <module>jdbc/stone-dal-jdbc-impl</module>
     </modules>
 
 </project>
