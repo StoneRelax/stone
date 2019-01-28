@@ -1,6 +1,5 @@
 package stone.dal.tools;
 
-import de.hunsicker.jalopy.Jalopy;
 import freemarker.cache.URLTemplateLoader;
 import freemarker.template.Configuration;
 import freemarker.template.DefaultObjectWrapper;
@@ -107,12 +106,6 @@ public class DoGenerator {
       javaFile = pojoPath + "src/main/java/" + replace(packageName, ".", "/")
               + "/" + ExcelUtils.convertFirstAlphetUpperCase(entityMetas.get(i).getName())+"Controller" + ".java";
       ExcelUtils.writeFile(javaFile, content.getBytes());
-//      Jalopy codeFormatter = new Jalopy();
-//      StringBuffer output = new StringBuffer();
-//      codeFormatter.setInput(new File(javaFile));
-//      codeFormatter.setOutput(output);
-//      codeFormatter.format();
-//      ExcelUtils.writeFile(javaFile, output.toString().getBytes());
     }
   }
 
@@ -126,12 +119,6 @@ public class DoGenerator {
       javaFile = pojoPath + "src/main/java/" + replace(packageName, ".", "/")
               + "/" + ExcelUtils.convertFirstAlphetUpperCase(entityMetas.get(i).getName())+"Repository" + ".java";
       ExcelUtils.writeFile(javaFile, content.getBytes());
-//      Jalopy codeFormatter = new Jalopy();
-//      StringBuffer output = new StringBuffer();
-//      codeFormatter.setInput(new File(javaFile));
-//      codeFormatter.setOutput(output);
-//      codeFormatter.format();
-//      ExcelUtils.writeFile(javaFile, output.toString().getBytes());
     }
   }
 
@@ -147,12 +134,6 @@ public class DoGenerator {
       javaFile = pojoPath + "src/main/java/" + replace(packageName, ".", "/")
           + "/" + ExcelUtils.convertFirstAlphetUpperCase(entityMetas.get(i).getName()) + ".java";
       ExcelUtils.writeFile(javaFile, content.getBytes());
-//      Jalopy codeFormatter = new Jalopy();
-//      StringBuffer output = new StringBuffer();
-//      codeFormatter.setInput(new File(javaFile));
-//      codeFormatter.setOutput(output);
-//      codeFormatter.format();
-//      ExcelUtils.writeFile(javaFile, output.toString().getBytes());
     }
   }
 
