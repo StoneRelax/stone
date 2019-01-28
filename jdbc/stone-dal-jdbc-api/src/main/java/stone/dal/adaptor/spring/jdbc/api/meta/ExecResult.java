@@ -4,7 +4,7 @@ package stone.dal.adaptor.spring.jdbc.api.meta;
  * @author fengxie
  */
 public class ExecResult {
-	private String error;
+  private String error = "";
 	private int rows;
 	private String sql;
 
@@ -19,6 +19,15 @@ public class ExecResult {
 	public String getError() {
 		return error;
 	}
+
+  @Override
+  public String toString() {
+    return "ExecResult{" +
+        "error='" + error + '\'' +
+        ", rows=" + rows +
+        ", sql='" + sql + '\'' +
+        '}';
+  }
 
 	public static Factory factory() {
 		return new Factory();

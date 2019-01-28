@@ -7,18 +7,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import stone.dal.kernel.utils.StringUtils;
-import stone.dal.tools.rdbms.app.RdbmsSyncTestApplication;
+import stone.dal.tools.rdbms.app.RdbmsSyncDeltaTestApplication;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@SpringBootTest(classes = RdbmsSyncTestApplication.class)
-public class DBSyncTest {
+@SpringBootTest(classes = RdbmsSyncDeltaTestApplication.class)
+public class DBSyncDeltaTest {
 
   @Autowired
   private DBSync dbSync;
 
   @Test
   public void testSyncDb() {
-    dbSync.syncDb();
+    dbSync.syncDb(true);
   }
 
   @Test
