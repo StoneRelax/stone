@@ -99,7 +99,12 @@ public class MysqlDialect implements DBDialectSpi {
   @Override
   public String getColumnDdl(ColumnInfo columnInfo) {
     StringBuilder sb = new StringBuilder();
-    sb.append(String.format("%s(%s)", columnInfo.getType().name(), columnInfo.getProperty()));
+    if ("datetime".equalsIgnoreCase(columnInfo.getType().name())
+        || "date".equalsIgnoreCase(columnInfo.getType().name())) {
+      sb.append(String.format("%s", columnInfo.getType().name()));
+    } else {
+      sb.append(String.format("%s(%s)", columnInfo.getType().name(), columnInfo.getProperty()));
+    }
     if (!columnInfo.getNullable()) {
       sb.append(" not null");
     }

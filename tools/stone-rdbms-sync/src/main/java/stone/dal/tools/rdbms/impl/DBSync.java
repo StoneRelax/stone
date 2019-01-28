@@ -2,6 +2,7 @@ package stone.dal.tools.rdbms.impl;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -25,6 +26,7 @@ import stone.dal.adaptor.spring.jdbc.impl.dialect.MysqlDialect;
 import stone.dal.adaptor.spring.jdbc.impl.dialect.OracleDialect;
 import stone.dal.adaptor.spring.jdbc.spi.DBDialectSpi;
 import stone.dal.common.models.meta.ColumnInfo;
+import stone.dal.common.models.meta.EntityMeta;
 import stone.dal.common.models.meta.FieldMeta;
 import stone.dal.common.models.meta.JoinColumn;
 import stone.dal.common.models.meta.RelationMeta;
@@ -62,6 +64,11 @@ public class DBSync {
     if (dbNameInfo.contains("?")) {
       dbNameInfo = dbNameInfo.substring(0, dbNameInfo.indexOf("?"));
     }
+    if (!delta) {
+      String sql = String
+          .format("DROP DATABASE IF EXISTS %s", dbNameInfo);
+      adminJdbcTemplate.execute(sql);
+    }
     String sql = String
         .format("CREATE DATABASE IF NOT EXISTS %s DEFAULT CHARSET UTF8 COLLATE UTF8_GENERAL_CI", dbNameInfo);
     adminJdbcTemplate.execute(sql);
@@ -75,52 +82,10 @@ public class DBSync {
     Assert.notNull(dialectSpi, "dialect can't be null!");
     Collection<RdbmsEntity> entities = rdbmsEntityManager.allEntities();
     entities.forEach(entity -> {
-      SqlQueryMeta queryMeta = SqlQueryMeta.factory().sql(
-          "desc " + entity.getMeta().getTableName()
-      ).build();
-      List<Map> columns = null;
-      if (delta) {
-        try {
-          columns = stJdbcTemplate.query(queryMeta);
-        } catch (Exception ex) {
-          if (ex.getMessage().contains("doesn't exist")) {
-            s_logger.info(String.format("Create new table %s", entity.getMeta().getTableName()));
-          } else {
-            s_logger.error(ex.getMessage());
-            throw new KernelRuntimeException(ex);
-          }
-        }
-      }
-      Map<String, ColumnInfo> dbColumns = new HashMap<>();
-      if (columns != null) {
-        for (Map column : columns) {
-          ColumnInfo columnInfo = dialectSpi.getColumnInfo(column);
-          dbColumns.put(columnInfo.getField(), columnInfo);
-        }
+      Map<String, ColumnInfo> dbColumns = getDbColumns(dialectSpi, delta, entity.getMeta().getTableName());
+      if (dbColumns != null) {
         Map<String, ColumnInfo> entityColumns = getEntityColumns(entity);
-        Set<String> toDropColumns = dbColumns.keySet().stream()
-            .filter(fieldName -> !entityColumns.containsKey(fieldName))
-            .collect(Collectors.toSet());
-        toDropColumns.forEach(dropColumnName -> {
-          lines.add(String.format("ALTER TABLE %s DROP COLUMN %s", entity.getMeta().getTableName(), dropColumnName));
-        });
-        Set<ColumnInfo> toAddColumns = entityColumns.keySet().stream()
-            .filter(fieldName -> !dbColumns.containsKey(fieldName))
-            .map(entityColumns::get).collect(Collectors.toSet());
-        toAddColumns.forEach(toAddColumn -> {
-          lines.add(String
-              .format("ALTER TABLE %s ADD %s %s", entity.getMeta().getTableName(),
-                  toAddColumn.getField(), dialectSpi.getColumnDdl(toAddColumn)));
-        });
-        entityColumns.keySet().forEach(columnName -> {
-          ColumnInfo columnInfo = entityColumns.get(columnName);
-          ColumnInfo dbColumnInfo = dbColumns.get(columnName);
-          if (dbColumnInfo != null && !columnInfo.equals(dbColumnInfo)) {
-            lines.add((String
-                .format("ALTER TABLE %s MODIFY %s %s", entity.getMeta().getTableName(),
-                    columnInfo.getField(), dialectSpi.getColumnDdl(columnInfo))));
-          }
-        });
+        lines.addAll(getTableDeltaSql(dialectSpi, entity, entityColumns, dbColumns));
       } else {
         //create full table script
         List<ColumnInfo> entityColumns = entity.getColumns();
@@ -135,13 +100,71 @@ public class DBSync {
             ")";
         lines.add(ddl);
       }
-      lines.addAll(parseRelationSql(entity, dbColumns, delta));
+      lines.addAll(parseRelationSql(dialectSpi, entity, dbColumns, delta));
       lines.addAll(getIndicesSql(entity, delta));
     });
     return lines;
   }
 
-  private List<String> parseRelationSql(RdbmsEntity entity, Map<String, ColumnInfo> dbColumns, boolean delta) {
+  private Collection<? extends String> getTableDeltaSql(DBDialectSpi dialectSpi, RdbmsEntity entity,
+      Map<String, ColumnInfo> entityColumns,
+      Map<String, ColumnInfo> dbColumns) {
+    List<String> lines = new ArrayList<>();
+    Set<String> toDropColumns = dbColumns.keySet().stream()
+        .filter(fieldName -> !entityColumns.containsKey(fieldName)
+            && entity.getRelationRefDbName(fieldName) == null)
+        .collect(Collectors.toSet());
+    toDropColumns.forEach(dropColumnName -> {
+      lines.add(String.format("ALTER TABLE %s DROP COLUMN %s", entity.getMeta().getTableName(), dropColumnName));
+    });
+    Set<ColumnInfo> toAddColumns = entityColumns.keySet().stream()
+        .filter(fieldName -> !dbColumns.containsKey(fieldName))
+        .map(entityColumns::get).collect(Collectors.toSet());
+    toAddColumns.forEach(toAddColumn -> {
+      lines.add(String
+          .format("ALTER TABLE %s ADD %s %s", entity.getMeta().getTableName(),
+              toAddColumn.getField(), dialectSpi.getColumnDdl(toAddColumn)));
+    });
+    entityColumns.keySet().forEach(columnName -> {
+      ColumnInfo columnInfo = entityColumns.get(columnName);
+      ColumnInfo dbColumnInfo = dbColumns.get(columnName);
+      if (dbColumnInfo != null && !columnInfo.equals(dbColumnInfo)) {
+        lines.add((String
+            .format("ALTER TABLE %s MODIFY %s %s", entity.getMeta().getTableName(),
+                columnInfo.getField(), dialectSpi.getColumnDdl(columnInfo))));
+      }
+    });
+    return lines;
+  }
+
+  private Map<String, ColumnInfo> getDbColumns(DBDialectSpi dialectSpi, boolean delta, String tableName) {
+    Map<String, ColumnInfo> dbColumns = null;
+    List<Map> columns = null;
+    if (delta) {
+      dbColumns = new HashMap<>();
+      try {
+        SqlQueryMeta queryMeta = SqlQueryMeta.factory().sql(
+            "desc " + tableName
+        ).build();
+        columns = stJdbcTemplate.query(queryMeta);
+        for (Map column : columns) {
+          ColumnInfo columnInfo = dialectSpi.getColumnInfo(column);
+          dbColumns.put(columnInfo.getField(), columnInfo);
+        }
+      } catch (Exception ex) {
+        if (ex.getMessage().contains("doesn't exist")) {
+          s_logger.info(String.format("Create new table %s", tableName));
+        } else {
+          s_logger.error(ex.getMessage());
+          throw new KernelRuntimeException(ex);
+        }
+      }
+    }
+    return dbColumns;
+  }
+
+  private List<String> parseRelationSql(DBDialectSpi dialectSpi, RdbmsEntity entity, Map<String, ColumnInfo> dbColumns,
+      boolean delta) {
     List<String> lines = new ArrayList<>();
     Set<String> joinProperties = entity.getJoinProperties();
     if (!CollectionUtils.isEmpty(joinProperties)) {
@@ -152,6 +175,7 @@ public class DBSync {
           Collection<JoinColumn> joinColumns = relation.getJoinColumns();
           Collection<JoinColumn> inverseJoinColumns = relation.getInverseJoinColumns();
           List<String> joinColumnsDcl = new ArrayList<>();
+          List<ColumnInfo> allColumns = new ArrayList<>();
           HashSet<String> joinTablePks = new HashSet<>();
           for (JoinColumn joinColumn : joinColumns) {
             FieldMeta fieldMeta = entity.getField(joinColumn.getReferencedColumnName());
@@ -159,6 +183,8 @@ public class DBSync {
             joinColumnsDcl
                 .add(String.format("%s %s", joinColumn.getName(), getDialect(dialectType).getColumnDdl(pkColumnInfo)));
             joinTablePks.add(joinColumn.getName());
+            allColumns.add(
+                new ColumnInfo(joinColumn.getName(), false, pkColumnInfo.getType(), pkColumnInfo.getProperty(), true));
           }
           RdbmsEntity relatedEntity = rdbmsEntityManager.getEntity(relation.getJoinPropertyType());
           List<String> inverseJoinColumnsDcl = new ArrayList<>();
@@ -169,30 +195,46 @@ public class DBSync {
                 .add(String
                     .format("%s %s", inverseJoinColumn.getName(), getDialect(dialectType).getColumnDdl(pkColumnInfo)));
             joinTablePks.add(inverseJoinColumn.getName());
+            allColumns.add(
+                new ColumnInfo(inverseJoinColumn.getName(), false, pkColumnInfo.getType(), pkColumnInfo.getProperty(),
+                    true));
           }
-          String ddl = "CREATE TABLE " + joinTable + "(" +
-              StringUtils.combineString(joinColumnsDcl, ",") + "," +
-              StringUtils.combineString(inverseJoinColumnsDcl, ",") +
-              ",PRIMARY KEY(" +
-              StringUtils.combineString(joinTablePks, ",") + "))";
-          lines.add(ddl);
+          Map<String, ColumnInfo> joinTableColumns = getDbColumns(dialectSpi, delta, joinTable);
+          if (joinTableColumns != null) {
+            Map<String, ColumnInfo> columnInfoMap = allColumns.stream()
+                .collect(Collectors.toMap(ColumnInfo::getField, columnInfo -> columnInfo));
+            lines
+                .addAll(getTableDeltaSql(dialectSpi, new RdbmsEntity(EntityMeta.factory().tableName(joinTable).build()),
+                    columnInfoMap, joinTableColumns));
+          } else {
+            String ddl = "CREATE TABLE " + joinTable + "(" +
+                StringUtils.combineString(joinColumnsDcl, ",") + "," +
+                StringUtils.combineString(inverseJoinColumnsDcl, ",") +
+                ",PRIMARY KEY(" +
+                StringUtils.combineString(joinTablePks, ",") + "))";
+            lines.add(ddl);
+          }
         } else if (!CollectionUtils.isEmpty(relation.getJoinColumns())) {
           Collection<JoinColumn> joinColumns = relation.getJoinColumns();
-          List<String> fkNames = new ArrayList<>();
+          List<String> deltaFkColumns = new ArrayList<>();
           for (JoinColumn joinColumn : joinColumns) {
             FieldMeta fieldMeta = entity.getField(joinColumn.getReferencedColumnName());
             ColumnInfo pkColumnInfo = entity.getColumnInfo(fieldMeta.getDbName());
-            lines.add(String.format("ALTER TABLE %s ADD %s %s", entity.getMeta().getTableName(), joinColumn.getName(),
-                getDialect(dialectType).getColumnDdl(pkColumnInfo)));
-            fkNames.add(joinColumn.getName());
+            if (!delta || dbColumns == null || !dbColumns.containsKey(joinColumn.getName())) {
+              lines.add(String.format("ALTER TABLE %s ADD %s %s", entity.getMeta().getTableName(), joinColumn.getName(),
+                  getDialect(dialectType).getColumnDdl(pkColumnInfo)));
+              deltaFkColumns.add(joinColumn.getName());
+            }
           }
-          String indexName = ("idx_" + relation.getJoinProperty() + "_fk").toUpperCase();
-          if (delta) {
-            lines.add("ALTER TABLE " + entity.getMeta().getTableName() + " DROP INDEX " + indexName);
+          if (!CollectionUtils.isEmpty(deltaFkColumns)) {
+            String indexName = ("idx_" + relation.getJoinProperty() + "_fk").toUpperCase();
+            if (delta) {
+              lines.add("ALTER TABLE " + entity.getMeta().getTableName() + " DROP INDEX " + indexName);
+            }
+            lines.add(String.format("CREATE INDEX %s on %s (%s)", indexName,
+                entity.getMeta().getTableName(),
+                StringUtils.combineString(deltaFkColumns, ",")));
           }
-          lines.add(String.format("CREATE INDEX %s on %s (%s)", indexName,
-              entity.getMeta().getTableName(),
-              StringUtils.combineString(fkNames, ",")));
         }
       });
     }

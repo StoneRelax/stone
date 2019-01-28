@@ -1,6 +1,8 @@
 package stone.dal.tools.rdbms.impl;
 
 import java.util.List;
+import org.apache.commons.collections.CollectionUtils;
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +25,12 @@ public class DBSyncDeltaTest {
 
   @Test
   public void testGetDbScript() {
+    dbSync.syncDb(false);
     List<String> lines = dbSync.getDbScript(false);
     System.out.println(StringUtils.combineString(lines, "\n"));
+
+    List<String> lines2 = dbSync.getDbScript(true);
+    System.out.println(StringUtils.combineString(lines2, "\n"));
+    Assert.assertTrue(CollectionUtils.isEmpty(lines2));
   }
 }
