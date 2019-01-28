@@ -2,6 +2,7 @@ package stone.dal.adaptor.spring.jdbc.spring.adaptor.app;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -12,7 +13,7 @@ import stone.dal.adaptor.spring.common.annotation.StRepositoryScan;
 /**
  * @author fengxie
  */
-@Configuration
+@SpringBootApplication
 @EnableAutoConfiguration
 @EnableTransactionManagement
 @ComponentScan(basePackages = { "stone.dal.adaptor.spring.autoconfigure", "stone.dal.adaptor.spring.jdbc.impl",

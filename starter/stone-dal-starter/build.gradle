@@ -4,6 +4,12 @@ dependencies {
     compile project(':adaptor:stone-spring-jdbc-adaptor')
     compile project(':sequence-generator:stone-sequence-gen-autoconfigure')
     compile project(':jdbc:stone-dal-jdbc-autoconfigure')
+//     compile 'org.springframework.boot:spring-boot-starter-tomcat'
+    compile 'org.springframework.boot:spring-boot-starter'
+//    compile 'org.springframework.boot:spring-boot-starter-security'
+    compile 'org.springframework.boot:spring-boot-starter-web'
+
+    compile 'com.wordnik:swagger-annotations:'
     testCompile 'mysql:mysql-connector-java'
     testCompile 'org.springframework.boot:spring-boot-starter-test'
 }
