@@ -1,6 +1,0 @@
-dependencies {
-    compile project(':jdbc:stone-dal-jdbc-api')
-    compile 'org.springframework:spring-beans'
-    compile 'org.springframework:spring-context'
-    testCompile 'org.springframework.boot:spring-boot-starter-test'
-}
