@@ -59,7 +59,7 @@ public class DBSync {
   private static Logger s_logger = LoggerFactory.getLogger(DBSync.class);
 
   public List<ExecResult> syncDb(boolean delta, String dbScriptPath) {
-    List<ExecResult> results = new ArrayList<>();
+    List<ExecResult> results;
     String[] dbInfos = StringUtils.splitString2Array(dbUrl, "/");
     String dbNameInfo = dbInfos[dbInfos.length - 1];
     if (dbNameInfo.contains("?")) {
@@ -75,11 +75,12 @@ public class DBSync {
     adminJdbcTemplate.execute(sql);
     List<String> lines = getDbScript(delta);
     results = stJdbcTemplate.execSqlScript(StringUtils.combineString(lines, ";\n"));
-
-    if (dbScriptPath != null) {
-      InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream(dbScriptPath);
-      Assert.notNull(is, String.format("Can not find script %s!", dbScriptPath));
-      results.addAll(stJdbcTemplate.execSqlScript(StringUtils.combineString(lines, ";\n")));
+    if (!delta) {
+      if (dbScriptPath != null) {
+        InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream(dbScriptPath);
+        Assert.notNull(is, String.format("Can not find script %s!", dbScriptPath));
+        results.addAll(stJdbcTemplate.execSqlStream(is));
+      }
     }
     return results;
   }

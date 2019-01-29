@@ -33,7 +33,7 @@ public class ${className} extends BaseDo {
     private ${gen.getFieldType(entity,dataField)} ${dataField.name};
     </#list>
 
-    <#list entity.rawRelations as relation><#if gen.one2many(entity,relation)|| gen.many2many(entity,relation)>
+    <#list entity.rawRelations as relation><#if gen.one2many(relation)|| gen.many2many(relation)>
     private List<${relation.getJoinPropertyTypeName()}> ${relation.joinProperty};<#else>
     private ${relation.getJoinPropertyTypeName()} ${relation.joinProperty};</#if>
     </#list>
@@ -49,8 +49,8 @@ public class ${className} extends BaseDo {
     }
     </#list>
 
-    <#list entity.rawRelations as relation><#if gen.one2many(entity,relation)>
-    @javax.persistence.OneToMany(cascade = {javax.persistence.CascadeType.ALL}<#if relation.mapperBy?exists>, mappedBy = "${relation.mapperBy}"</#if>)
+    <#list entity.rawRelations as relation><#if gen.one2many(relation)>
+    @javax.persistence.OneToMany(cascade = {javax.persistence.CascadeType.ALL}<#if relation.mappedBy?exists>, mappedBy = "${relation.mappedBy}"</#if>)
     public java.util.List<${relation.getJoinPropertyTypeName()}> get${gen.getMethodName(relation.joinProperty)}(){
         return this.${relation.joinProperty};
     }
@@ -58,7 +58,7 @@ public class ${className} extends BaseDo {
     public void set${gen.getMethodName(relation.joinProperty)}(java.util.List<${relation.getJoinPropertyTypeName()}> ${relation.joinProperty}){
         this.${relation.joinProperty} = ${relation.joinProperty};
     }
-    <#elseif gen.many2many(entity,relation)>
+    <#elseif gen.many2many(relation)>
     @javax.persistence.ManyToMany(cascade = {CascadeType.REFRESH}, fetch = FetchType.LAZY)
     ${gen.many2manyAnnotation(entity, relation, entityDict)}
     public java.util.List<${relation.joinPropertyTypeName}> get${gen.getMethodName(relation.joinProperty)}(){
@@ -68,10 +68,10 @@ public class ${className} extends BaseDo {
     public void set${gen.getMethodName(relation.joinProperty)}(java.util.List<${relation.joinPropertyTypeName}> ${relation.joinProperty}){
         this.${relation.joinProperty} = ${relation.joinProperty};
     }
-    <#else><#if gen.one2one(entity,relation)&&relation.joinColumnName?exists>
+    <#else><#if gen.one2one(relation)&&relation.joinColumnName?exists>
     @javax.persistence.OneToOne(cascade = {javax.persistence.CascadeType.REFRESH}, fetch = javax.persistence.FetchType.LAZY)<#else>
     @javax.persistence.ManyToOne(cascade = {javax.persistence.CascadeType.REFRESH}, fetch = javax.persistence.FetchType.LAZY)</#if>
-    @javax.persistence.JoinColumn(name = "${relation.joinColumnName}", <#if relation.refColumn?exists>referencedColumnName = "${relation.refColumn}",</#if> nullable = ${relation.genNullableStr()}, updatable = ${relation.genUpdatableStr()})
+    @javax.persistence.JoinColumn(name = "${relation.joinColumnName}", <#if relation.refColumn?exists>referencedColumnName = "${relation.refColumn}",</#if> nullable = ${relation.nullable()}, updatable = ${relation.updatable()})
     public ${relation.joinPropertyTypeName} get${gen.getMethodName(relation.joinProperty)}(){
         return this.${relation.joinProperty};
     }

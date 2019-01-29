@@ -17,6 +17,7 @@ import stone.dal.adaptor.spring.jdbc.spi.JdbcTemplateSpi;
 import stone.dal.common.models.data.Page;
 import stone.dal.common.spi.ResultSetClobHandler;
 import stone.dal.kernel.utils.KernelRuntimeException;
+import stone.dal.kernel.utils.StringUtils;
 
 import static stone.dal.kernel.utils.KernelUtils.isCollectionEmpty;
 import static stone.dal.kernel.utils.KernelUtils.replace;
@@ -28,6 +29,7 @@ import static stone.dal.kernel.utils.KernelUtils.str2Arr;
 public class StJdbcTemplateImpl implements StJdbcTemplate {
 
   private ResultSetClobHandler resultSetClobHandler;
+
   private JdbcTemplateSpi jdbcTemplateSpi;
 
   private DBDialectSpi dbDialectSpi;
@@ -38,7 +40,7 @@ public class StJdbcTemplateImpl implements StJdbcTemplate {
 
   public StJdbcTemplateImpl(JdbcTemplateSpi jdbcTemplateSpi, DBDialectSpi dbDialectSpi,
       RelationQueryBuilder relationQueryBuilder,
-      RdbmsEntityManager entityMetaManager,ResultSetClobHandler resultSetClobHandler) {
+      RdbmsEntityManager entityMetaManager, ResultSetClobHandler resultSetClobHandler) {
     this.dbDialectSpi = dbDialectSpi;
     this.entityMetaManager = entityMetaManager;
     this.jdbcTemplateSpi = jdbcTemplateSpi;
@@ -49,15 +51,15 @@ public class StJdbcTemplateImpl implements StJdbcTemplate {
   @Override
   @SuppressWarnings("unchecked")
   public <T> List<T> query(SqlQueryMeta queryMeta) {
-    List<T> res =  jdbcTemplateSpi.query(queryMeta, this.rowMapper);
+    List<T> res = jdbcTemplateSpi.query(queryMeta, this.rowMapper);
     handleClob(res, queryMeta);
     return res;
   }
 
-  private void handleClob(List res, SqlQueryMeta queryMeta){
-    if (queryMeta.getMappingClazz()!=null){
+  private void handleClob(List res, SqlQueryMeta queryMeta) {
+    if (queryMeta.getMappingClazz() != null) {
       RdbmsEntity entity = entityMetaManager.getEntity(queryMeta.getMappingClazz());
-      if (entity!=null){
+      if (entity != null) {
         resultSetClobHandler.handle(res, entity.getMeta());
       }
     }
@@ -139,24 +141,28 @@ public class StJdbcTemplateImpl implements StJdbcTemplate {
 
   @Override
   public List<ExecResult> execSqlScript(String sqlScripts) {
+    if (!sqlScripts.endsWith(";")) {
+      sqlScripts += ";";
+    }
     List<ExecResult> results = new ArrayList<>();
     String[] sqls = str2Arr(sqlScripts, ";");
     for (String sql : sqls) {
-      try {
-        int rows = exec(sql);
-        results.add(ExecResult.factory().sql(sql).rows(rows).build());
-      } catch (Exception ex) {
-        results.add(ExecResult.factory().sql(sql).error(ex.getMessage()).build());
+      if (!StringUtils.isEmpty(sql)) {
+        try {
+          int rows = exec(sql);
+          results.add(ExecResult.factory().sql(sql).rows(rows).build());
+        } catch (Exception ex) {
+          results.add(ExecResult.factory().sql(sql).error(ex.getMessage()).build());
+        }
       }
     }
     return results;
   }
 
-
   @Override
   @SuppressWarnings("unchecked")
   public <T> List<T> queryClobKey(SqlQueryMeta queryMeta) {
-    List<T> res =  jdbcTemplateSpi.query(queryMeta, this.rowMapper);
+    List<T> res = jdbcTemplateSpi.query(queryMeta, this.rowMapper);
     return res;
   }
 }

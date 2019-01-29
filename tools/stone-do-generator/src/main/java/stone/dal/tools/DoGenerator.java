@@ -28,7 +28,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
-import javax.xml.datatype.XMLGregorianCalendar;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.poi.ss.usermodel.Cell;
@@ -81,7 +80,6 @@ public class DoGenerator {
     classTypeMap.put(boolean.class.getName(), boolean.class);
     classTypeMap.put(Boolean.class.getName(), Boolean.class);
     classTypeMap.put(Class.class.getName(), Class.class);
-    classTypeMap.put(XMLGregorianCalendar.class.getName(), XMLGregorianCalendar.class);
     classTypeMap.put("java.lang.Object", Object.class);
     classTypeMap.put(Byte.class.getName(), Byte.class);
     classTypeMap.put(byte.class.getName(), byte.class);
@@ -97,12 +95,13 @@ public class DoGenerator {
 
   public void build(String xlsxPath, String targetSource,
       String rootPackage, String basePath, String extensionRulePath) throws Exception {
-    File sourceExcelFile = new File(xlsxPath);
-    List<RawEntityMeta> entityMetas = parseFile(sourceExcelFile);
+    xlsxPath = StringUtils.isEmpty(xlsxPath) ? "entities.xlsx" : xlsxPath;
     String rootPath = targetSource != null ? targetSource : "gen-src";
-    String jpaPackage = rootPackage == null ? "stone.dal.pojo.jpa" : rootPackage + ".jpa";
-    String repoPackage = rootPackage == null ? "stone.dal.pojo.jpa" : rootPackage + ".repo";
-    String controllerPackage = rootPackage == null ? "stone.dal.pojo.jpa" : rootPackage + ".controller";
+    String jpaPackage = rootPackage == null ? "stone.dal.jpa" : rootPackage + ".jpa";
+    String repoPackage = rootPackage == null ? "stone.dal.repo" : rootPackage + ".repo";
+    String controllerPackage = rootPackage == null ? "stone.dal.controller" : rootPackage + ".controller";
+    File sourceExcelFile = new File(xlsxPath);
+    List<RawEntityMeta> entityMetas = parseFile(jpaPackage, sourceExcelFile);
     Map<String, ExtensionRuleReader.RuleSet.Rule> turnOnMap = ExtensionRuleReader.read(extensionRulePath)
         .getTurnOnMap();
     Set<String> hdrEntities = getHdrEntityNames(entityMetas);
@@ -187,7 +186,7 @@ public class DoGenerator {
     return "idx_" + idxName;
   }
 
-  private List<RawEntityMeta> parseFile(File file) throws Exception {
+  private List<RawEntityMeta> parseFile(String packageName, File file) throws Exception {
     InputStream is = new FileInputStream(file);
     Workbook book = DoGeneratorUtils.getWorkbook(is);
     int i = 0;
@@ -213,6 +212,7 @@ public class DoGenerator {
       RawEntityMeta meta = new RawEntityMeta();
       Row headRow = sheet.getRow(0);
       meta.setName(entityName);
+      meta.setClazzName(packageName + "." + entityName);
       String tableName = stone.dal.kernel.utils.StringUtils.canonicalPropertyName2DBField(entityName);
       meta.setTableName(tableName);
       meta.setNosql(DoGeneratorUtils.cellBool(headRow.getCell(3)));
@@ -278,9 +278,10 @@ public class DoGenerator {
             many2one.setRelationType(RelationTypes.MANY_2_ONE);
             many2one.setRefColumn((entity.pks().iterator().next()).toLowerCase()); //todo: fix if pk fields have 2 more.
             many2one.setUpdatable(false);
+            many2one.setNullable(true);
             many2one.setJoinColumnName(
                 (entity.getName().toLowerCase() + "_" + entity.pks().iterator().next()).toLowerCase());
-            many2one.setJoinProperty(entity.getClazzName());
+            many2one.setJoinProperty(DoGeneratorUtils.convertFirstAlphetLowerCase(entity.getName()));
             many2one.setJoinDomain(entity.getName());
             entityMeta.getRawRelations().add(many2one);
           } else if (RelationTypes.ONE_2_ONE_REF.equals(relation.getRelationType())
@@ -298,6 +299,19 @@ public class DoGenerator {
         }
       }
     });
+  }
+
+  public boolean one2one(RelationMeta relationMeta) {
+    return relationMeta.getRelationType() == RelationTypes.ONE_2_ONE_VAL
+        || relationMeta.getRelationType() == RelationTypes.ONE_2_ONE_REF;
+  }
+
+  public boolean one2many(RelationMeta relationMeta) {
+    return relationMeta.getRelationType() == RelationTypes.ONE_2_MANY;
+  }
+
+  public boolean many2many(RelationMeta relationMeta) {
+    return relationMeta.getRelationType() == RelationTypes.MANY_2_MANY;
   }
 
   private void resolveFileFields(RawEntityMeta meta) {
@@ -519,10 +533,6 @@ public class DoGenerator {
     return DoGeneratorUtils.booleanValueForBoolean(entity.isNosql());
   }
 
-  public boolean many2many(EntityMeta entity, RelationMeta relationMeta) {
-    return relationMeta.getRelationType() == RelationTypes.MANY_2_MANY;
-  }
-
   public String many2manyAnnotation(RawEntityMeta entityMeta, RawRelationMeta relation,
       Map<String, RawEntityMeta> entityDict) {
     String joinTable = relation.getJoinTable();
@@ -562,10 +572,6 @@ public class DoGenerator {
     return classTypeMap.get(classType).getName();
   }
 
-  public boolean one2many(RawEntityMeta entity, RawRelationMeta relationMeta) {
-    return relationMeta.getRelationType().name().equalsIgnoreCase("one_2_many");
-  }
-
   public String getAnnotation(RawFieldMeta fieldMeta) {
     List<String> annotations = new ArrayList<>();
     if (DoGeneratorUtils.booleanValueForBoolean(fieldMeta.getPk())) {
@@ -573,6 +579,9 @@ public class DoGenerator {
     }
     if (DoGeneratorUtils.booleanValueForBoolean(fieldMeta.getClob())) {
       annotations.add("@stone.dal.common.models.annotation.Clob");
+    }
+    if (DoGeneratorUtils.booleanValueForBoolean(fieldMeta.getNotPersist())) {
+      annotations.add("@javax.persistence.Transient");
     }
     if (!StringUtils.isEmpty(fieldMeta.getMappedBy()) && !StringUtils.isEmpty(fieldMeta.getMapper())) {
       annotations.add(
@@ -639,6 +648,9 @@ public class DoGenerator {
     RawFieldMeta fieldMeta = readFromExcel(sfRow);
     if ("file".equalsIgnoreCase(fieldMeta.getTypeName())) {
       fieldMeta.setFile(true);
+      fieldMeta.setMaxLength(200);
+    } else if ("clob".equalsIgnoreCase(fieldMeta.getTypeName())) {
+      fieldMeta.setClob(true);
     }
     String property = fieldMeta.getFieldProperty();
     if (!isStrEmpty(property)) {
@@ -728,34 +740,35 @@ public class DoGenerator {
   }
 
   private RawRelationMeta readRelations(RawEntityMeta entityMeta, Row sfRow, HashSet<String> n2nJoinTables) {
-    RawRelationMeta meta = new RawRelationMeta();
-    meta.setJoinDomain(DoGeneratorUtils.cellStr(sfRow.getCell(1)));
-    meta.setJoinProperty(DoGeneratorUtils.cellStr(sfRow.getCell(2)));
-    meta.setJoinColumnName(DoGeneratorUtils.cellStr(sfRow.getCell(3)));
+    RawRelationMeta relation = new RawRelationMeta();
+    relation.setJoinDomain(DoGeneratorUtils.cellStr(sfRow.getCell(1)));
+    relation.setJoinProperty(DoGeneratorUtils.cellStr(sfRow.getCell(2)));
+    relation.setJoinColumnName(DoGeneratorUtils.cellStr(sfRow.getCell(3)));
     String type = DoGeneratorUtils.cellStr(sfRow.getCell(0));
     if ("1:N".equals(type)) {
       type = RelationTypes.ONE_2_MANY.name();
+      relation.setMappedBy(DoGeneratorUtils.convertFirstAlphetLowerCase(entityMeta.getName()));
     }
     if ("N:N".equals(type)) {
       String joinTable = DoGeneratorUtils.cellStr(sfRow.getCell(4));
       type = RelationTypes.MANY_2_MANY.name();
       if (isStrEmpty(joinTable)) {
-        String reverseJoinTable = meta.getJoinDomain().toLowerCase() + "_" + entityMeta.getName().toLowerCase();
+        String reverseJoinTable = relation.getJoinDomain().toLowerCase() + "_" + entityMeta.getName().toLowerCase();
         if (!n2nJoinTables.contains(reverseJoinTable.toUpperCase())) {
-          joinTable = entityMeta.getName().toLowerCase() + "_" + meta.getJoinDomain().toLowerCase();
+          joinTable = entityMeta.getName().toLowerCase() + "_" + relation.getJoinDomain().toLowerCase();
         } else {
           joinTable = reverseJoinTable;
         }
       }
-      meta.setJoinTable(joinTable.toUpperCase());
-      n2nJoinTables.add(meta.getJoinTable());
+      relation.setJoinTable(joinTable.toUpperCase());
+      n2nJoinTables.add(relation.getJoinTable());
     }
     if ("1:1".equals(type)) {
       type = RelationTypes.ONE_2_ONE_REF.name();
-      meta.setUpdatable(false);
+      relation.setUpdatable(false);
     }
-    meta.setRelationType(RelationTypes.valueOf(type));
-    return meta;
+    relation.setRelationType(RelationTypes.valueOf(type));
+    return relation;
   }
 
   private void validFieldMeta(String entityName, RawFieldMeta meta) throws Exception {

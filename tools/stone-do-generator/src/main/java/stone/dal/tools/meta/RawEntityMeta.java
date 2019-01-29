@@ -4,7 +4,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.stream.Collectors;
 import stone.dal.common.models.meta.EntityMeta;
+import stone.dal.common.models.meta.FieldMeta;
 import stone.dal.common.models.meta.UniqueIndexMeta;
 
 public class RawEntityMeta extends EntityMeta {
@@ -22,8 +24,6 @@ public class RawEntityMeta extends EntityMeta {
   protected List<RawRelationMeta> rawRelations = new ArrayList<>();
 
   protected Collection<UniqueIndexMeta> uniqueIndices = new ArrayList<>();
-
-  private transient HashSet<String> pks = new HashSet<String>();
 
   public List<RawRelationMeta> getRawRelations() {
     return rawRelations;
@@ -74,7 +74,8 @@ public class RawEntityMeta extends EntityMeta {
   }
 
   public HashSet<String> pks() {
-    return pks;
+    return (HashSet<String>) fields.stream().filter(FieldMeta::getPk).map(FieldMeta::getName)
+        .collect(Collectors.toSet());
   }
 
   public String getClazzName() {

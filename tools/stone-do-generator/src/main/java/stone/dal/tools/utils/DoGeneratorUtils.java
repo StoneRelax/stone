@@ -78,6 +78,15 @@ public class DoGeneratorUtils {
     }
   }
 
+  public static String convertFirstAlphetLowerCase(String str) {
+    if (StringUtils.isEmpty(str)) {
+      return null;
+    } else {
+      String firstLetter = str.substring(0, 1).toLowerCase();
+      return firstLetter + str.substring(1);
+    }
+  }
+
   public static void writeFile(String filePath, byte[] content) {
     writeFile(filePath, content, false);
   }

@@ -10,7 +10,7 @@ public class RawRelationMeta extends RelationMeta {
 
   private String refColumn;
 
-  private Boolean nullable;
+  private Boolean nullable = true;
 
   private Boolean updatable = true;
 
@@ -21,6 +21,10 @@ public class RawRelationMeta extends RelationMeta {
   private String joinTable;
 
   private RelationTypes relationType;
+
+  public void setMappedBy(String mappedBy) {
+    this.mappedBy = mappedBy;
+  }
 
   public String getJoinProperty() {
     return joinProperty;
@@ -75,16 +79,16 @@ public class RawRelationMeta extends RelationMeta {
     this.refColumn = refColumn;
   }
 
-  public Boolean getNullable() {
-    return nullable;
+  public String nullable() {
+    return Boolean.toString(nullable);
   }
 
   public void setNullable(Boolean nullable) {
     this.nullable = nullable;
   }
 
-  public Boolean getUpdatable() {
-    return updatable;
+  public String updatable() {
+    return Boolean.toString(updatable);
   }
 
   public void setUpdatable(Boolean updatable) {
