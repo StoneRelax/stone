@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import javax.annotation.PostConstruct;
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,13 +59,27 @@ public class DBSync {
 
   private static Logger s_logger = LoggerFactory.getLogger(DBSync.class);
 
-  public List<ExecResult> syncDb(boolean delta, String dbScriptPath) {
-    List<ExecResult> results;
+  @PostConstruct
+  public void init() {
+    List<String> databases = adminJdbcTemplate.query("show databases", (resultSet, i) -> resultSet.getString(1));
+    String dbNameInfo = getDbName();
+    if (!databases.contains(dbNameInfo)) {
+      syncDb(false, "db-init.sql");
+    }
+  }
+
+  private String getDbName() {
     String[] dbInfos = StringUtils.splitString2Array(dbUrl, "/");
     String dbNameInfo = dbInfos[dbInfos.length - 1];
     if (dbNameInfo.contains("?")) {
       dbNameInfo = dbNameInfo.substring(0, dbNameInfo.indexOf("?"));
     }
+    return dbNameInfo;
+  }
+
+  public List<ExecResult> syncDb(boolean delta, String dbScriptPath) {
+    List<ExecResult> results;
+    String dbNameInfo = getDbName();
     if (!delta) {
       String sql = String
           .format("DROP DATABASE IF EXISTS %s", dbNameInfo);
