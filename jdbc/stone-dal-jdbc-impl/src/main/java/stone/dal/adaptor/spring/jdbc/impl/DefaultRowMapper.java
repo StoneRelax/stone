@@ -18,6 +18,7 @@ import stone.dal.adaptor.spring.jdbc.impl.utils.RelationQueryBuilder;
 import stone.dal.adaptor.spring.jdbc.spi.DBDialectSpi;
 import stone.dal.adaptor.spring.jdbc.spi.JdbcTemplateSpi;
 import stone.dal.common.ex.CreateRowObjectException;
+import stone.dal.common.models.data.BaseDo;
 import stone.dal.common.models.meta.FieldMeta;
 import stone.dal.kernel.utils.CGLibUtils;
 import stone.dal.kernel.utils.ClassUtils;
@@ -83,7 +84,7 @@ public class DefaultRowMapper implements SqlQueryMeta.RowMapper {
     Class clazz = queryMeta.getMappingClazz();
     if (clazz != null && clazz != Map.class) {
       try {
-        if (queryMeta.isUpdatable()) {
+        if (queryMeta.shouldAttached()) {
           clazz = CGLibUtils.buildProxyClass(clazz, dirtyMarkInterceptor, dirtyMarkMethodFilter);
         } else if (queryMeta.isSupportFetchMore()) {
           clazz = CGLibUtils.buildProxyClass(clazz, lazyLoadInterceptor, lazyLoadMethodFilter);
@@ -102,6 +103,11 @@ public class DefaultRowMapper implements SqlQueryMeta.RowMapper {
       ResultSetMetaData rsmd, int row, ResultSet rs) {
     try {
       Object rowObj = getRowMapClazz(queryMeta).newInstance();
+      if (queryMeta.shouldAttached()) {
+        if (rowObj instanceof BaseDo) {
+          ((BaseDo) rowObj).attach();
+        }
+      }
       int numberOfColumns = rsmd.getColumnCount();
       for (int index = 0; index < numberOfColumns; index++) {
         String colName = dbDialectSpi.getColumnName(index + 1, rsmd).toLowerCase();

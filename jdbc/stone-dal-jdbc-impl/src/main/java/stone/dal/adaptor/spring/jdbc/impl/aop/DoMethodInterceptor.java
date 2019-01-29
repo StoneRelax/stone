@@ -60,11 +60,11 @@ public class DoMethodInterceptor implements MethodInterceptor {
       String methodName = method.getName();
       if (methodName.startsWith("set")) {
         methodProxy.invokeSuper(obj, objects);
-        if (((BaseDo) obj).monitor()) {
+        if (((BaseDo) obj).check_attached()) {
           String fieldName = StringUtils.firstChar2UpperCase(
               methodName.replace("set", ""));
           ((BaseDo) obj).ackChange(fieldName);
-          ((BaseDo) obj).set_state(BaseDo.States.UPDATED);
+          ((BaseDo) obj).set_state(BaseDo.States.Updated);
         }
         return false;
       }

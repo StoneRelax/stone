@@ -81,7 +81,7 @@ public class StJpaRepositoryImpl<T extends BaseDo, K>
 
   @Override
   public void update(T obj) {
-    if (BaseDo.States.UPDATED == obj.get_state()) {
+    if (BaseDo.States.Updated == obj.get_state()) {
       runUpdate(obj);
     }
   }
@@ -145,15 +145,19 @@ public class StJpaRepositoryImpl<T extends BaseDo, K>
   }
 
   private void runUpdate(BaseDo obj) {
-    if (BaseDo.States.UPDATED == obj.get_state()) {
+    if (BaseDo.States.Updated == obj.get_state()) {
       RdbmsEntity entity = entityMetaManager.getEntity(obj.getClass());
-      obj.get_changes().forEach(change -> {
-        FieldMeta fieldMeta = entity.getField(change);
-        bindOneClobColumn(fieldMeta, obj, entity);
-      });
+      if (obj.check_attached()) {
+        obj.get_changes().forEach(change -> {
+          FieldMeta fieldMeta = entity.getField(change);
+          bindOneClobColumn(fieldMeta, obj, entity);
+        });
+      } else {
+        entity.getMeta().getFields().forEach(fieldMeta -> bindOneClobColumn(fieldMeta, obj, entity));
+      }
       jdbcTemplate.exec(entity.getUpdateMeta(obj));
       cascadeUpdate(entity, obj);
-    } else if (BaseDo.States.DELETED == obj.get_state()) {
+    } else if (BaseDo.States.Deleted == obj.get_state()) {
       runDel(obj);
     } else {
       runCreate(obj);
