@@ -93,8 +93,11 @@ public class DBSync {
     if (!delta) {
       if (dbScriptPath != null) {
         InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream(dbScriptPath);
-        Assert.notNull(is, String.format("Can not find script %s!", dbScriptPath));
-        results.addAll(stJdbcTemplate.execSqlStream(is));
+        if (is == null) {
+          results.add(ExecResult.factory().error(String.format("Can not find db script %s!", dbScriptPath)).build());
+        } else {
+          results.addAll(stJdbcTemplate.execSqlStream(is));
+        }
       }
     }
     return results;
