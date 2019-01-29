@@ -216,9 +216,9 @@ public class RdbmsEntity extends BaseEntity {
     Collection<String> pks = getPks();
     List<FieldMeta> changedFields = this.meta.getFields().stream()
         .filter(fieldMeta -> !pks.contains(fieldMeta.getName())
-            && changes.contains(fieldMeta.getName())).collect(Collectors.toList());
+            && (changes.contains(fieldMeta.getName()) || !obj.check_attached())).collect(Collectors.toList());
     changedFields.stream().filter(fieldMeta -> !KernelUtils.boolValue(fieldMeta.getNotPersist())).forEach(fieldMeta -> {
-      changeFieldsName.add(fieldMeta.getDbName() + "=:" + fieldMeta.getDbName());
+      changeFieldsName.add(fieldMeta.getDbName() + "=?");
       bindDmlParams(obj, fieldMeta, params);
     });
     bindPkParams(params, obj);
@@ -477,7 +477,7 @@ public class RdbmsEntity extends BaseEntity {
         relationMeta.getInverseJoinColumns().forEach(joinColumn -> {
           params.add(getPropVal(record, joinColumn.getReferencedColumnName()));
         });
-        if (BaseDo.States.DELETED == record.get_state()) {
+        if (BaseDo.States.Deleted == record.get_state()) {
           SqlBaseMeta meta = SqlBaseMeta.factory().sql(delRelSqls.get(joinProperty + DEL_REL_WHEN_SAVE_SUFFIX))
               .params(params.toArray(new Object[0])).build();
           delSqlMetaList.add(meta);

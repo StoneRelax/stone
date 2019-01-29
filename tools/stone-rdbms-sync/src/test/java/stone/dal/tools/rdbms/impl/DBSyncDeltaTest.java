@@ -20,12 +20,12 @@ public class DBSyncDeltaTest {
 
   @Test
   public void testSyncDb() {
-    dbSync.syncDb(true);
+    dbSync.syncDb(true, null);
   }
 
   @Test
   public void testGetDbScript() {
-    dbSync.syncDb(false);
+    dbSync.syncDb(false, null);
     List<String> lines = dbSync.getDbScript(false);
     System.out.println(StringUtils.combineString(lines, "\n"));
 

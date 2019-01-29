@@ -11,7 +11,8 @@ public class BaseDo {
 
   private States _state;
 	private Set<String> _changes = new HashSet<>();
-	private transient boolean _monitor;
+
+  private transient boolean _attached;
 	private Set<String> _lazyLoading = new HashSet<>();
 
   public States get_state() {
@@ -31,24 +32,24 @@ public class BaseDo {
 	}
 
   public void ackChange(String field) {
-    _state = States.UPDATED;
+    _state = States.Updated;
     _changes.add(field);
 	}
 
-	public void monitor_on() {
-		this._monitor = true;
-	}
+  public void attach() {
+    this._attached = true;
+  }
 
-	public void monitor_off() {
-		this._monitor = false;
-	}
+  public void detatch() {
+    this._attached = false;
+  }
 
-	public boolean monitor() {
-		return _monitor;
+  public boolean check_attached() {
+    return _attached;
 	}
 
   public void markDel() {
-    _state = States.DELETED;
+    _state = States.Deleted;
   }
 
 	public void markLazyLoadedField(String field) {
@@ -64,9 +65,8 @@ public class BaseDo {
 	}
 
   public enum States {
-    CREATE,
-    UPDATED,
-    DELETED
+    Updated,
+    Deleted,
   }
 
 }

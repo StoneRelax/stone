@@ -61,7 +61,7 @@ public abstract class SqlQueryMeta {
   /**
    * Search 4 modify
    */
-  boolean updatable;
+  boolean shouldAttached;
 
   /**
    * Support field mapper
@@ -98,8 +98,8 @@ public abstract class SqlQueryMeta {
     return maxSize;
   }
 
-  public boolean isUpdatable() {
-    return updatable;
+  public boolean shouldAttached() {
+    return shouldAttached;
   }
 
   public boolean isSupportMapper() {
@@ -162,7 +162,7 @@ public abstract class SqlQueryMeta {
     }
 
     public Factory updatable(boolean updatable) {
-      meta.updatable = updatable;
+      meta.shouldAttached = updatable;
       return this;
     }
 

@@ -1,8 +1,8 @@
 package stone.dal.tools.rdbms.impl;
 
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -58,7 +58,8 @@ public class DBSync {
 
   private static Logger s_logger = LoggerFactory.getLogger(DBSync.class);
 
-  public List<ExecResult> syncDb(boolean delta) {
+  public List<ExecResult> syncDb(boolean delta, String dbScriptPath) {
+    List<ExecResult> results = new ArrayList<>();
     String[] dbInfos = StringUtils.splitString2Array(dbUrl, "/");
     String dbNameInfo = dbInfos[dbInfos.length - 1];
     if (dbNameInfo.contains("?")) {
@@ -73,7 +74,14 @@ public class DBSync {
         .format("CREATE DATABASE IF NOT EXISTS %s DEFAULT CHARSET UTF8 COLLATE UTF8_GENERAL_CI", dbNameInfo);
     adminJdbcTemplate.execute(sql);
     List<String> lines = getDbScript(delta);
-    return stJdbcTemplate.execSqlScript(StringUtils.combineString(lines, ";\n"));
+    results = stJdbcTemplate.execSqlScript(StringUtils.combineString(lines, ";\n"));
+
+    if (dbScriptPath != null) {
+      InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream(dbScriptPath);
+      Assert.notNull(is, String.format("Can not find script %s!", dbScriptPath));
+      results.addAll(stJdbcTemplate.execSqlScript(StringUtils.combineString(lines, ";\n")));
+    }
+    return results;
   }
 
   public List<String> getDbScript(boolean delta) {
