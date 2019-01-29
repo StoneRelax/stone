@@ -44,7 +44,7 @@ public class StJdbcTemplateTest {
         params(new Object[] { 1 }).
         pageNo(1).pageSize(1).
         mappingClazz(MyOrder.class).build();
-    Page<MyOrder> page = stJdbcTemplate.pagination(queryMeta);
+    Page<MyOrder> page = stJdbcTemplate.pageQuery(queryMeta);
     Assert.assertEquals(1, page.getPageInfo().getPageNo());
     Assert.assertEquals(2, page.getPageInfo().getTotalRows());
     Assert.assertEquals(1, page.getRows().size());
@@ -55,7 +55,7 @@ public class StJdbcTemplateTest {
         params(new Object[] { 1 }).
         pageNo(1).pageSize(2).
         mappingClazz(MyOrder.class).build();
-    page = stJdbcTemplate.pagination(queryMeta);
+    page = stJdbcTemplate.pageQuery(queryMeta);
     Assert.assertEquals(1, page.getPageInfo().getPageNo());
     Assert.assertEquals(2, page.getPageInfo().getTotalRows());
     Assert.assertEquals(2, page.getRows().size());
@@ -65,7 +65,7 @@ public class StJdbcTemplateTest {
         params(new Object[] { 1 }).
         pageNo(2).pageSize(1).
         mappingClazz(MyOrder.class).build();
-    page = stJdbcTemplate.pagination(queryMeta);
+    page = stJdbcTemplate.pageQuery(queryMeta);
     Assert.assertEquals(2, page.getPageInfo().getPageNo());
     Assert.assertEquals(2, page.getPageInfo().getTotalRows());
     Assert.assertEquals(1, page.getRows().size());

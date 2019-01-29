@@ -89,7 +89,7 @@ public class StJdbcTemplateImpl implements StJdbcTemplate {
 
   @Override
   @SuppressWarnings("unchecked")
-  public <T> Page<T> pagination(SqlQueryMeta queryMeta) {
+  public <T> Page<T> pageQuery(SqlQueryMeta queryMeta) {
     String sql = queryMeta.getSql();
     int pageNo = queryMeta.getPageNo();
     int pageSize = queryMeta.getPageSize();

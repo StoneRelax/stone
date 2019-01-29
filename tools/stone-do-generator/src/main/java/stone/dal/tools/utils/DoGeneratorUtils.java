@@ -13,12 +13,12 @@ import stone.dal.kernel.utils.StringUtils;
 import static stone.dal.kernel.utils.StringUtils.replaceNull;
 
 /**
- * Component:  ExcelUtils
- * Description:  ExcelUtils
+ * Component:  DoGeneratorUtils
+ * Description:  DoGeneratorUtils
  * User: feng.xie
  * Date: 29/06/11
  */
-public class ExcelUtils {
+public class DoGeneratorUtils {
 
   public static Workbook getWorkbook(InputStream is) throws Exception {
     return WorkbookFactory.create(is);

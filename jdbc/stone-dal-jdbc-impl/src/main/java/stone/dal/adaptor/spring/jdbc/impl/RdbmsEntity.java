@@ -25,8 +25,10 @@ import stone.dal.common.models.meta.RelationTypes;
 import stone.dal.kernel.utils.KernelRuntimeException;
 import stone.dal.kernel.utils.KernelUtils;
 import stone.dal.kernel.utils.ObjectUtils;
+import stone.dal.kernel.utils.StringUtils;
 
 import static stone.dal.kernel.utils.KernelUtils.getPropVal;
+import static stone.dal.kernel.utils.KernelUtils.isCollectionEmpty;
 import static stone.dal.kernel.utils.KernelUtils.isStrEmpty;
 import static stone.dal.kernel.utils.KernelUtils.list2Str;
 import static stone.dal.kernel.utils.KernelUtils.replace;
@@ -182,10 +184,28 @@ public class RdbmsEntity extends BaseEntity {
         .build();
   }
 
-  public SqlQueryMeta getFindMeta(BaseDo obj) {
+  public SqlQueryMeta getFindMeta(BaseDo obj, boolean pkOnly) {
     SqlQueryMeta.Factory factory = SqlQueryMeta.factory()
-        .one2oneCascadeFetching(true).sql(findSql).mappingClazz(meta.getClazz());
-    factory.params(getPkValues(obj));
+        .one2oneCascadeFetching(true).mappingClazz(meta.getClazz());
+    if (pkOnly) {
+      factory.sql(findSql);
+      factory.params(getPkValues(obj));
+    } else {
+      String sql = findSqlNoCondition;
+      Collection<FieldMeta> fields = meta.getFields().stream().filter(fieldMeta -> !fieldMeta.getNotPersist()).collect(
+          Collectors.toList());
+      List<String> criteria = new ArrayList<>();
+      List<Object> params = new ArrayList<>();
+      fields.forEach(field -> {
+        //todo: stone, value can't be null
+        criteria.add(field.getDbName() + "=?");
+      });
+      if (isCollectionEmpty(params)) {
+        sql += " where " + StringUtils.combineString(criteria, " and ");
+      }
+      //todo:stone, append to sql
+      factory.sql(sql).params(params.toArray(new Object[0]));
+    }
     return factory.build();
   }
 
@@ -221,6 +241,11 @@ public class RdbmsEntity extends BaseEntity {
     });
     factory.params(params.toArray(new Object[0]));
     return factory.build();
+  }
+
+  public SqlQueryMeta getFindAllQueryMeta() {
+    //todo:stone
+    return null;
   }
 
   public String getFindSqlNoCondition() {
@@ -533,13 +558,6 @@ public class RdbmsEntity extends BaseEntity {
     Collection<String> pks = getPks();
     pks.forEach(pk -> params.add(ObjectUtils.getPropertyValue(object, pk)));
     return params.toArray(new Object[0]);
-  }
-
-  public Map<String, Object> getParameterValues(Object object) {
-    Map<String, Object> params = new HashMap<>();
-    Collection<String> pks = getPks();
-    pks.forEach(pk -> params.put(pk, ObjectUtils.getPropertyValue(object, pk)));
-    return params;
   }
 
 }

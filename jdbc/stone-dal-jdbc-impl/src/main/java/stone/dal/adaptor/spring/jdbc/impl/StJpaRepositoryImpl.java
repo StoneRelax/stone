@@ -12,6 +12,7 @@ import stone.dal.adaptor.spring.jdbc.api.meta.SqlBaseMeta;
 import stone.dal.adaptor.spring.jdbc.api.meta.SqlQueryMeta;
 import stone.dal.adaptor.spring.jdbc.impl.utils.RelationQueryBuilder;
 import stone.dal.common.models.data.BaseDo;
+import stone.dal.common.models.data.Page;
 import stone.dal.common.models.meta.EntityMeta;
 import stone.dal.common.models.meta.FieldMeta;
 import stone.dal.common.models.meta.RelationMeta;
@@ -93,13 +94,30 @@ public class StJpaRepositoryImpl<T extends BaseDo, K>
   @Override
   public T get(T pk) {
     RdbmsEntity entity = entityMetaManager.getEntity(pk.getClass());
-    List<T> res = jdbcTemplate.query(entity.getFindMeta(pk));
+    List<T> res = jdbcTemplate.query(entity.getFindMeta(pk, true));
     T obj = null;
     if (!isCollectionEmpty(res)) {
       obj = res.get(0);
       cascadeFind(entity, obj, true);
     }
     return obj;
+  }
+
+  @Override
+  public Collection<T> findList(T condition) {
+    RdbmsEntity entity = entityMetaManager.getEntity(condition.getClass());
+    SqlQueryMeta queryMeta = entity.getFindMeta(condition, false);
+    return jdbcTemplate.query(queryMeta);
+  }
+
+  @Override
+  public Page<T> pageQuery(T obj, int pageSize, int pageNo) {
+    RdbmsEntity entity = entityMetaManager.getEntity(obj.getClass());
+    SqlQueryMeta queryMeta = entity.getFindMeta(obj, false);
+    SqlQueryMeta pageQueryMeta = SqlQueryMeta.factory()
+        .sql(queryMeta.getSql()).params(queryMeta.getParameters())
+        .pageNo(pageNo).pageSize(pageSize).build();
+    return jdbcTemplate.pageQuery(pageQueryMeta);
   }
 
   @SuppressWarnings("unchecked")
@@ -160,7 +178,7 @@ public class StJpaRepositoryImpl<T extends BaseDo, K>
       }
     }
     if (clobFlag) {
-      List<T> res = jdbcTemplate.queryClobKey(entity.getFindMeta(obj));
+      List<T> res = jdbcTemplate.queryClobKey(entity.getFindMeta(obj, true));
       if (!isCollectionEmpty(res)) {
         obj = res.get(0);
         cascadeFind(entity, obj, true);

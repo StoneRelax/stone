@@ -46,13 +46,13 @@ public interface StJdbcTemplate {
   <T> T queryOne(SqlCondition condition);
 
   /**
-   * Execute pagination query with specified meta name, and parameters
+   * Execute pageQuery query with specified meta name, and parameters
    *
    * @param queryMeta query meta
    * @return result list, if query meta has mapping class, then the result contains instances of mapping class. Otherwise, the result
    * contains map instances.
    */
-  <T> Page<T> pagination(SqlQueryMeta queryMeta);
+  <T> Page<T> pageQuery(SqlQueryMeta queryMeta);
 
   /**
    * Execute exec operation

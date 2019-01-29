@@ -1,7 +1,5 @@
 package stone.dal.tools;
 
-import org.apache.commons.lang.StringUtils;
-
 public class ToolsMain {
 
   public static void main(String[] args) throws Exception {
@@ -10,6 +8,7 @@ public class ToolsMain {
     String targetPath = System.getProperty("target");
     String rootPackage = System.getProperty("rootPackage");
     String basePath = System.getProperty("basePath");
-    doGenerator.build(xlsxPath, targetPath, rootPackage, basePath);
+    String extensionRulePath = System.getProperty("extensionRulePath");
+    doGenerator.build(xlsxPath, targetPath, rootPackage, basePath, extensionRulePath);
   }
 }

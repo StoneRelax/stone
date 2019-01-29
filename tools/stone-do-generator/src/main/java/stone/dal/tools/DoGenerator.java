@@ -37,6 +37,7 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.util.Assert;
 import stone.dal.common.models.meta.EntityMeta;
 import stone.dal.common.models.meta.FieldMeta;
 import stone.dal.common.models.meta.RelationMeta;
@@ -48,9 +49,10 @@ import stone.dal.tools.meta.ExcelSpecColumnEnu;
 import stone.dal.tools.meta.RawEntityMeta;
 import stone.dal.tools.meta.RawFieldMeta;
 import stone.dal.tools.meta.RawRelationMeta;
-import stone.dal.tools.utils.ExcelUtils;
+import stone.dal.tools.utils.DoGeneratorUtils;
 
 import static stone.dal.kernel.utils.KernelUtils.boolValue;
+import static stone.dal.kernel.utils.KernelUtils.isCollectionEmpty;
 import static stone.dal.kernel.utils.KernelUtils.isStrEmpty;
 import static stone.dal.kernel.utils.KernelUtils.replace;
 import static stone.dal.kernel.utils.KernelUtils.replaceNull;
@@ -93,17 +95,36 @@ public class DoGenerator {
     classTypeMap.put("time", String.class);
   }
 
-  public void build(String xlsxPath, String targetSource, String rootPackage, String basePath) throws Exception {
+  public void build(String xlsxPath, String targetSource,
+      String rootPackage, String basePath, String extensionRulePath) throws Exception {
     File sourceExcelFile = new File(xlsxPath);
     List<RawEntityMeta> entityMetas = parseFile(sourceExcelFile);
     String rootPath = targetSource != null ? targetSource : "gen-src";
     String jpaPackage = rootPackage == null ? "stone.dal.pojo.jpa" : rootPackage + ".jpa";
     String repoPackage = rootPackage == null ? "stone.dal.pojo.jpa" : rootPackage + ".repo";
     String controllerPackage = rootPackage == null ? "stone.dal.pojo.jpa" : rootPackage + ".controller";
+    Map<String, ExtensionRuleReader.RuleSet.Rule> turnOnMap = ExtensionRuleReader.read(extensionRulePath)
+        .getTurnOnMap();
+    Set<String> hdrEntities = getHdrEntityNames(entityMetas);
     basePath = basePath == null ? "/api" : basePath;
-    writeDoFiles(entityMetas, rootPath, jpaPackage);
+    writeDoFiles(entityMetas, rootPath, jpaPackage, turnOnMap, hdrEntities);
     writeRepositoryFiles(entityMetas, rootPath, repoPackage, jpaPackage);
     writeControllerFiles(entityMetas, basePath, rootPath, controllerPackage, jpaPackage, repoPackage);
+  }
+
+  private Set<String> getHdrEntityNames(List<RawEntityMeta> entityMetas) {
+    Map<String, RawEntityMeta> mapper = entityMetas.stream()
+        .collect(Collectors.toMap(RawEntityMeta::getName, entity -> entity));
+    Set<String> hdrEntities = new HashSet<>();
+    entityMetas.forEach(entityMeta -> {
+      List<RawRelationMeta> relations = entityMeta.getRawRelations();
+      long count = relations.stream()
+          .filter(rawRelationMeta -> rawRelationMeta.getRelationType() == RelationTypes.MANY_2_ONE).count();
+      if (count == 0) {
+        hdrEntities.add(entityMeta.getName());
+      }
+    });
+    return hdrEntities;
   }
 
   private void writeControllerFiles(List<RawEntityMeta> entityMetas, String basePath, String rootPath,
@@ -114,9 +135,9 @@ public class DoGenerator {
     for (int i = 0; i < contents.size(); i++) {
       String content = contents.get(i);
       javaFile = rootPath + "/main/java/" + replace(packageName, ".", "/")
-          + "/" + ExcelUtils.convertFirstAlphetUpperCase(entityMetas.get(i).getName()) + "Controller" + ".java";
+          + "/" + DoGeneratorUtils.convertFirstAlphetUpperCase(entityMetas.get(i).getName()) + "Controller" + ".java";
       if (!FileUtils.isExisted(javaFile)) {
-        ExcelUtils.writeFile(javaFile, content.getBytes());
+        DoGeneratorUtils.writeFile(javaFile, content.getBytes());
       }
     }
   }
@@ -128,22 +149,23 @@ public class DoGenerator {
     for (int i = 0; i < contents.size(); i++) {
       String content = contents.get(i);
       javaFile = rootPath + "/main/java/" + replace(packageName, ".", "/")
-          + "/" + ExcelUtils.convertFirstAlphetUpperCase(entityMetas.get(i).getName()) + "Repository" + ".java";
+          + "/" + DoGeneratorUtils.convertFirstAlphetUpperCase(entityMetas.get(i).getName()) + "Repository" + ".java";
       if (!FileUtils.isExisted(javaFile)) {
-        ExcelUtils.writeFile(javaFile, content.getBytes());
+        DoGeneratorUtils.writeFile(javaFile, content.getBytes());
       }
     }
   }
 
-  private void writeDoFiles(List<RawEntityMeta> entityMetas, String rootPath, String packageName)
+  private void writeDoFiles(List<RawEntityMeta> entityMetas, String rootPath, String packageName,
+      Map<String, ExtensionRuleReader.RuleSet.Rule> turnOnMap, Set<String> hdrEntities)
       throws Exception {
-    List<String> contents = createDoJavaSource(entityMetas, packageName);
+    List<String> contents = createDoJavaFiles(entityMetas, packageName, turnOnMap, hdrEntities);
     String javaFile;
     for (int i = 0; i < contents.size(); i++) {
       String content = contents.get(i);
       javaFile = rootPath + "/main/java/" + replace(packageName, ".", "/")
-          + "/" + ExcelUtils.convertFirstAlphetUpperCase(entityMetas.get(i).getName()) + ".java";
-      ExcelUtils.writeFile(javaFile, content.getBytes());
+          + "/" + DoGeneratorUtils.convertFirstAlphetUpperCase(entityMetas.get(i).getName()) + ".java";
+      DoGeneratorUtils.writeFile(javaFile, content.getBytes());
     }
   }
 
@@ -167,7 +189,7 @@ public class DoGenerator {
 
   private List<RawEntityMeta> parseFile(File file) throws Exception {
     InputStream is = new FileInputStream(file);
-    Workbook book = ExcelUtils.getWorkbook(is);
+    Workbook book = DoGeneratorUtils.getWorkbook(is);
     int i = 0;
     List<RawEntityMeta> entities = new ArrayList<>();
     HashSet<String> n2nJoinTables = new HashSet<>();
@@ -193,8 +215,8 @@ public class DoGenerator {
       meta.setName(entityName);
       String tableName = stone.dal.kernel.utils.StringUtils.canonicalPropertyName2DBField(entityName);
       meta.setTableName(tableName);
-      meta.setNosql(ExcelUtils.cellBool(headRow.getCell(3)));
-      String delInd = ExcelUtils.cellStr(headRow.getCell(9));
+      meta.setNosql(DoGeneratorUtils.cellBool(headRow.getCell(3)));
+      String delInd = DoGeneratorUtils.cellStr(headRow.getCell(9));
       if (!isStrEmpty(delInd)) {
         meta.setDelFlag(delInd);
       }
@@ -206,20 +228,20 @@ public class DoGenerator {
         int col = 0;
         if (sfRow != null) {
           Cell cell = sfRow.getCell(col);
-          if (beginRelationRead && (cell == null || isStrEmpty(ExcelUtils.cellStr(cell)))) {
+          if (beginRelationRead && (cell == null || isStrEmpty(DoGeneratorUtils.cellStr(cell)))) {
             break;
           }
-          String sv = ExcelUtils.cellStr(cell);
+          String sv = DoGeneratorUtils.cellStr(cell);
           if (sv.equals("<<Fields>>")) {
             beginFieldRead = true;
           } else if (sv.equals("<<Relations>>")) {
             beginFieldRead = false;
             beginRelationRead = true;
           } else if (!isStrEmpty(sv)) {
-            if (beginRelationRead && !replaceNull(ExcelUtils.cellStr(sfRow.getCell(0))).equals("Type")) {
+            if (beginRelationRead && !replaceNull(DoGeneratorUtils.cellStr(sfRow.getCell(0))).equals("Type")) {
               RawRelationMeta relation = readRelations(meta, sfRow, n2nJoinTables);
               meta.getRawRelations().add(relation);
-            } else if (beginFieldRead && !replaceNull(ExcelUtils.cellStr(sfRow.getCell(0))).equals("Name")) {
+            } else if (beginFieldRead && !replaceNull(DoGeneratorUtils.cellStr(sfRow.getCell(0))).equals("Name")) {
               RawFieldMeta fieldMeta = readField(entityName, sfRow);
               meta.getRawFields().add(fieldMeta);
             }
@@ -229,7 +251,7 @@ public class DoGenerator {
             break;
           }
           if (row > 1000) {
-            throw new Exception("No relation definition is found![" + entityName + "]");
+            break;
           }
         }
         row++;
@@ -238,11 +260,48 @@ public class DoGenerator {
       entities.add(buildUniqueIndices(meta));
       i++;
     }
+    resolveReverseRelation(entities);
     return entities;
   }
 
+  private void resolveReverseRelation(List<RawEntityMeta> entities) {
+    Map<String, RawEntityMeta> map = entities.stream()
+        .collect(Collectors.toMap(RawEntityMeta::getName, entity -> entity));
+    entities.forEach(entity -> {
+      List<RawRelationMeta> relations = entity.getRawRelations();
+      if (!isCollectionEmpty(relations)) {
+        for (RawRelationMeta relation : relations) {
+          if (RelationTypes.ONE_2_MANY.equals(relation.getRelationType())) {
+            RawEntityMeta entityMeta = map.get(relation.getJoinDomain());
+            Assert.notNull(entityMeta, String.format("Cant find related object %s", relation.getJoinDomain()));
+            RawRelationMeta many2one = new RawRelationMeta();
+            many2one.setRelationType(RelationTypes.MANY_2_ONE);
+            many2one.setRefColumn((entity.pks().iterator().next()).toLowerCase()); //todo: fix if pk fields have 2 more.
+            many2one.setUpdatable(false);
+            many2one.setJoinColumnName(
+                (entity.getName().toLowerCase() + "_" + entity.pks().iterator().next()).toLowerCase());
+            many2one.setJoinProperty(entity.getClazzName());
+            many2one.setJoinDomain(entity.getName());
+            entityMeta.getRawRelations().add(many2one);
+          } else if (RelationTypes.ONE_2_ONE_REF.equals(relation.getRelationType())
+              || RelationTypes.ONE_2_ONE_VAL.equals(relation.getRelationType())) {
+//            if (str_emp(relation.getJoinColumnName())) {
+//              List<RelationMeta> one2one = one2oneComplementary.get(relation.getJoinDomain());
+//              if (one2one == null) {
+//                one2one = new ArrayList<>();
+//                one2oneComplementary.put(relation.getJoinDomain(), one2one);
+//              }
+//              one2one.add(relation);
+//            }
+            //todo: fix if pk fields have 2 more.
+          }
+        }
+      }
+    });
+  }
+
   private void resolveFileFields(RawEntityMeta meta) {
-    List<RawFieldMeta> fileUuidFields = meta.getRawFields().stream().filter(rawFieldMeta -> rawFieldMeta.getFile()).map(
+    List<RawFieldMeta> fileUuidFields = meta.getRawFields().stream().filter(FieldMeta::getFile).map(
         rawFieldMeta -> {
           RawFieldMeta fileUuidField = new RawFieldMeta();
           fileUuidField.setTypeName("string");
@@ -274,15 +333,69 @@ public class DoGenerator {
     return meta;
   }
 
-  public List<String> createDoJavaSource(List<RawEntityMeta> entities, String packageName) throws Exception {
+  public List<String> createDoJavaFiles(List<RawEntityMeta> entities,
+      String packageName, Map<String, ExtensionRuleReader.RuleSet.Rule> turnOnMap, Set<String> hdrEntities)
+      throws Exception {
     Map<String, RawEntityMeta> mapper = entities.stream()
         .collect(Collectors.toMap(RawEntityMeta::getName, entityMeta -> entityMeta));
     List<String> javaContents = new ArrayList<>();
     for (RawEntityMeta entityMeta : entities) {
-      String javaContent = genDoJavaClass(entityMeta, packageName, mapper);
-      javaContents.add(javaContent);
+      List<RawFieldMeta> fields = entityMeta.getRawFields();
+      List<String> pkFields = new ArrayList<>();
+      for (FieldMeta field : fields) {
+        if (DoGeneratorUtils.booleanValueForBoolean(field.getPk())) {
+          pkFields.add(field.getName());
+        }
+      }
+      addExtensionFields(entityMeta, turnOnMap, hdrEntities);
+      entityMeta.pks().clear(); //todo: why clear?
+      entityMeta.pks().addAll(pkFields);
+      List<RawRelationMeta> relations = entityMeta.getRawRelations();
+      if (!CollectionUtils.isEmpty(relations)) {
+        for (RawRelationMeta relation : relations) {
+          if (StringUtils.isEmpty(relation.getJoinPropertyTypeName())) {
+            String propertyDomain = relation.getJoinDomain();
+            relation.setJoinPropertyTypeName(packageName + "." + propertyDomain);
+          }
+        }
+      }
+      Configuration cfg = new Configuration();
+      cfg.setTemplateLoader(
+          new URLTemplateLoader() {
+            protected URL getURL(String name) {
+              Locale locale = Locale.getDefault();
+              String urlName =
+                  "stone/dal/tools/template/" + StringUtils.replace(name, "_" + locale.toString(), "");
+              return Thread.currentThread().getContextClassLoader().getResource(urlName);
+            }
+          });
+      cfg.setObjectWrapper(new DefaultObjectWrapper());
+      Template temp = cfg.getTemplate("entity_java.ftl");
+      ByteArrayOutputStream bos = new ByteArrayOutputStream();
+      Writer out = new OutputStreamWriter(bos);
+      SimpleHash params = new SimpleHash();
+      params.put("entity", entityMeta);
+      params.put("className", entityMeta.getName());
+      params.put("packageName", stone.dal.kernel.utils.StringUtils.replaceNull(packageName));
+      params.put("entityDict", mapper);
+      params.put("gen", this);
+      temp.process(params, out);
+      out.flush();
+      javaContents.add(new String(bos.toByteArray(), StandardCharsets.UTF_8));
     }
     return javaContents;
+  }
+
+  private void addExtensionFields(RawEntityMeta entityMeta, Map<String, ExtensionRuleReader.RuleSet.Rule> turnOnMap,
+      Set<String> hdrEntities) {
+    ExtensionRuleReader.RuleSet.Rule bothRuleSet = turnOnMap.get(ExtensionRuleReader.TurnOnSwitches.both.name());
+    if (hdrEntities.contains(entityMeta.getName())) {
+      ExtensionRuleReader.RuleSet.Rule headerRuleSet = turnOnMap.get(ExtensionRuleReader.TurnOnSwitches.header.name());
+//      headerRuleSet.getAddOnFields()
+    } else {
+      ExtensionRuleReader.RuleSet.Rule headerRuleSet = turnOnMap.get(ExtensionRuleReader.TurnOnSwitches.details.name());
+    }
+    //todo:stone, finish and test
   }
 
   public List<String> createRepoJavaSource(List<RawEntityMeta> entities, String packageName, String jpaPackageName)
@@ -402,58 +515,8 @@ public class DoGenerator {
     return pkField;
   }
 
-  private String genDoJavaClass(RawEntityMeta entityMeta, String packageName, Map<String, RawEntityMeta> mapper)
-      throws Exception {
-    List<RawFieldMeta> fields = entityMeta.getRawFields();
-    List<String> pkFields = new ArrayList<>();
-    for (FieldMeta field : fields) {
-      if (ExcelUtils.booleanValueForBoolean(field.getPk())) {
-        pkFields.add(field.getName());
-      }
-    }
-    entityMeta.pks().clear();
-    entityMeta.pks().addAll(pkFields);
-    List<RawRelationMeta> relations = entityMeta.getRawRelations();
-    if (!CollectionUtils.isEmpty(relations)) {
-      for (RawRelationMeta relation : relations) {
-        if (StringUtils.isEmpty(relation.getJoinPropertyTypeName())) {
-          String propertyDomain = relation.getJoinDomain();
-          relation.setJoinPropertyTypeName(packageName + "." + propertyDomain);
-        }
-      }
-    }
-    Configuration cfg = new Configuration();
-    cfg.setTemplateLoader(
-        new URLTemplateLoader() {
-          protected URL getURL(String name) {
-            Locale locale = Locale.getDefault();
-            String urlName =
-                "stone/dal/tools/template/" + StringUtils.replace(name, "_" + locale.toString(), "");
-            return Thread.currentThread().getContextClassLoader().getResource(urlName);
-          }
-        });
-    cfg.setObjectWrapper(new DefaultObjectWrapper());
-    try {
-      Template temp = cfg.getTemplate("entity_java.ftl");
-      ByteArrayOutputStream bos = new ByteArrayOutputStream();
-      Writer out = new OutputStreamWriter(bos);
-      SimpleHash params = new SimpleHash();
-      params.put("entity", entityMeta);
-      params.put("className", entityMeta.getName());
-      params.put("packageName", stone.dal.kernel.utils.StringUtils.replaceNull(packageName));
-      params.put("entityDict", mapper);
-      params.put("gen", this);
-      temp.process(params, out);
-      out.flush();
-      return new String(bos.toByteArray(), StandardCharsets.UTF_8);
-    } catch (Exception e) {
-      s_logger.error(e.getMessage());
-      throw new Exception(e);
-    }
-  }
-
   public boolean nosql(RawEntityMeta entity) {
-    return ExcelUtils.booleanValueForBoolean(entity.isNosql());
+    return DoGeneratorUtils.booleanValueForBoolean(entity.isNosql());
   }
 
   public boolean many2many(EntityMeta entity, RelationMeta relationMeta) {
@@ -487,7 +550,7 @@ public class DoGenerator {
 
   public String getFieldType(RawEntityMeta meta, RawFieldMeta fieldMeta) {
     String classType = fieldMeta.getTypeName();
-    if (ExcelUtils.booleanValueForBoolean(meta.isNosql())) {
+    if (DoGeneratorUtils.booleanValueForBoolean(meta.isNosql())) {
       if (classType.equalsIgnoreCase("bigDecimal")) {
         classType = "double";
       }
@@ -505,10 +568,10 @@ public class DoGenerator {
 
   public String getAnnotation(RawFieldMeta fieldMeta) {
     List<String> annotations = new ArrayList<>();
-    if (ExcelUtils.booleanValueForBoolean(fieldMeta.getPk())) {
+    if (DoGeneratorUtils.booleanValueForBoolean(fieldMeta.getPk())) {
       annotations.add("@javax.persistence.Id");
     }
-    if (ExcelUtils.booleanValueForBoolean(fieldMeta.getClob())) {
+    if (DoGeneratorUtils.booleanValueForBoolean(fieldMeta.getClob())) {
       annotations.add("@stone.dal.common.models.annotation.Clob");
     }
     if (!StringUtils.isEmpty(fieldMeta.getMappedBy()) && !StringUtils.isEmpty(fieldMeta.getMapper())) {
@@ -529,7 +592,7 @@ public class DoGenerator {
       annotation += ")";
       annotations.add(annotation);
     }
-    return ExcelUtils.combineString(annotations, "\n");
+    return DoGeneratorUtils.combineString(annotations, "\n");
   }
 
   private String getColumnAnnotation(RawFieldMeta dataFieldMeta) {
@@ -565,7 +628,7 @@ public class DoGenerator {
   }
 
   public String getMethodName(String fieldName) {
-    return ExcelUtils.convertFirstAlphetUpperCase(fieldName);
+    return DoGeneratorUtils.convertFirstAlphetUpperCase(fieldName);
   }
 
   public List<String> getPks(RawEntityMeta entityMeta) {
@@ -598,7 +661,7 @@ public class DoGenerator {
         fieldMeta.setPrecision(18);
       } else if (fieldMeta.getTypeName().equalsIgnoreCase("int")) {
         fieldMeta.setPrecision(7);
-      } else if (fieldMeta.getTypeName().equalsIgnoreCase("string")){
+      } else if (fieldMeta.getTypeName().equalsIgnoreCase("string")) {
         fieldMeta.setMaxLength(128);
       }
     }
@@ -655,9 +718,9 @@ public class DoGenerator {
       Class propType = ClassUtils.getPropertyType(RawFieldMeta.class, field);
       Object cellVal = null;
       if (propType == String.class) {
-        cellVal = ExcelUtils.cellStr(sfRow.getCell(enu.ordinal())).trim();
+        cellVal = DoGeneratorUtils.cellStr(sfRow.getCell(enu.ordinal())).trim();
       } else if (propType == Boolean.class) {
-        cellVal = ExcelUtils.cellBool(sfRow.getCell(enu.ordinal()));
+        cellVal = DoGeneratorUtils.cellBool(sfRow.getCell(enu.ordinal()));
       }
       Objects.requireNonNull(ClassUtils.getWriteMethod(RawFieldMeta.class, field)).invoke(fieldMeta, cellVal);
     }
@@ -666,15 +729,15 @@ public class DoGenerator {
 
   private RawRelationMeta readRelations(RawEntityMeta entityMeta, Row sfRow, HashSet<String> n2nJoinTables) {
     RawRelationMeta meta = new RawRelationMeta();
-    meta.setJoinDomain(ExcelUtils.cellStr(sfRow.getCell(1)));
-    meta.setJoinProperty(ExcelUtils.cellStr(sfRow.getCell(2)));
-    meta.setJoinColumnName(ExcelUtils.cellStr(sfRow.getCell(3)));
-    String type = ExcelUtils.cellStr(sfRow.getCell(0));
+    meta.setJoinDomain(DoGeneratorUtils.cellStr(sfRow.getCell(1)));
+    meta.setJoinProperty(DoGeneratorUtils.cellStr(sfRow.getCell(2)));
+    meta.setJoinColumnName(DoGeneratorUtils.cellStr(sfRow.getCell(3)));
+    String type = DoGeneratorUtils.cellStr(sfRow.getCell(0));
     if ("1:N".equals(type)) {
       type = RelationTypes.ONE_2_MANY.name();
     }
     if ("N:N".equals(type)) {
-      String joinTable = ExcelUtils.cellStr(sfRow.getCell(4));
+      String joinTable = DoGeneratorUtils.cellStr(sfRow.getCell(4));
       type = RelationTypes.MANY_2_MANY.name();
       if (isStrEmpty(joinTable)) {
         String reverseJoinTable = meta.getJoinDomain().toLowerCase() + "_" + entityMeta.getName().toLowerCase();

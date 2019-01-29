@@ -79,7 +79,7 @@ public interface DBDialectSpi {
   String getPaginationCtnSql(String originalSql);
 
   /**
-   * Return pagination sql like select count(*)...
+   * Return pageQuery sql like select count(*)...
    *
    * @param originalSql Original SQL
    * @return Pagination number's sql
