@@ -186,24 +186,25 @@ public class RdbmsEntity extends BaseEntity {
 
   public SqlQueryMeta getFindMeta(BaseDo obj, boolean pkOnly) {
     SqlQueryMeta.Factory factory = SqlQueryMeta.factory()
-        .one2oneCascadeFetching(true).mappingClazz(meta.getClazz());
+            .one2oneCascadeFetching(true).mappingClazz(meta.getClazz());
     if (pkOnly) {
       factory.sql(findSql);
       factory.params(getPkValues(obj));
     } else {
       String sql = findSqlNoCondition;
       Collection<FieldMeta> fields = meta.getFields().stream().filter(fieldMeta -> !fieldMeta.getNotPersist()).collect(
-          Collectors.toList());
+              Collectors.toList());
       List<String> criteria = new ArrayList<>();
       List<Object> params = new ArrayList<>();
       fields.forEach(field -> {
-        //todo: stone, value can't be null
-        criteria.add(field.getDbName() + "=?");
+        if(ObjectUtils.getPropertyValue(obj,field.getName()) != null){
+          criteria.add(field.getDbName() + "=?");
+          params.add(ObjectUtils.getPropertyValue(obj,field.getName()));
+        }
       });
-      if (isCollectionEmpty(params)) {
+      if (!isCollectionEmpty(params)) {
         sql += " where " + StringUtils.combineString(criteria, " and ");
       }
-      //todo:stone, append to sql
       factory.sql(sql).params(params.toArray(new Object[0]));
     }
     return factory.build();
@@ -243,9 +244,12 @@ public class RdbmsEntity extends BaseEntity {
     return factory.build();
   }
 
-  public SqlQueryMeta getFindAllQueryMeta() {
-    //todo:stone
-    return null;
+  public SqlQueryMeta getFindAllQueryMeta(BaseDo obj) {
+    SqlQueryMeta.Factory factory = SqlQueryMeta.factory()
+            .one2oneCascadeFetching(true).mappingClazz(meta.getClazz());
+    String sql = findSqlNoCondition;
+    factory.sql(sql);
+    return factory.build();
   }
 
   public String getFindSqlNoCondition() {

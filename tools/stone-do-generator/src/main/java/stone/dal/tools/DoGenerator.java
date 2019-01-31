@@ -49,6 +49,7 @@ import stone.dal.tools.meta.RawEntityMeta;
 import stone.dal.tools.meta.RawFieldMeta;
 import stone.dal.tools.meta.RawRelationMeta;
 import stone.dal.tools.utils.DoGeneratorUtils;
+import stone.dal.tools.ExtensionRuleReader.RuleSet;
 
 import static stone.dal.kernel.utils.KernelUtils.boolValue;
 import static stone.dal.kernel.utils.KernelUtils.isCollectionEmpty;
@@ -361,7 +362,7 @@ public class DoGenerator {
           pkFields.add(field.getName());
         }
       }
-      addExtensionFields(entityMeta, turnOnMap, hdrEntities);
+      addExtensionFields(entityMeta, turnOnMap, hdrEntities,entities);
       entityMeta.pks().clear(); //todo: why clear?
       entityMeta.pks().addAll(pkFields);
       List<RawRelationMeta> relations = entityMeta.getRawRelations();
@@ -400,16 +401,47 @@ public class DoGenerator {
     return javaContents;
   }
 
-  private void addExtensionFields(RawEntityMeta entityMeta, Map<String, ExtensionRuleReader.RuleSet.Rule> turnOnMap,
-      Set<String> hdrEntities) {
-    ExtensionRuleReader.RuleSet.Rule bothRuleSet = turnOnMap.get(ExtensionRuleReader.TurnOnSwitches.both.name());
-    if (hdrEntities.contains(entityMeta.getName())) {
-      ExtensionRuleReader.RuleSet.Rule headerRuleSet = turnOnMap.get(ExtensionRuleReader.TurnOnSwitches.header.name());
-//      headerRuleSet.getAddOnFields()
-    } else {
-      ExtensionRuleReader.RuleSet.Rule headerRuleSet = turnOnMap.get(ExtensionRuleReader.TurnOnSwitches.details.name());
+  private void addExtensionFields(RawEntityMeta entityMeta, Map<String,RuleSet.Rule> turnOnMap, Set<String> hdrEntities, List<RawEntityMeta> allEntities) {
+    Map<String, RawEntityMeta> map = allEntities.stream().collect(Collectors.toMap(RawEntityMeta::getName, (entity) -> {
+      return entity;
+    }));
+    RuleSet.Rule bothRuleSet = turnOnMap.get(ExtensionRuleReader.TurnOnSwitches.both.name());
+    if (bothRuleSet != null) {
+      entityMeta.getRawRelations().stream().filter((rawRelationMeta) -> {
+        return rawRelationMeta.getRelationType() == RelationTypes.ONE_2_MANY;
+      }).forEach((rawRelationMeta) -> {
+        RawEntityMeta rawEntityMeta = map.get(rawRelationMeta.getJoinDomain());
+        this.addFields(rawEntityMeta, bothRuleSet);
+      });
+      this.addFields(entityMeta, bothRuleSet);
     }
-    //todo:stone, finish and test
+
+    ExtensionRuleReader.RuleSet.Rule headerRuleSet;
+    if (hdrEntities.contains(entityMeta.getName())) {
+      headerRuleSet = turnOnMap.get(ExtensionRuleReader.TurnOnSwitches.header.name());
+      if (headerRuleSet != null) {
+        this.addFields(entityMeta, headerRuleSet);
+      }
+    } else {
+      headerRuleSet = turnOnMap.get(ExtensionRuleReader.TurnOnSwitches.details.name());
+      if (headerRuleSet != null) {
+        entityMeta.getRawRelations().stream().filter((rawRelationMeta) -> {
+          return rawRelationMeta.getRelationType() == RelationTypes.ONE_2_MANY;
+        }).forEach((rawRelationMeta) -> {
+          RawEntityMeta rawEntityMeta = (RawEntityMeta)map.get(rawRelationMeta.getJoinDomain());
+          this.addFields(rawEntityMeta, headerRuleSet);
+        });
+      }
+    }
+
+  }
+
+  private void addFields(RawEntityMeta entityMeta, RuleSet.Rule ruleSet) {
+    List<RawFieldMeta> rawFieldMetas = entityMeta.getRawFields();
+    ruleSet.getAddOnFields().forEach((rawFieldMeta) -> {
+      rawFieldMetas.add(rawFieldMeta);
+    });
+    entityMeta.setRawFields(rawFieldMetas);
   }
 
   public List<String> createRepoJavaSource(List<RawEntityMeta> entities, String packageName, String jpaPackageName)
