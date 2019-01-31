@@ -1,40 +1,24 @@
 package ${packageName};
 
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.Table;
-import javax.persistence.Transient;
-import javax.persistence.UniqueConstraint;
-import stone.dal.common.models.data.BaseDo;
-import stone.dal.common.models.annotation.Sequence;
-import stone.dal.common.models.annotation.FieldMapper;
-import stone.dal.common.models.annotation.Nosql;
-import stone.dal.common.models.annotation.UniqueIndex;
-import stone.dal.common.models.annotation.UniqueIndices;
-import java.util.List;
-
-@Entity
-<#if gen.nosql(entity)>@Nosql</#if>
-@Table(name = "${entity.tableName}")
+@javax.persistence.Entity<#if gen.nosql(entity)>@stone.dal.common.models.annotation.Nosql</#if>
+@javax.persistence.Table(name = "${entity.tableName}")
 <#if gen.hasUniqueKeys(entity)>
-@UniqueIndices(indices =
+@stone.dal.common.models.annotation.UniqueIndices(indices =
 {<#list gen.uniqueIndices(entity) as idxName>
-@UniqueIndex(name="${gen.dbIdxName(idxName)}",columnNames = {<#list gen.getUniqueColumns(entity,idxName) as keyField>"${keyField}"<#if keyField_has_next>,</#if></#list>})
+@stone.dal.common.models.annotation.UniqueIndex(name="${gen.dbIdxName(idxName)}",columnNames = {<#list gen.getUniqueColumns(entity,idxName) as keyField>"${keyField}"<#if keyField_has_next>,</#if></#list>})
 <#if idxName_has_next>,</#if>
-</#list>})
-</#if>
-public class ${className} extends BaseDo {
+</#list>})</#if><#if gen.hasListener(entity)>@javax.persistence.EntityListeners({
+<#list entity.entityListeners as entityListener>
+    ${entityListener.className}.class
+</#list>})</#if>
+public class ${className} extends stone.dal.common.models.data.BaseDo <#if gen.hasListenerIntf(entity)>implements <#list entity.entityListeners as entityListener>${entityListener.interfaceName}<#if entityListener_has_next>,</#if></#list></#if> {
 
     <#list entity.getRawFields() as dataField>
     private ${gen.getFieldType(entity,dataField)} ${dataField.name};
     </#list>
 
     <#list entity.rawRelations as relation><#if gen.one2many(relation)|| gen.many2many(relation)>
-    private List<${relation.getJoinPropertyTypeName()}> ${relation.joinProperty};<#else>
+    private java.util.List<${relation.getJoinPropertyTypeName()}> ${relation.joinProperty};<#else>
     private ${relation.getJoinPropertyTypeName()} ${relation.joinProperty};</#if>
     </#list>
 
@@ -59,7 +43,7 @@ public class ${className} extends BaseDo {
         this.${relation.joinProperty} = ${relation.joinProperty};
     }
     <#elseif gen.many2many(relation)>
-    @javax.persistence.ManyToMany(cascade = {CascadeType.REFRESH}, fetch = FetchType.LAZY)
+    @javax.persistence.ManyToMany(cascade = {javax.persistence.CascadeType.REFRESH}, fetch = javax.persistence.FetchType.LAZY)
     ${gen.many2manyAnnotation(entity, relation, entityDict)}
     public java.util.List<${relation.joinPropertyTypeName}> get${gen.getMethodName(relation.joinProperty)}(){
         return this.${relation.joinProperty};
@@ -80,6 +64,7 @@ public class ${className} extends BaseDo {
         this.${relation.joinProperty} = ${relation.joinProperty};
     }
     </#if>
+
     </#list>
 
     @Override

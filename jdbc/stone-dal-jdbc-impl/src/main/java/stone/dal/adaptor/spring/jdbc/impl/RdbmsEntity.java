@@ -186,20 +186,20 @@ public class RdbmsEntity extends BaseEntity {
 
   public SqlQueryMeta getFindMeta(BaseDo obj, boolean pkOnly) {
     SqlQueryMeta.Factory factory = SqlQueryMeta.factory()
-            .one2oneCascadeFetching(true).mappingClazz(meta.getClazz());
+        .one2oneCascadeFetching(true).mappingClazz(meta.getClazz());
     if (pkOnly) {
       factory.sql(findSql);
       factory.params(getPkValues(obj));
     } else {
       String sql = findSqlNoCondition;
       Collection<FieldMeta> fields = meta.getFields().stream().filter(fieldMeta -> !fieldMeta.getNotPersist()).collect(
-              Collectors.toList());
+          Collectors.toList());
       List<String> criteria = new ArrayList<>();
       List<Object> params = new ArrayList<>();
       fields.forEach(field -> {
-        if(ObjectUtils.getPropertyValue(obj,field.getName()) != null){
+        if (ObjectUtils.getPropertyValue(obj, field.getName()) != null) {
           criteria.add(field.getDbName() + "=?");
-          params.add(ObjectUtils.getPropertyValue(obj,field.getName()));
+          params.add(ObjectUtils.getPropertyValue(obj, field.getName()));
         }
       });
       if (!isCollectionEmpty(params)) {
@@ -246,7 +246,7 @@ public class RdbmsEntity extends BaseEntity {
 
   public SqlQueryMeta getFindAllQueryMeta(BaseDo obj) {
     SqlQueryMeta.Factory factory = SqlQueryMeta.factory()
-            .one2oneCascadeFetching(true).mappingClazz(meta.getClazz());
+        .one2oneCascadeFetching(true).mappingClazz(meta.getClazz());
     String sql = findSqlNoCondition;
     factory.sql(sql);
     return factory.build();

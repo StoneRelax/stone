@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import org.yaml.snakeyaml.Yaml;
 import stone.dal.kernel.utils.StringUtils;
+import stone.dal.tools.meta.EntityListener;
 import stone.dal.tools.meta.RawFieldMeta;
 
 public class ExtensionRuleReader {
@@ -43,6 +44,8 @@ public class ExtensionRuleReader {
 
       private List<RawFieldMeta> addOnFields = new ArrayList<>();
 
+      private List<EntityListener> entityListeners = new ArrayList();
+
       public String getTurnOn() {
         return turnOn;
       }
@@ -57,6 +60,15 @@ public class ExtensionRuleReader {
 
       public void setAddOnFields(List<RawFieldMeta> addOnFields) {
         this.addOnFields = addOnFields;
+      }
+
+      public List<EntityListener> getEntityListeners() {
+        return entityListeners;
+      }
+
+      public void setEntityListeners(
+          List<EntityListener> entityListeners) {
+        this.entityListeners = entityListeners;
       }
     }
   }

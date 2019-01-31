@@ -33,14 +33,14 @@ public class ${className} {
     }
 
     @Transactional
-    @RequestMapping(value="/",method=RequestMethod.POST)
+    @RequestMapping(value="",method=RequestMethod.POST)
     @ApiOperation(httpMethod="POST",value="Create ${doName}",notes="Create ${doName}")
     public @ResponseBody ${pkType} create(@RequestBody ${doName} entity){
       return repository.create(entity);
     }
 
     @Transactional
-    @RequestMapping(value="/",method=RequestMethod.PUT)
+    @RequestMapping(value="",method=RequestMethod.PUT)
     @ApiOperation(httpMethod="PUT",value="Update ${doName}",notes="Update ${doName}")
     public void update(@RequestBody ${doName} entity){
       repository.update(entity);
