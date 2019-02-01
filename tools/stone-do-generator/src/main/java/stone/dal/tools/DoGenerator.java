@@ -44,12 +44,12 @@ import stone.dal.common.models.meta.RelationTypes;
 import stone.dal.common.models.meta.UniqueIndexMeta;
 import stone.dal.kernel.utils.ClassUtils;
 import stone.dal.kernel.utils.FileUtils;
+import stone.dal.tools.ExtensionRuleReader.RuleSet;
 import stone.dal.tools.meta.ExcelSpecColumnEnu;
 import stone.dal.tools.meta.RawEntityMeta;
 import stone.dal.tools.meta.RawFieldMeta;
 import stone.dal.tools.meta.RawRelationMeta;
 import stone.dal.tools.utils.DoGeneratorUtils;
-import stone.dal.tools.ExtensionRuleReader.RuleSet;
 
 import static stone.dal.kernel.utils.KernelUtils.boolValue;
 import static stone.dal.kernel.utils.KernelUtils.isCollectionEmpty;
@@ -348,8 +348,18 @@ public class DoGenerator {
     return meta;
   }
 
+  public boolean hasListener(RawEntityMeta entityMeta) {
+    return !CollectionUtils.isEmpty(entityMeta.getEntityListeners());
+  }
+
+  public boolean hasListenerIntf(RawEntityMeta entityMeta) {
+    return !CollectionUtils.isEmpty(entityMeta.getEntityListeners().stream()
+        .filter(entityListener -> !StringUtils.isEmpty(entityListener.getInterfaceName())).collect(
+            Collectors.toList()));
+  }
+
   public List<String> createDoJavaFiles(List<RawEntityMeta> entities,
-                                        String packageName, Map<String, RuleSet.Rule> turnOnMap, Set<String> hdrEntities)
+      String packageName, Map<String, ExtensionRuleReader.RuleSet.Rule> turnOnMap, Set<String> hdrEntities)
       throws Exception {
     Map<String, RawEntityMeta> mapper = entities.stream()
         .collect(Collectors.toMap(RawEntityMeta::getName, entityMeta -> entityMeta));
@@ -362,7 +372,8 @@ public class DoGenerator {
           pkFields.add(field.getName());
         }
       }
-      addExtensionFields(entityMeta, turnOnMap, hdrEntities,entities);
+      addExtensionFields(entityMeta, turnOnMap, hdrEntities, entities);
+      addEntityListeners(entityMeta, turnOnMap, hdrEntities, entities);
       entityMeta.pks().clear(); //todo: why clear?
       entityMeta.pks().addAll(pkFields);
       List<RawRelationMeta> relations = entityMeta.getRawRelations();
@@ -401,47 +412,48 @@ public class DoGenerator {
     return javaContents;
   }
 
-  private void addExtensionFields(RawEntityMeta entityMeta, Map<String,RuleSet.Rule> turnOnMap, Set<String> hdrEntities, List<RawEntityMeta> allEntities) {
-    Map<String, RawEntityMeta> map = allEntities.stream().collect(Collectors.toMap(RawEntityMeta::getName, (entity) -> {
-      return entity;
-    }));
+  private void addEntityListeners(RawEntityMeta entityMeta, Map<String, RuleSet.Rule> turnOnMap,
+      Set<String> hdrEntities, List<RawEntityMeta> allEntities) {
     RuleSet.Rule bothRuleSet = turnOnMap.get(ExtensionRuleReader.TurnOnSwitches.both.name());
     if (bothRuleSet != null) {
-      entityMeta.getRawRelations().stream().filter((rawRelationMeta) -> {
-        return rawRelationMeta.getRelationType() == RelationTypes.ONE_2_MANY;
-      }).forEach((rawRelationMeta) -> {
-        RawEntityMeta rawEntityMeta = map.get(rawRelationMeta.getJoinDomain());
-        addFields(rawEntityMeta, bothRuleSet);
-      });
-      addFields(entityMeta, bothRuleSet);
+      this.addEntityListener(entityMeta, bothRuleSet);
     }
-
-    ExtensionRuleReader.RuleSet.Rule headerRuleSet;
     if (hdrEntities.contains(entityMeta.getName())) {
-      headerRuleSet = turnOnMap.get(ExtensionRuleReader.TurnOnSwitches.header.name());
+      ExtensionRuleReader.RuleSet.Rule headerRuleSet = turnOnMap.get(ExtensionRuleReader.TurnOnSwitches.header.name());
       if (headerRuleSet != null) {
-        addFields(entityMeta, headerRuleSet);
+        this.addEntityListener(entityMeta, headerRuleSet);
       }
     } else {
-      headerRuleSet = turnOnMap.get(ExtensionRuleReader.TurnOnSwitches.details.name());
-      if (headerRuleSet != null) {
-        entityMeta.getRawRelations().stream().filter((rawRelationMeta) -> {
-          return rawRelationMeta.getRelationType() == RelationTypes.ONE_2_MANY;
-        }).forEach((rawRelationMeta) -> {
-          RawEntityMeta rawEntityMeta = map.get(rawRelationMeta.getJoinDomain());
-          addFields(rawEntityMeta, headerRuleSet);
-        });
-      }
+      ExtensionRuleReader.RuleSet.Rule dtlRuleSet = turnOnMap.get(ExtensionRuleReader.TurnOnSwitches.details.name());
+      this.addEntityListener(entityMeta, dtlRuleSet);
     }
-
   }
 
-  private void addFields(RawEntityMeta entityMeta, RuleSet.Rule ruleSet) {
+  private void addExtensionFields(RawEntityMeta entityMeta, Map<String, RuleSet.Rule> turnOnMap,
+      Set<String> hdrEntities, List<RawEntityMeta> allEntities) {
+    RuleSet.Rule bothRuleSet = turnOnMap.get(ExtensionRuleReader.TurnOnSwitches.both.name());
+    if (bothRuleSet != null) {
+      this.addExtFields(entityMeta, bothRuleSet);
+    }
+    if (hdrEntities.contains(entityMeta.getName())) {
+      ExtensionRuleReader.RuleSet.Rule headerRuleSet = turnOnMap.get(ExtensionRuleReader.TurnOnSwitches.header.name());
+      if (headerRuleSet != null) {
+        this.addExtFields(entityMeta, headerRuleSet);
+      }
+    } else {
+      ExtensionRuleReader.RuleSet.Rule dtlRuleSet = turnOnMap.get(ExtensionRuleReader.TurnOnSwitches.details.name());
+      this.addExtFields(entityMeta, dtlRuleSet);
+    }
+  }
+
+  private void addExtFields(RawEntityMeta entityMeta, RuleSet.Rule ruleSet) {
     List<RawFieldMeta> rawFieldMetas = entityMeta.getRawFields();
-    ruleSet.getAddOnFields().forEach((rawFieldMeta) -> {
-      rawFieldMetas.add(rawFieldMeta);
-    });
+    rawFieldMetas.addAll(ruleSet.getAddOnFields());
     entityMeta.setRawFields(rawFieldMetas);
+  }
+
+  private void addEntityListener(RawEntityMeta entityMeta, RuleSet.Rule ruleSet) {
+    entityMeta.setEntityListeners(ruleSet.getEntityListeners());
   }
 
   public List<String> createRepoJavaSource(List<RawEntityMeta> entities, String packageName, String jpaPackageName)
@@ -572,7 +584,8 @@ public class DoGenerator {
     List<String> joinColumns = new ArrayList<>();
     for (String pk : pks) {
       String joinColumn =
-          "@JoinColumn(name = \"" + entityMeta.getName().toLowerCase() + "_" + pk + "\", referencedColumnName = \"" +
+          "@javax.persistence.JoinColumn(name = \"" + entityMeta.getName().toLowerCase() + "_" + pk +
+              "\", referencedColumnName = \"" +
               pk + "\")";
       joinColumns.add(joinColumn);
     }
@@ -581,7 +594,8 @@ public class DoGenerator {
     List<String> inverseJoinColumns = new ArrayList<>();
     for (String pk : inversePks) {
       String joinColumn =
-          "@JoinColumn(name = \"" + relatedEntity.getName().toLowerCase() + "_" + pk + "\", referencedColumnName = \"" +
+          "@javax.persistence.JoinColumn(name = \"" + relatedEntity.getName().toLowerCase() + "_" + pk +
+              "\", referencedColumnName = \"" +
               pk + "\")";
       inverseJoinColumns.add(joinColumn);
     }
@@ -620,10 +634,10 @@ public class DoGenerator {
           "@FieldMapper(mapper = \"" + fieldMeta.getMapper() + "\", mappedBy = \"" + fieldMeta.getMappedBy() + "\")");
     }
     if (!boolValue(fieldMeta.getNotPersist())) {
-      annotations.add("@Column(" + getColumnAnnotation(fieldMeta) + ")");
+      annotations.add("@javax.persistence.Column(" + getColumnAnnotation(fieldMeta) + ")");
     }
     if (!StringUtils.isEmpty(fieldMeta.getSeqType())) {
-      String annotation = "@Sequence(";
+      String annotation = "@stone.dal.common.models.annotation.Sequence(";
       if (!StringUtils.isEmpty(fieldMeta.getSeqKey())) {
         annotation += "key = \"" + fieldMeta.getSeqKey() + "\"";
       }

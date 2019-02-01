@@ -6,6 +6,7 @@
 package stone.dal.tools.meta;
 
 import stone.dal.common.models.meta.FieldMeta;
+import stone.dal.kernel.utils.StringUtils;
 
 /**
  * Component scope: JBolt Data Dictionary
@@ -38,6 +39,13 @@ public class RawFieldMeta extends FieldMeta {
 
   public void setRemarks(String remarks) {
     this.remarks = remarks;
+  }
+
+  public String getDbName() {
+    if (StringUtils.isEmpty(dbName)) {
+      return StringUtils.canonicalPropertyName2DBField(name);
+    }
+    return dbName;
   }
 
   @Override

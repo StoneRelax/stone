@@ -1,8 +1,6 @@
 package ${packageName};
 
 import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,21 +24,25 @@ public class ${className} {
 
     @RequestMapping(value="/{id}",method=RequestMethod.GET)
     @ApiOperation(httpMethod="GET",value="Query ${doName}",notes="Find ${doName} by uuid")
-    public @ResponseBody ${doName} get(@ApiParam(value = "id") @PathVariable("id") ${pkType} id){
-      ${doName} entity = new ${doName}();
-      entity.set${pkName}(id);
-      return repository.get(entity);
+    public @ResponseBody ${doName} findByPk(@ApiParam(value = "id") @PathVariable("id") ${pkType} id){
+      return repository.findByPk(id);
+    }
+
+    @RequestMapping(value="/get-all/",method=RequestMethod.GET)
+    @ApiOperation(httpMethod="GET",value="Query ${doName}",notes="Find ${doName} by uuid")
+    public @ResponseBody java.util.Collection<${doName}> findAll(){
+        return repository.findAll();
     }
 
     @Transactional
-    @RequestMapping(value="/",method=RequestMethod.POST)
+    @RequestMapping(value="",method=RequestMethod.POST)
     @ApiOperation(httpMethod="POST",value="Create ${doName}",notes="Create ${doName}")
     public @ResponseBody ${pkType} create(@RequestBody ${doName} entity){
       return repository.create(entity);
     }
 
     @Transactional
-    @RequestMapping(value="/",method=RequestMethod.PUT)
+    @RequestMapping(value="",method=RequestMethod.PUT)
     @ApiOperation(httpMethod="PUT",value="Update ${doName}",notes="Update ${doName}")
     public void update(@RequestBody ${doName} entity){
       repository.update(entity);

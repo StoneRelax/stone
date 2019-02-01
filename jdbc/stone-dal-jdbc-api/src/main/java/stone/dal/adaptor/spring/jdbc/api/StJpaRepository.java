@@ -30,13 +30,33 @@ public interface StJpaRepository<T extends BaseDo, K> extends StRepository {
   void del(T obj);
 
   /**
-   * @param pk
-   * @return
-   * @
+   * @param obj Object contains condition values
+   * @return DO object
    */
-  T get(T pk);
+  T findOne(T obj);
 
-  Collection<T> findList(T condition);
+  /**
+   * Find by specific pk value
+   *
+   * @param pk Pk value
+   * @return Do object of which pk equals to the given one
+   */
+  T findByPk(K pk);
+
+  /**
+   * Find all do objects
+   *
+   * @return List of do objects
+   */
+  Collection<T> findAll();
+
+  /**
+   * Find a list by a give condition of T object
+   *
+   * @param condition Object contains condition values
+   * @return List of DO object
+   */
+  Collection<T> findMany(T condition);
 
   /**
    * Query with a given page number

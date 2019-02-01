@@ -22,10 +22,10 @@ public class OracleDialect implements DBDialectSpi {
 
   @Override
   public ColumnInfo getColumnInfo(Map<String, Object> column) {
-//    String typeStr = (String) column.get("type");
-//    String nullStr = (String) column.get("null");
-//    String key = (String) column.get("key");
-//    String field = (String) column.get("field");
+//    String typeStr = (String) column.findOne("type");
+//    String nullStr = (String) column.findOne("null");
+//    String key = (String) column.findOne("key");
+//    String field = (String) column.findOne("field");
 //    return new ColumnInfo(field, "YES".equalsIgnoreCase(nullStr),
 //        typeStr, "PRI".equalsIgnoreCase(key));
     return null;

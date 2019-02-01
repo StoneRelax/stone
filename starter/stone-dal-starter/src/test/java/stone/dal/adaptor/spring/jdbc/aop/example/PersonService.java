@@ -4,7 +4,6 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
-
 import io.swagger.annotations.ApiParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,7 +15,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import stone.dal.adaptor.spring.jdbc.aop.example.repo.PersonRepository;
 import stone.dal.common.models.Person;
-import stone.dal.common.models.data.BaseDo;
 
 @RestController
 @RequestMapping("/person")
@@ -44,7 +42,7 @@ public class PersonService {
   public @ResponseBody Person get(@PathVariable Long id){
     Person person = new Person();
     person.setUuid(id);
-    return personRepository.get(person);
+    return personRepository.findOne(person);
   }
 
   @Transactional

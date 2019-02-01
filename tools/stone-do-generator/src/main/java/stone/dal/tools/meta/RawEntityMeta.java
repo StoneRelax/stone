@@ -21,6 +21,8 @@ public class RawEntityMeta extends EntityMeta {
 
   private List<RawFieldMeta> fields = new ArrayList<>();
 
+  private List<EntityListener> entityListeners = new ArrayList<>();
+
   protected List<RawRelationMeta> rawRelations = new ArrayList<>();
 
   protected Collection<UniqueIndexMeta> uniqueIndices = new ArrayList<>();
@@ -89,5 +91,13 @@ public class RawEntityMeta extends EntityMeta {
   @Override
   public Collection<UniqueIndexMeta> getUniqueIndices() {
     return uniqueIndices;
+  }
+
+  public List<EntityListener> getEntityListeners() {
+    return entityListeners;
+  }
+
+  public void setEntityListeners(List<EntityListener> entityListeners) {
+    this.entityListeners = entityListeners;
   }
 }

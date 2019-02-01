@@ -1,11 +1,11 @@
-package stone.dal.adaptor.spring.common.utils;
+package stone.dal.common.utils;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import stone.dal.common.StRepository;
 import stone.dal.common.models.data.BaseDo;
 
-public class DalAopUtils {
+public class DalClassUtils {
 
   public static Class getDoClass(Class repoClazz) {
     Class doClazz = null;

@@ -92,7 +92,21 @@ public class StJpaRepositoryImpl<T extends BaseDo, K>
   }
 
   @Override
-  public T get(T pk) {
+  @SuppressWarnings("unchecked")
+  public T findByPk(K pk) {
+    throw new IllegalArgumentException(
+        "The method works on a derived interface of abstract class of " + StJpaRepositoryImpl.class.getName());
+  }
+
+  @Override
+  @SuppressWarnings("unchecked")
+  public Collection<T> findAll() {
+    throw new IllegalArgumentException(
+        "The method works on a derived interface of abstract class of " + StJpaRepositoryImpl.class.getName());
+  }
+
+  @Override
+  public T findOne(T pk) {
     RdbmsEntity entity = entityMetaManager.getEntity(pk.getClass());
     List<T> res = jdbcTemplate.query(entity.getFindMeta(pk, true));
     T obj = null;
@@ -104,7 +118,7 @@ public class StJpaRepositoryImpl<T extends BaseDo, K>
   }
 
   @Override
-  public Collection<T> findList(T condition) {
+  public Collection<T> findMany(T condition) {
     RdbmsEntity entity = entityMetaManager.getEntity(condition.getClass());
     SqlQueryMeta queryMeta = entity.getFindMeta(condition, false);
     return jdbcTemplate.query(queryMeta);
@@ -115,6 +129,7 @@ public class StJpaRepositoryImpl<T extends BaseDo, K>
     RdbmsEntity entity = entityMetaManager.getEntity(obj.getClass());
     SqlQueryMeta queryMeta = entity.getFindMeta(obj, false);
     SqlQueryMeta pageQueryMeta = SqlQueryMeta.factory()
+        .mappingClazz(entity.getMeta().getClazz())
         .sql(queryMeta.getSql()).params(queryMeta.getParameters())
         .pageNo(pageNo).pageSize(pageSize).build();
     return jdbcTemplate.pageQuery(pageQueryMeta);
