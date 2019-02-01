@@ -349,7 +349,7 @@ public class DoGenerator {
   }
 
   public List<String> createDoJavaFiles(List<RawEntityMeta> entities,
-      String packageName, Map<String, ExtensionRuleReader.RuleSet.Rule> turnOnMap, Set<String> hdrEntities)
+                                        String packageName, Map<String, RuleSet.Rule> turnOnMap, Set<String> hdrEntities)
       throws Exception {
     Map<String, RawEntityMeta> mapper = entities.stream()
         .collect(Collectors.toMap(RawEntityMeta::getName, entityMeta -> entityMeta));
@@ -411,16 +411,16 @@ public class DoGenerator {
         return rawRelationMeta.getRelationType() == RelationTypes.ONE_2_MANY;
       }).forEach((rawRelationMeta) -> {
         RawEntityMeta rawEntityMeta = map.get(rawRelationMeta.getJoinDomain());
-        this.addFields(rawEntityMeta, bothRuleSet);
+        addFields(rawEntityMeta, bothRuleSet);
       });
-      this.addFields(entityMeta, bothRuleSet);
+      addFields(entityMeta, bothRuleSet);
     }
 
     ExtensionRuleReader.RuleSet.Rule headerRuleSet;
     if (hdrEntities.contains(entityMeta.getName())) {
       headerRuleSet = turnOnMap.get(ExtensionRuleReader.TurnOnSwitches.header.name());
       if (headerRuleSet != null) {
-        this.addFields(entityMeta, headerRuleSet);
+        addFields(entityMeta, headerRuleSet);
       }
     } else {
       headerRuleSet = turnOnMap.get(ExtensionRuleReader.TurnOnSwitches.details.name());
@@ -428,8 +428,8 @@ public class DoGenerator {
         entityMeta.getRawRelations().stream().filter((rawRelationMeta) -> {
           return rawRelationMeta.getRelationType() == RelationTypes.ONE_2_MANY;
         }).forEach((rawRelationMeta) -> {
-          RawEntityMeta rawEntityMeta = (RawEntityMeta)map.get(rawRelationMeta.getJoinDomain());
-          this.addFields(rawEntityMeta, headerRuleSet);
+          RawEntityMeta rawEntityMeta = map.get(rawRelationMeta.getJoinDomain());
+          addFields(rawEntityMeta, headerRuleSet);
         });
       }
     }
