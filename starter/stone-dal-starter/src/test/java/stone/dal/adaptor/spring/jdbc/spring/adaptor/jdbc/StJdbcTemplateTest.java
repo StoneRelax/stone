@@ -38,6 +38,19 @@ public class StJdbcTemplateTest {
   }
 
   @Test
+  public void testPagination_noData() {
+    SqlQueryMeta queryMeta = SqlQueryMeta.factory().
+        sql("select * from my_order where uuid>? order by uuid").
+        params(new Object[] { 100000 }).
+        pageNo(1).pageSize(1).
+        mappingClazz(MyOrder.class).build();
+    Page<MyOrder> page = stJdbcTemplate.pageQuery(queryMeta);
+    Assert.assertEquals(1, page.getPageInfo().getPageNo());
+    Assert.assertEquals(0, page.getPageInfo().getTotalRows());
+    Assert.assertEquals(0, page.getRows().size());
+  }
+
+  @Test
   public void testPagination() {
     SqlQueryMeta queryMeta = SqlQueryMeta.factory().
         sql("select * from my_order where uuid>? order by uuid").

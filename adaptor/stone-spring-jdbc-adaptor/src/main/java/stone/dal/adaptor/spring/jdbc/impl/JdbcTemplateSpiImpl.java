@@ -56,7 +56,7 @@ public class JdbcTemplateSpiImpl implements JdbcTemplateSpi {
   @Override
   @SuppressWarnings("unchecked")
   public Page queryPage(SqlQueryMeta queryMeta, SqlQueryMeta.RowMapper rowMapper) {
-    List<Page.PageInfo> pageInfo = jdbcTemplate.query(queryMeta.getSql(), ps -> {
+    List<Page.PageInfo> pageInfo = jdbcTemplate.query(queryMeta.getPageTotalCountQuerySql(), ps -> {
       ps.setMaxRows(1);
       for (int i = 0; i < queryMeta.getParameters().length; i++) {
         setStatementParams(ps, queryMeta.getParameters()[i], i);

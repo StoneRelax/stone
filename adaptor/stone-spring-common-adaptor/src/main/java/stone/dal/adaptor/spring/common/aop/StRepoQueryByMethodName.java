@@ -2,7 +2,7 @@ package stone.dal.adaptor.spring.common.aop;
 
 import java.lang.reflect.Method;
 import org.springframework.data.repository.query.parser.PartTree;
-import stone.dal.adaptor.spring.common.utils.DalAopUtils;
+import stone.dal.common.utils.DalClassUtils;
 
 public abstract class StRepoQueryByMethodName {
 
@@ -11,7 +11,7 @@ public abstract class StRepoQueryByMethodName {
   protected Class doClazz;
 
   public StRepoQueryByMethodName(Method method, PartTree tree) {
-    doClazz = DalAopUtils.getDoClass(method.getDeclaringClass());
+    doClazz = DalClassUtils.getDoClass(method.getDeclaringClass());
     this.tree = tree;
   }
 

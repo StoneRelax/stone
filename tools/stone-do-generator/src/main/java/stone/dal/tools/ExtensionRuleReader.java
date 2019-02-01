@@ -44,7 +44,7 @@ public class ExtensionRuleReader {
 
       private List<RawFieldMeta> addOnFields = new ArrayList<>();
 
-      private List<EntityListener> entityListeners = new ArrayList();
+      private List<EntityListener> entityListeners;
 
       public String getTurnOn() {
         return turnOn;

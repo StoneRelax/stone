@@ -24,6 +24,11 @@ public abstract class SqlQueryMeta {
   String pageQuerySql;
 
   /**
+   * Page total count query sql
+   */
+  String pageTotalCountQuerySql;
+
+  /**
    * parameters
    */
   Object[] parameters = new Object[0];
@@ -73,8 +78,9 @@ public abstract class SqlQueryMeta {
    */
   boolean one2oneCascadeFetching = false;
 
-  public static SqlQueryMeta bindPageSql(SqlQueryMeta queryMeta, String pageQuerySql) {
+  public static SqlQueryMeta bindPageSql(SqlQueryMeta queryMeta, String pageQuerySql, String pageTotalCountQuerySql) {
     queryMeta.pageQuerySql = pageQuerySql;
+    queryMeta.pageTotalCountQuerySql = pageTotalCountQuerySql;
     return queryMeta;
   }
 
@@ -116,6 +122,10 @@ public abstract class SqlQueryMeta {
 
   public String getPageQuerySql() {
     return pageQuerySql;
+  }
+
+  public String getPageTotalCountQuerySql() {
+    return pageTotalCountQuerySql;
   }
 
   public Object[] getParameters() {

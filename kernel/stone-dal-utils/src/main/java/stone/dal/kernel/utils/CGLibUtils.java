@@ -20,24 +20,6 @@ public class CGLibUtils {
   private CGLibUtils() {
   }
 
-  public static Object enhanceObject(Class clazz,
-                              MethodInterceptor methodInterceptor,
-                              CallbackFilter callBackFilter){
-    Enhancer enhancer = new Enhancer();
-    enhancer.setSuperclass(clazz);
-    enhancer.setCallback(methodInterceptor);
-    enhancer.setCallbackFilter(callBackFilter);
-    return enhancer.create();
-  }
-
-  /**
-   * Create CGLib Proxy object
-   *
-   * @param clazz             Model class
-   * @param methodInterceptor Method interceptor
-   * @param callBackFilter    Callback filter
-   * @return Proxy object
-   */
   private static Class buildProxy(
           Class clazz,
           MethodInterceptor methodInterceptor,
@@ -52,32 +34,24 @@ public class CGLibUtils {
     return enhancedClass;
   }
 
-//  public static Class getUserClass(Class clazz) {
-//    return ClassUtils.getUserClass(clazz);
-//  }
-
-//  public static Class getUserClass(Object obj) {
-//    return ClassUtils.getUserClass(obj);
-//  }
-
-  public static Class buildProxyClass(
-      Class clazz,
+  public static Class enhance(
+      Class superClass,
       MethodInterceptor methodInterceptor,
       CallbackFilter callBackFilter)
-      throws IllegalAccessException, InstantiationException {
+      throws IllegalAccessException {
     String key =
-        clazz.getName() + "." + methodInterceptor.getClass().getName() + "." + callBackFilter.getClass()
+        superClass.getName() + "." + methodInterceptor.getClass().getName() + "." + callBackFilter.getClass()
             .getName();
     Class enhancedClass = proxyClazzPool.computeIfAbsent(key, s -> {
       try {
-        return buildProxy(clazz, methodInterceptor, callBackFilter);
+        return buildProxy(superClass, methodInterceptor, callBackFilter);
       } catch (Exception e) {
         LogUtils.error(logger, e);
       }
       return null;
     });
     if (enhancedClass == null) {
-      throw new IllegalAccessException("Initial class fails,[" + clazz.getName() + "]");
+      throw new IllegalAccessException("Initial class fails,[" + superClass.getName() + "]");
     }
     return enhancedClass;
   }

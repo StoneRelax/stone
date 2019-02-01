@@ -35,7 +35,7 @@ import org.springframework.core.type.filter.TypeFilter;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import stone.dal.adaptor.spring.common.annotation.StRepositoryScan;
-import stone.dal.adaptor.spring.common.utils.DalAopUtils;
+import stone.dal.common.utils.DalClassUtils;
 import stone.dal.kernel.utils.CGLibUtils;
 import stone.dal.kernel.utils.KernelRuntimeException;
 import stone.dal.kernel.utils.LogUtils;
@@ -102,7 +102,7 @@ public class StRepoBeanDefinitionRegistrar implements ImportBeanDefinitionRegist
           Collection<Method> methods = conf.filterParsableMethods(repositoryClazz.getMethods());
           methods.forEach(method -> {
             StRepoMethodPartRegistry.getInstance().registerMethod(method,
-                DalAopUtils.getDoClass(repositoryClazz), conf.repoQueryByMethodNameClazz);
+                DalClassUtils.getDoClass(repositoryClazz), conf.repoQueryByMethodNameClazz);
           });
           Class enhancedClass = build(repositoryClazz, conf.methodFilter, conf.methodInterceptor);
           RootBeanDefinition rootBeanDefinition = new RootBeanDefinition(enhancedClass);
@@ -203,7 +203,7 @@ public class StRepoBeanDefinitionRegistrar implements ImportBeanDefinitionRegist
     Class repoClazz;
     try {
       if (clazz.isInterface() || Modifier.isAbstract(clazz.getModifiers())) {
-        repoClazz = CGLibUtils.buildProxyClass(clazz, methodInterceptor, methodFilter);
+        repoClazz = CGLibUtils.enhance(clazz, methodInterceptor, methodFilter);
       } else {
         repoClazz = clazz.getSuperclass();
       }

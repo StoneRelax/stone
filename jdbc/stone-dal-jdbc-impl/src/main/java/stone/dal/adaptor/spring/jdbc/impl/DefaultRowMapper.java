@@ -85,9 +85,9 @@ public class DefaultRowMapper implements SqlQueryMeta.RowMapper {
     if (clazz != null && clazz != Map.class) {
       try {
         if (queryMeta.shouldAttached()) {
-          clazz = CGLibUtils.buildProxyClass(clazz, dirtyMarkInterceptor, dirtyMarkMethodFilter);
+          clazz = CGLibUtils.enhance(clazz, dirtyMarkInterceptor, dirtyMarkMethodFilter);
         } else if (queryMeta.isSupportFetchMore()) {
-          clazz = CGLibUtils.buildProxyClass(clazz, lazyLoadInterceptor, lazyLoadMethodFilter);
+          clazz = CGLibUtils.enhance(clazz, lazyLoadInterceptor, lazyLoadMethodFilter);
         }
       } catch (Exception e) {
         throw new CreateRowObjectException(e);

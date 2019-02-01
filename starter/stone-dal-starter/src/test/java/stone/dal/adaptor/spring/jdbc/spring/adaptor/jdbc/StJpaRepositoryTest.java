@@ -66,7 +66,7 @@ public class StJpaRepositoryTest {
 
     MyOrder pk = new MyOrder();
     pk.setUuid(1000L);
-    MyOrder _order = myOrderRepository.get(pk);
+    MyOrder _order = myOrderRepository.findOne(pk);
     Assert.assertEquals(new Long(1000), _order.getUuid());
     Assert.assertEquals("M1000L", _order.getOrderDesc());
 
@@ -76,7 +76,7 @@ public class StJpaRepositoryTest {
 
     myOrderRepository.del(pk);
 
-    _order = myOrderRepository.get(pk);
+    _order = myOrderRepository.findOne(pk);
     Assert.assertNull(_order);
     List res = stJdbcTemplate.query(SqlQueryMeta.factory().sql("select * from my_order_item where uuid>=?").params(
         new Object[] { 10000L }).build());
@@ -91,13 +91,13 @@ public class StJpaRepositoryTest {
     Long uuid = goodsRepository.create(goods);
     Assert.assertEquals(new Long(1001), uuid);
 
-//    Per _person = personRepository.get(goods);
+//    Per _person = personRepository.findOne(goods);
 //    Assert.assertEquals(new Long(1001l), _person.getUuid());
 //    Assert.assertEquals("jinny", _person.getName());
-//    Assert.assertEquals("M00001", _person.getMyOrders().get(0).getOrderNo());
-//    Assert.assertEquals(new Long(1), _person.getMyOrders().get(0).getUuid());
-//    Assert.assertEquals("M00002", _person.getMyOrders().get(1).getOrderNo());
-//    Assert.assertEquals(new Long(2), _person.getMyOrders().get(1).getUuid());
+//    Assert.assertEquals("M00001", _person.getMyOrders().findOne(0).getOrderNo());
+//    Assert.assertEquals(new Long(1), _person.getMyOrders().findOne(0).getUuid());
+//    Assert.assertEquals("M00002", _person.getMyOrders().findOne(1).getOrderNo());
+//    Assert.assertEquals(new Long(2), _person.getMyOrders().findOne(1).getUuid());
   }
 
 
@@ -118,7 +118,7 @@ public class StJpaRepositoryTest {
 
     Assert.assertEquals(new Long(1001), personRepository.create(person));
 
-    Person _person = personRepository.get(person);
+    Person _person = personRepository.findOne(person);
     Assert.assertEquals(new Long(1001l), _person.getUuid());
     Assert.assertEquals("jinny", _person.getName());
     Assert.assertEquals("M00001", _person.getMyOrders().get(0).getOrderNo());
@@ -133,7 +133,7 @@ public class StJpaRepositoryTest {
     Person person = new Person();
     person.setUuid(1001L);
     personRepository.del(person);
-    Assert.assertNull(personRepository.get(person));
+    Assert.assertNull(personRepository.findOne(person));
     SqlQueryMeta queryMeta = SqlQueryMeta.factory()
         .sql("select * from person_order where person_uuid=?")
         .params(new Object[] { 1001L }).build();

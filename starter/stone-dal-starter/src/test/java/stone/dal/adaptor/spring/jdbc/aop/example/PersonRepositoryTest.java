@@ -34,6 +34,24 @@ public class PersonRepositoryTest {
   private PersonService personService;
 
   @Test
+  public void testFindOneById() {
+    Person user = new Person();
+    user.setUuid(1002l);
+    user.setName("Xie Feng");
+    personRepository.create(user);
+    Assert.assertEquals("Xie Feng", personRepository.findByPk(1002l).getName());
+  }
+
+  @Test
+  public void testFindAll() {
+    Person user = new Person();
+    user.setUuid(1002l);
+    user.setName("Xie Feng");
+    personRepository.create(user);
+    Assert.assertEquals("Xie Feng", personRepository.findAll().iterator().next().getName());
+  }
+
+  @Test
   public void testFindUserByManager() {
     Person user = new Person();
     user.setUuid(1002l);
