@@ -9,6 +9,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EntityListeners;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinColumns;
@@ -85,6 +86,10 @@ public class EntityMetaManager {
         Table tableAnnotation = (Table) dalClazz.getAnnotation(Table.class);
         entityFactory.tableName(tableAnnotation.name());
         parseFields(clazz, entityFactory);
+      }
+      if (clazz.isAnnotationPresent(EntityListeners.class)) {
+        EntityListeners listeners = (EntityListeners) dalClazz.getAnnotation(EntityListeners.class);
+        entityFactory.addEntityListeners(listeners);
       }
       if (clazz.isAnnotationPresent(UniqueIndices.class)) {
         UniqueIndices uniqueIndices = (UniqueIndices) dalClazz.getAnnotation(UniqueIndices.class);
