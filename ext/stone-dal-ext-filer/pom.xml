@@ -8,17 +8,13 @@
         <relativePath>../..</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>stone-dal-jdbc-autoconfigure</artifactId>
-    <name>stone-dal-jdbc-autoconfigure</name>
+    <artifactId>stone-dal-ext-filer</artifactId>
+    <name>stone-dal-ext-filer</name>
     <packaging>jar</packaging>
     <dependencies>
         <dependency>
             <groupId>stone</groupId>
-            <artifactId>stone-dal-jdbc-impl</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-jdbc</artifactId>
+            <artifactId>stone-dal-utils</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>

@@ -470,6 +470,12 @@
                 <artifactId>stone-rdbms-sync</artifactId>
                 <version>${stone.version}</version>
             </dependency>
+
+            <dependency>
+                <groupId>stone</groupId>
+                <artifactId>stone-dal-ext-filer</artifactId>
+                <version>${stone.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -518,6 +524,7 @@
         <module>jdbc/stone-dal-jdbc-impl</module>
         <module>adaptor/stone-spring-jdbc-adaptor</module>
         <module>adaptor/stone-spring-common-adaptor</module>
+        <module>ext/stone-dal-ext-filer</module>
     </modules>
 
 </project>
