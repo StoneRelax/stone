@@ -9,7 +9,7 @@ import stone.dal.ext.filer.impl.LocalFileResolver;
 @Configuration
 public class FilerAutoConfigure {
 
-  @Value("${app.localStorePath}")
+  @Value("${stone.dal.ext.filer.local-store-path}")
   private String localStorePath;
 
   @Bean
