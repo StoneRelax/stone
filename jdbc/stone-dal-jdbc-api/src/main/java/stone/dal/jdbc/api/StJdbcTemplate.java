@@ -46,6 +46,14 @@ public interface StJdbcTemplate {
   <T> T queryOne(SqlCondition condition);
 
   /**
+   * Execute page query with a specified <code>stone.dal.jdbc.api.meta.SqlCondition</code>. It returns one object.
+   *
+   * @param condition query condition
+   * @return Page object
+   */
+  <T> Page<T> pageQuery(SqlCondition condition, int pageNo, int pageSize);
+
+  /**
    * Execute pageQuery query with specified meta name, and parameters
    *
    * @param queryMeta query meta

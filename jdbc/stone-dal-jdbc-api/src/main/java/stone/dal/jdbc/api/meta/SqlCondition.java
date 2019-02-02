@@ -29,6 +29,12 @@ public class SqlCondition {
     return this;
   }
 
+  public SqlCondition like(String field, String value) {
+    params.add(value);
+    operators.add(field + " like ?");
+    return this;
+  }
+
   public SqlCondition gt(String field, Object value) {
     params.add(value);
     operators.add(field + ">?");
@@ -70,12 +76,12 @@ public class SqlCondition {
     return this;
   }
 
-  public SqlCondition union(SqlCondition condition, String operator){
+  public SqlCondition union(SqlCondition condition, String operator) {
     SqlQueryMeta joinMeta = condition.build();
-    if(operator.toUpperCase().equals("AND")){
+    if (operator.toUpperCase().equals("AND")) {
       operators.add("AND (" + joinMeta.getSql() + ")");
       params.addAll(Arrays.asList(joinMeta.getParameters()));
-    }else if(operator.toUpperCase().equals("OR")){
+    } else if (operator.toUpperCase().equals("OR")) {
       operators.add("OR (" + joinMeta.getSql() + ")");
       params.addAll(Arrays.asList(joinMeta.getParameters()));
     }
@@ -90,6 +96,17 @@ public class SqlCondition {
     });
     return SqlQueryMeta.factory().mappingClazz(clazz)
         .sql(sb.toString()).params(params.toArray(new Object[0])).build();
+  }
+
+  public SqlQueryMeta build(int pageNo, int pageSize) {
+    StringBuilder sb = new StringBuilder();
+    operators.forEach(operator -> {
+      sb.append(operator);
+      sb.append(" ");
+    });
+    return SqlQueryMeta.factory().mappingClazz(clazz)
+        .sql(sb.toString()).pageNo(pageNo).pageSize(pageSize)
+        .params(params.toArray(new Object[0])).build();
   }
 
 }

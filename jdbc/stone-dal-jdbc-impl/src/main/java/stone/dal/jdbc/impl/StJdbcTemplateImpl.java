@@ -78,7 +78,10 @@ public class StJdbcTemplateImpl implements StJdbcTemplate {
   public <T> T queryOne(SqlCondition condition) {
     SqlQueryMeta queryMeta = condition.build();
     RdbmsEntity entity = entityMetaManager.getEntity(queryMeta.getMappingClazz());
-    String sql = entity.getFindSqlNoCondition() + " where ";
+    String sql = entity.getFindSqlNoCondition();
+    if (!StringUtils.isEmpty(queryMeta.getSql())) {
+      sql += " where ";
+    }
     SqlQueryMeta _queryMeta = SqlQueryMeta.factory()
         .mappingClazz(queryMeta.getMappingClazz())
         .sql(sql).join(queryMeta).build();
@@ -87,6 +90,23 @@ public class StJdbcTemplateImpl implements StJdbcTemplate {
       return res.get(0);
     }
     return null;
+  }
+
+  @Override
+  @SuppressWarnings("unchecked")
+  public <T> Page<T> pageQuery(SqlCondition condition, int pageNo, int pageSize) {
+    SqlQueryMeta queryMeta = condition.build();
+    RdbmsEntity entity = entityMetaManager.getEntity(queryMeta.getMappingClazz());
+    String sql = entity.getFindSqlNoCondition();
+    String _sql = replace(sql, "\n", " ");
+    if (!StringUtils.isEmpty(queryMeta.getSql())) {
+      _sql += " where ";
+    }
+    SqlQueryMeta _queryMeta = SqlQueryMeta.factory()
+        .mappingClazz(queryMeta.getMappingClazz())
+        .pageSize(pageSize).pageNo(pageNo)
+        .sql(_sql).join(queryMeta).build();
+    return pageQuery(_queryMeta);
   }
 
   @Override
