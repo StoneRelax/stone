@@ -5,5 +5,4 @@ import ${jpaPackageName}.${doName};
 
 public interface ${className} extends StJpaRepository<${doName}, ${pkType}> {
 
-
 }
