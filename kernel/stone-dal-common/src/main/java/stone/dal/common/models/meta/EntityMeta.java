@@ -1,9 +1,11 @@
 package stone.dal.common.models.meta;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import javax.persistence.EntityListeners;
 
 /**
  * @author fengxie
@@ -12,6 +14,7 @@ public abstract class EntityMeta {
 	protected String tableName;
 
 	protected boolean nosql;
+
 	transient Class clazz;
 
 	transient Class pkClazz;
@@ -21,6 +24,8 @@ public abstract class EntityMeta {
 	protected Collection<RelationMeta> relations;
 
 	protected Collection<UniqueIndexMeta> uniqueIndices;
+
+  private Collection<Class> entityListenersClasses;
 
 	public boolean isNosql() {
 		return nosql;
@@ -46,6 +51,10 @@ public abstract class EntityMeta {
 		return relations;
 	}
 
+  public Collection<Class> getEntityListenersClasses() {
+    return entityListenersClasses;
+  }
+
 	public Collection<UniqueIndexMeta> getUniqueIndices() {
 		return uniqueIndices;
 	}
@@ -59,6 +68,8 @@ public abstract class EntityMeta {
 		private List<FieldMeta> fields = new ArrayList<>();
 		private List<RelationMeta> relations = new ArrayList<>();
 		private List<UniqueIndexMeta> uniqueIndices = new ArrayList<>();
+
+    private List<Class> entityListenersClasses = new ArrayList<>();
 
 		private EntityMeta meta = new EntityMeta() {
 		};
@@ -93,10 +104,16 @@ public abstract class EntityMeta {
 			return this;
 		}
 
+    public Factory addEntityListeners(EntityListeners listeners) {
+      entityListenersClasses.addAll(Arrays.asList(listeners.value()));
+      return this;
+    }
+
 		public EntityMeta build() {
 			meta.fields = Collections.unmodifiableCollection(fields);
 			meta.relations = Collections.unmodifiableCollection(relations);
 			meta.uniqueIndices = Collections.unmodifiableCollection(uniqueIndices);
+      meta.entityListenersClasses = Collections.unmodifiableCollection(entityListenersClasses);
 			return meta;
 		}
 	}

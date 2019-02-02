@@ -5,6 +5,7 @@ import java.util.List;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EntityListeners;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
@@ -12,7 +13,7 @@ import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
-
+import stone.dal.adaptor.spring.jdbc.aop.example.SampleEntityListener;
 import stone.dal.common.models.annotation.Clob;
 import stone.dal.common.models.annotation.Sequence;
 import stone.dal.common.models.data.BaseDo;
@@ -22,6 +23,7 @@ import stone.dal.common.models.data.BaseDo;
  */
 @Entity
 @Table(name = "person", uniqueConstraints = @UniqueConstraint(columnNames = { "uuid" }))
+@EntityListeners(SampleEntityListener.class)
 public class Person extends BaseDo {
   private Long uuid;
 
