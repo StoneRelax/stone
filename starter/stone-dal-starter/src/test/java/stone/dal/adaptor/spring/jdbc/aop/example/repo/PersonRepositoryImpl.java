@@ -1,10 +1,10 @@
 package stone.dal.adaptor.spring.jdbc.aop.example.repo;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import stone.dal.adaptor.spring.jdbc.api.StJdbcTemplate;
-import stone.dal.adaptor.spring.jdbc.api.StJpaRepository;
-import stone.dal.adaptor.spring.jdbc.api.meta.SqlCondition;
 import stone.dal.common.models.Person;
+import stone.dal.jdbc.api.StJdbcTemplate;
+import stone.dal.jdbc.api.StJpaRepository;
+import stone.dal.jdbc.api.meta.SqlCondition;
 
 public abstract class PersonRepositoryImpl implements PersonRepository {
 

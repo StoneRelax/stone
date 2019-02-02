@@ -10,9 +10,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import stone.dal.adaptor.spring.jdbc.aop.example.repo.PersonRepository;
-import stone.dal.adaptor.spring.jdbc.api.StJdbcTemplate;
-import stone.dal.adaptor.spring.jdbc.spring.adaptor.app.SpringJdbcAdaptorTestApplication;
 import stone.dal.common.models.Person;
+import stone.dal.jdbc.api.StJdbcTemplate;
+import stone.dal.jdbc.spring.adaptor.app.SpringJdbcAdaptorTestApplication;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest(classes = SpringJdbcAdaptorTestApplication.class)
@@ -40,6 +40,18 @@ public class PersonRepositoryTest {
     user.setName("Xie Feng");
     personRepository.create(user);
     Assert.assertEquals("Xie Feng", personRepository.findByPk(1002l).getName());
+  }
+
+  @Test
+  public void testDelById() {
+    Person user = new Person();
+    user.setUuid(1002l);
+    user.setName("Xie Feng");
+    personRepository.create(user);
+    Assert.assertEquals("Xie Feng", personRepository.findByPk(1002l).getName());
+
+    personRepository.delByPk(user.getUuid());
+    Assert.assertNull(personRepository.findByPk(1002l));
   }
 
   @Test

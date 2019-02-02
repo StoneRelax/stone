@@ -23,38 +23,36 @@ public class ${className} {
   private ${repoName} repository;
 
     @RequestMapping(value="/{id}",method=RequestMethod.GET)
-    @ApiOperation(httpMethod="GET",value="Query ${doName}",notes="Find ${doName} by uuid")
+    @ApiOperation(httpMethod="GET",value="Query ${doName}")
     public @ResponseBody ${doName} findByPk(@ApiParam(value = "id") @PathVariable("id") ${pkType} id){
       return repository.findByPk(id);
     }
 
     @RequestMapping(value="/get-all/",method=RequestMethod.GET)
-    @ApiOperation(httpMethod="GET",value="Query ${doName}",notes="Find ${doName} by uuid")
+    @ApiOperation(httpMethod="GET",value="Query ${doName}")
     public @ResponseBody java.util.Collection<${doName}> findAll(){
         return repository.findAll();
     }
 
     @Transactional
     @RequestMapping(value="",method=RequestMethod.POST)
-    @ApiOperation(httpMethod="POST",value="Create ${doName}",notes="Create ${doName}")
+    @ApiOperation(httpMethod="POST",value="Create ${doName}")
     public @ResponseBody ${pkType} create(@RequestBody ${doName} entity){
       return repository.create(entity);
     }
 
     @Transactional
     @RequestMapping(value="",method=RequestMethod.PUT)
-    @ApiOperation(httpMethod="PUT",value="Update ${doName}",notes="Update ${doName}")
+    @ApiOperation(httpMethod="PUT",value="Update ${doName}")
     public void update(@RequestBody ${doName} entity){
       repository.update(entity);
     }
 
     @Transactional
     @RequestMapping(value="/{id}",method=RequestMethod.DELETE)
-    @ApiOperation(httpMethod="DELETE",value="Delete ${doName}",notes="Delete ${doName} by id")
+    @ApiOperation(httpMethod="DELETE",value="Delete ${doName}")
     public void delete(@ApiParam(value = "id") @PathVariable("id") ${pkType} id){
-      ${doName} entity = new ${doName}();
-      entity.set${pkName}(id);
-      repository.del(entity);
+      repository.delByPk(id);
     }
 
 }

@@ -1,8 +1,8 @@
 package stone.dal.adaptor.spring.jdbc.aop.example.repo;
 
 import java.util.List;
-import stone.dal.adaptor.spring.jdbc.api.StJpaRepository;
 import stone.dal.common.models.Person;
+import stone.dal.jdbc.api.StJpaRepository;
 
 public interface PersonRepository extends StJpaRepository<Person, Long> {
 
