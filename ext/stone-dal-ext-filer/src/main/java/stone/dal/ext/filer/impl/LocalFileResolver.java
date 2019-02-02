@@ -10,6 +10,7 @@ import stone.dal.ext.filer.FileResolver;
 import stone.dal.kernel.utils.FileUtils;
 import stone.dal.kernel.utils.KernelRuntimeException;
 import stone.dal.kernel.utils.LogUtils;
+import stone.dal.kernel.utils.StringUtils;
 
 public class LocalFileResolver implements FileResolver {
 
@@ -22,8 +23,8 @@ public class LocalFileResolver implements FileResolver {
   }
 
   @Override
-  public InputStream getInputStream(String uuid) {
-    String resolvePath = resolvePath(uuid);
+  public InputStream getInputStream(String uuid, String category) {
+    String resolvePath = resolvePath(uuid, category);
     try {
       return new FileInputStream(resolvePath);
     } catch (FileNotFoundException e) {
@@ -33,10 +34,10 @@ public class LocalFileResolver implements FileResolver {
   }
 
   @Override
-  public String resolve(InputStream is) {
+  public String resolve(InputStream is, String category) {
     try {
       String uuid = UUID.randomUUID().toString();
-      FileUtils.writeFile(resolvePath(uuid), is);
+      FileUtils.writeFile(resolvePath(uuid, category), is);
       return uuid;
     } catch (Exception e) {
       LogUtils.error(s_logger, e);
@@ -44,7 +45,10 @@ public class LocalFileResolver implements FileResolver {
     }
   }
 
-  private String resolvePath(String uuid) {
-    return storePath + "/" + uuid;
+  private String resolvePath(String uuid, String category) {
+    if (StringUtils.isEmpty(category)) {
+      category = "anonymous ";
+    }
+    return storePath + "/" + category + "/" + uuid;
   }
 }
