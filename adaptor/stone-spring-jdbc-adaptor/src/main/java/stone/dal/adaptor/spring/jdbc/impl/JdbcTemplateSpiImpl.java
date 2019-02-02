@@ -5,10 +5,10 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.List;
 import org.springframework.jdbc.core.JdbcTemplate;
-import stone.dal.adaptor.spring.jdbc.api.meta.SqlBaseMeta;
-import stone.dal.adaptor.spring.jdbc.api.meta.SqlQueryMeta;
-import stone.dal.adaptor.spring.jdbc.spi.JdbcTemplateSpi;
 import stone.dal.common.models.data.Page;
+import stone.dal.jdbc.api.meta.SqlBaseMeta;
+import stone.dal.jdbc.api.meta.SqlQueryMeta;
+import stone.dal.jdbc.spi.JdbcTemplateSpi;
 
 public class JdbcTemplateSpiImpl implements JdbcTemplateSpi {
 

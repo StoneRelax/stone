@@ -8,11 +8,11 @@ import org.springframework.data.repository.query.parser.Part;
 import org.springframework.data.repository.query.parser.PartTree;
 import stone.dal.adaptor.spring.common.SpringContextHolder;
 import stone.dal.adaptor.spring.common.aop.StRepoQueryByMethodName;
-import stone.dal.adaptor.spring.jdbc.api.StJdbcTemplate;
-import stone.dal.adaptor.spring.jdbc.api.meta.SqlCondition;
-import stone.dal.adaptor.spring.jdbc.impl.RdbmsEntity;
-import stone.dal.adaptor.spring.jdbc.impl.RdbmsEntityManager;
 import stone.dal.common.models.meta.FieldMeta;
+import stone.dal.jdbc.api.StJdbcTemplate;
+import stone.dal.jdbc.api.meta.SqlCondition;
+import stone.dal.jdbc.impl.RdbmsEntity;
+import stone.dal.jdbc.impl.RdbmsEntityManager;
 import stone.dal.kernel.utils.KernelUtils;
 
 public class StJpaRepoQueryByMethodName extends StRepoQueryByMethodName {

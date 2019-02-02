@@ -3,7 +3,7 @@ package stone.dal.adaptor.spring.jdbc.aop;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import org.springframework.cglib.proxy.CallbackFilter;
-import stone.dal.adaptor.spring.jdbc.api.StJpaRepository;
+import stone.dal.jdbc.api.StJpaRepository;
 
 public class StJpaRepoMethodFilter implements CallbackFilter {
 

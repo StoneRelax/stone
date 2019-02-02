@@ -34,7 +34,7 @@ public class DalAutoConfigure {
   }
 
   @Bean
-  public EntityMetaManager getEntityMetaManager() throws DoParseException {
+  public EntityMetaManager getEntStJdbcTemplateTestityMetaManager() throws DoParseException {
     return this.entityMetaManager;
   }
 
