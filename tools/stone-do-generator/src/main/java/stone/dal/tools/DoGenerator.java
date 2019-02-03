@@ -348,7 +348,7 @@ public class DoGenerator {
     return meta;
   }
 
-  public boolean hasListener(RawEntityMeta entityMeta) {
+  public boolean hasEntityListenerListener(RawEntityMeta entityMeta) {
     return !CollectionUtils.isEmpty(entityMeta.getEntityListeners());
   }
 

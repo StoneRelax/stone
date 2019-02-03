@@ -23,7 +23,8 @@ import stone.dal.common.models.data.BaseDo;
  */
 @Entity
 @Table(name = "person", uniqueConstraints = @UniqueConstraint(columnNames = { "uuid" }))
-@EntityListeners(SampleEntityListener.class)
+@EntityListeners(value = SampleEntityListener.class)
+
 public class Person extends BaseDo {
   private Long uuid;
 
@@ -32,6 +33,10 @@ public class Person extends BaseDo {
   private List<MyOrder> myOrders = new ArrayList<>();
 
   private String description;
+
+  private java.sql.Timestamp createdDate;
+
+  private java.sql.Timestamp lastUpdateDate;
 
   @Id
   @Column(name = "uuid", precision = 18, scale = 0)
@@ -64,6 +69,25 @@ public class Person extends BaseDo {
 
   public void setName(String name) {
     this.name = name;
+  }
+
+  @Column(name = "last_update_date")
+  public java.sql.Timestamp getLastUpdateDate() {
+    return this.lastUpdateDate;
+  }
+
+  public void setLastUpdateDate(java.sql.Timestamp lastUpdateDate) {
+    this.lastUpdateDate = lastUpdateDate;
+  }
+
+
+  @Column(name = "created_date")
+  public java.sql.Timestamp getCreatedDate() {
+    return this.createdDate;
+  }
+
+  public void setCreatedDate(java.sql.Timestamp createdDate) {
+    this.createdDate = createdDate;
   }
 
   @ManyToMany(cascade = { CascadeType.ALL }, fetch = FetchType.LAZY)

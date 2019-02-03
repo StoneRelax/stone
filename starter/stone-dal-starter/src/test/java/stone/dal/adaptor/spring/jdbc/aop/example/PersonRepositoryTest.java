@@ -11,6 +11,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import stone.dal.adaptor.spring.jdbc.aop.example.repo.PersonRepository;
 import stone.dal.common.models.Person;
+import stone.dal.common.models.data.BaseDo;
 import stone.dal.jdbc.api.StJdbcTemplate;
 import stone.dal.jdbc.spring.adaptor.app.SpringJdbcAdaptorTestApplication;
 
@@ -95,6 +96,18 @@ public class PersonRepositoryTest {
     }
     List<Person> usersStone = personRepository.findByName("Stone");
     Assert.assertEquals("Stone", usersStone.get(0).getName());
+  }
+
+  @Test
+  public void testEntityListener(){
+    Person person = new Person();
+    person.setName("go");
+    personService.create(person);
+    long uuid = person.getUuid();
+
+    person.setName("no go");
+    person.set_state(BaseDo.States.Updated);
+    personService.update(person);
   }
 
 }

@@ -1,6 +1,8 @@
 package stone.dal.jdbc.api;
 
 import java.util.Collection;
+
+import org.springframework.stereotype.Repository;
 import stone.dal.common.StRepository;
 import stone.dal.common.models.data.BaseDo;
 import stone.dal.common.models.data.Page;
@@ -8,6 +10,7 @@ import stone.dal.common.models.data.Page;
 /**
  * @author fengxie
  */
+@Repository
 public interface StJpaRepository<T extends BaseDo, K> extends StRepository {
 
   /**

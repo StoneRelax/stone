@@ -37,6 +37,8 @@ CREATE TABLE `person` (
   `uuid` decimal(18),
   `name` varchar(50) DEFAULT NULL,
   `descriptionUuid` varchar(64) DEFAULT NULL,
+  `created_date` DATE DEFAULT NULL,
+  `last_update_date` DATE DEFAULT NULL,
   PRIMARY KEY (`uuid`)
 );
 
