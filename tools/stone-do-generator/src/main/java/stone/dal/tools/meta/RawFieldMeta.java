@@ -21,9 +21,9 @@ public class RawFieldMeta extends FieldMeta {
 
   private String unique;
 
-  private String seqDesc;
+  private String seqDsl;
 
-  private String mapperDesc;
+  private String columnMapperDsl;
 
   private String fieldProperty;
 
@@ -77,20 +77,12 @@ public class RawFieldMeta extends FieldMeta {
     this.fieldProperty = fieldProperty;
   }
 
-  public void setMapperBy(String mapperBy) {
-    this.mappedBy = mapperBy;
+  public String getColumnMapperDsl() {
+    return columnMapperDsl;
   }
 
-  public void setMapper(String mapper) {
-    this.mapper = mapper;
-  }
-
-  public String getMapperDesc() {
-    return mapperDesc;
-  }
-
-  public void setMapperDesc(String mapperDesc) {
-    this.mapperDesc = mapperDesc;
+  public void setColumnMapperDsl(String columnMapperDsl) {
+    this.columnMapperDsl = columnMapperDsl;
   }
 
   public String getUnique() {
@@ -113,12 +105,12 @@ public class RawFieldMeta extends FieldMeta {
     this.seqType = seqType;
   }
 
-  public String getSeqDesc() {
-    return seqDesc;
+  public String getSeqDsl() {
+    return seqDsl;
   }
 
-  public void setSeqDesc(String seqDesc) {
-    this.seqDesc = seqDesc;
+  public void setSeqDsl(String seqDsl) {
+    this.seqDsl = seqDsl;
   }
 
   public void setSeqStartNum(int defaultStartSeq) {

@@ -5,14 +5,14 @@ public enum ExcelSpecColumnEnu {
   typeName,
   fieldProperty,
   pk,
-  seqDesc,
+  seqDsl,
   notNull,
   label,
   notPersist,
   order,
   unique,
   index,
-  mapperDesc,
+  columnMapperDsl,
   dbName,
   remarks
 };
