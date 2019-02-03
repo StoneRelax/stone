@@ -12,6 +12,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import stone.dal.common.models.DalColumnMapper;
 import stone.dal.common.models.data.BaseDo;
 import stone.dal.common.models.data.BaseEntity;
 import stone.dal.common.models.meta.ColumnInfo;
@@ -52,6 +55,8 @@ public class RdbmsEntity extends BaseEntity {
 
   private HashMap<String, String> dbFieldRelationRefMapper;
 
+  private HashMap<String, ColumnMapper> columnMapperRegistry;
+
   private Map<String, RelationMeta> relationMapper;
 
   private static final String UPDATE_SET_HOLDER = "$CHANGED_FIELDS$";
@@ -73,9 +78,12 @@ public class RdbmsEntity extends BaseEntity {
     super(meta);
   }
 
+  private static Logger s_logger = LoggerFactory.getLogger(RdbmsEntity.class);
+
   @Override
   protected void doInit() {
     dbFieldNameMapper = new HashMap<>();
+    columnMapperRegistry = new HashMap<>();
     relationMapper = new HashMap<>();
     insertRelSqls = new ConcurrentHashMap<>();
     delRelSqls = new ConcurrentHashMap<>();
@@ -84,6 +92,11 @@ public class RdbmsEntity extends BaseEntity {
 
     meta.getFields().forEach(field -> {
       dbFieldNameMapper.put(field.getDbName(), field);
+      if (field.getColumnMapperClazz() != null) {
+        columnMapperRegistry
+            .put(field.getName(), new ColumnMapper(field.getColumnMapperClazz(),
+                field.getAssociateColumn(), field.getColumnMapperArgs()));
+      }
     });
 
     meta.getRelations().forEach(this::readRelation);
@@ -92,6 +105,14 @@ public class RdbmsEntity extends BaseEntity {
     updateDml = buildUpdateSql();
     findSql = buildFindSql();
     findSqlNoCondition = buildSelectSql(meta.getTableName(), false);
+  }
+
+  public Set<String> getColumnsHavingMapper() {
+    return columnMapperRegistry.keySet();
+  }
+
+  public ColumnMapper getColumnMapper(String columnName) {
+    return columnMapperRegistry.get(columnName);
   }
 
   public List<ColumnInfo> getColumns() {
@@ -564,4 +585,33 @@ public class RdbmsEntity extends BaseEntity {
     return params.toArray(new Object[0]);
   }
 
+  public static class ColumnMapper {
+    private DalColumnMapper dalColumnMapper;
+
+    private String associateColumn;
+
+    private String args;
+
+    public ColumnMapper(Class clazz, String associateColumn, String args) {
+      try {
+        this.dalColumnMapper = (DalColumnMapper) clazz.newInstance();
+        this.associateColumn = associateColumn;
+        this.args = args;
+      } catch (Exception ex) {
+        s_logger.error(ex.getMessage());
+      }
+    }
+
+    public String getArgs() {
+      return args;
+    }
+
+    public DalColumnMapper getDalColumnMapper() {
+      return dalColumnMapper;
+    }
+
+    public String getAssociateColumn() {
+      return associateColumn;
+    }
+  }
 }

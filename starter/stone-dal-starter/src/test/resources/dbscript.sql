@@ -51,6 +51,7 @@ CREATE TABLE `goods` (
   `uuid` decimal(18),
   `name` varchar(50) DEFAULT NULL,
   `create_date` datetime DEFAULT NULL,
+  `label_id` decimal(18) DEFAULT NULL,
   PRIMARY KEY (`uuid`)
 );
 

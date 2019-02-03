@@ -7,6 +7,7 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import stone.dal.common.models.Goods;
 import stone.dal.common.models.MyOrder;
 import stone.dal.common.models.MyOrderItem;
 import stone.dal.common.models.data.Page;
@@ -36,6 +37,23 @@ public class StJdbcTemplateTest {
     Assert.assertEquals(orderList.get(0).getUuid(), new Long(2));
     Assert.assertEquals(orderList.get(1).getUuid(), new Long(3));
   }
+
+  @Test
+  public void testColumnMapper() {
+    SqlQueryMeta queryMeta = SqlQueryMeta.factory().
+        sql("select * from goods where uuid=? order by uuid").
+        params(new Object[] { -1 }).
+        mappingClazz(Goods.class).build();
+    List<Goods> goodsList = stJdbcTemplate.query(queryMeta);
+    Assert.assertEquals(goodsList.get(0).getLabel(), "Mapped");
+
+    Page<Goods> page = stJdbcTemplate.pageQuery(SqlQueryMeta.factory().
+        sql("select * from goods where uuid=? order by uuid").
+        params(new Object[] { -1 }).pageSize(1).pageNo(1).
+        mappingClazz(Goods.class).build());
+    Assert.assertEquals(page.getRows().get(0).getLabel(), "Mapped");
+  }
+
 
   @Test
   public void testPagination_noData() {

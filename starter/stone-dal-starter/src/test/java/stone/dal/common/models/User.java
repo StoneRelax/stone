@@ -14,7 +14,6 @@ import javax.persistence.ManyToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
-import stone.dal.common.models.annotation.FieldMapper;
 import stone.dal.common.models.annotation.Sequence;
 import stone.dal.common.models.data.BaseDo;
 
@@ -59,12 +58,6 @@ public class User extends BaseDo {
   private Boolean supervisor;
 
   private String locale;
-
-  private Integer age;
-
-  private String gender;
-
-  private Long genderUuid;
 
   private Date birthday;
 
@@ -131,16 +124,6 @@ public class User extends BaseDo {
 
   public void setParentType(String parentType) {
     this.parentType = parentType;
-  }
-
-  @Transient
-  @FieldMapper(mapper = "organisation", mappedBy = "parentUuid")
-  public String getParentName() {
-    return parentName;
-  }
-
-  public void setParentName(String parentName) {
-    this.parentName = parentName;
   }
 
   @Transient
@@ -257,41 +240,6 @@ public class User extends BaseDo {
 
   public void setRoles(List<Role> roles) {
     this.roles = roles;
-  }
-
-  @Transient
-  @FieldMapper(
-      mapper = "todayOffset",
-      mappedBy = "birthday"
-  )
-  public Integer getAge() {
-    return age;
-  }
-
-  public void setAge(Integer age) {
-    this.age = age;
-  }
-
-  @Transient
-  @FieldMapper(
-      mapper = "code",
-      mappedBy = "genderUuid"
-  )
-  public String getGender() {
-    return gender;
-  }
-
-  public void setGender(String gender) {
-    this.gender = gender;
-  }
-
-  @Column(name = "gender_uuid", precision = 18, scale = 0)
-  public Long getGenderUuid() {
-    return genderUuid;
-  }
-
-  public void setGenderUuid(Long genderUuid) {
-    this.genderUuid = genderUuid;
   }
 
   @Column(name = "birthday")

@@ -4,39 +4,41 @@ package stone.dal.common.models.meta;
  * @author fengxie
  */
 public abstract class FieldMeta {
-	protected String seqKey;
+  protected String seqKey;
 
-	protected String seqType;
+  protected String seqType;
 
-	protected long seqStartNum;
+  protected long seqStartNum;
 
-	protected String dbName;
+  protected String dbName;
 
-	protected Boolean nullable = true;
+  protected Boolean nullable = true;
 
-	protected Boolean insertable = true;
+  protected Boolean insertable = true;
 
-	protected String name;
+  protected String name;
 
-	transient Class type;
+  transient Class type;
 
-	protected Boolean pk = false;
+  protected Class columnMapperClazz;
 
-	protected Integer maxLength = 0;
+  protected String associateColumn;
 
-	protected Integer scale = 0;
+  protected String columnMapperArgs;
 
-	protected Integer precision = 0;
+  protected Boolean pk = false;
 
-	protected String mapper;
+  protected Integer maxLength = 0;
 
-	protected String mappedBy;
+  protected Integer scale = 0;
 
-	protected String order;
+  protected Integer precision = 0;
+
+  protected String order;
 
   protected Boolean notPersist = false;
 
-	protected String index;
+  protected String index;
 
   protected Boolean file = false;
 
@@ -44,205 +46,214 @@ public abstract class FieldMeta {
 
   protected Boolean updatable = true;
 
-	public void setMaxLength(Integer maxLength) {
-		this.maxLength = maxLength;
-	}
+  public void setMaxLength(Integer maxLength) {
+    this.maxLength = maxLength;
+  }
 
-	public String getSeqKey() {
-		return seqKey;
-	}
+  public String getSeqKey() {
+    return seqKey;
+  }
 
-	public String getSeqType() {
-		return seqType;
-	}
+  public String getSeqType() {
+    return seqType;
+  }
 
-	public long getSeqStartNum() {
-		return seqStartNum;
-	}
+  public long getSeqStartNum() {
+    return seqStartNum;
+  }
 
-	public String getDbName() {
-		return dbName;
-	}
+  public String getDbName() {
+    return dbName;
+  }
 
-	public Boolean getNullable() {
+  public Boolean getNullable() {
     if (pk) {
       return false;
     }
-		return nullable;
-	}
+    return nullable;
+  }
 
-	public Boolean getInsertable() {
-		return insertable;
-	}
+  public Class getColumnMapperClazz() {
+    return columnMapperClazz;
+  }
 
-	public Boolean getUpdatable() {
-		return updatable;
-	}
+  public String getAssociateColumn() {
+    return associateColumn;
+  }
 
-	public String getName() {
-		return name;
-	}
+  public String getColumnMapperArgs() {
+    return columnMapperArgs;
+  }
 
-	public Class getType() {
-		return type;
-	}
+  public Boolean getInsertable() {
+    return insertable;
+  }
 
-	public Boolean getPk() {
-		return pk;
-	}
+  public Boolean getUpdatable() {
+    return updatable;
+  }
 
-	public Integer getMaxLength() {
-		return maxLength;
-	}
+  public String getName() {
+    return name;
+  }
 
-	public Integer getScale() {
-		return scale;
-	}
+  public Class getType() {
+    return type;
+  }
 
-	public Integer getPrecision() {
-		return precision;
-	}
+  public Boolean getPk() {
+    return pk;
+  }
 
-	public String getMapper() {
-		return mapper;
-	}
+  public Integer getMaxLength() {
+    return maxLength;
+  }
 
-	public String getMappedBy() {
-		return mappedBy;
-	}
+  public Integer getScale() {
+    return scale;
+  }
 
-	public String getOrder() {
-		return order;
-	}
+  public Integer getPrecision() {
+    return precision;
+  }
 
-	public Boolean getNotPersist() {
-    return notPersist || clob;
-	}
+  public String getOrder() {
+    return order;
+  }
 
-	public String getIndex() {
-		return index;
-	}
+  public Boolean getNotPersist() {
+    return notPersist || clob || columnMapperClazz != null;
+  }
 
-	public Boolean getFile() {
-		return file;
-	}
+  public String getIndex() {
+    return index;
+  }
 
-	public Boolean getClob() {
-		return clob;
-	}
+  public Boolean getFile() {
+    return file;
+  }
 
-	public static Factory factory() {
-		return new Factory();
-	}
+  public Boolean getClob() {
+    return clob;
+  }
 
-	public static class Factory {
+  public static Factory factory() {
+    return new Factory();
+  }
 
-		private FieldMeta meta = new FieldMeta() {
-		};
+  public static class Factory {
 
-		public Factory insertable(Boolean insertable) {
-			meta.insertable = insertable;
-			return this;
-		}
+    private FieldMeta meta = new FieldMeta() {
+    };
 
-		public Factory seqKey(String seqKey) {
-			meta.seqKey = seqKey;
-			return this;
-		}
+    public Factory insertable(Boolean insertable) {
+      meta.insertable = insertable;
+      return this;
+    }
 
-		public Factory seqType(String seqType) {
-			meta.seqType = seqType;
-			return this;
-		}
+    public Factory seqKey(String seqKey) {
+      meta.seqKey = seqKey;
+      return this;
+    }
 
-		public Factory dbName(String dbName) {
-			meta.dbName = dbName;
-			return this;
-		}
+    public Factory seqType(String seqType) {
+      meta.seqType = seqType;
+      return this;
+    }
 
-		public Factory nullable(Boolean nullable) {
-			meta.nullable = nullable;
-			return this;
-		}
+    public Factory dbName(String dbName) {
+      meta.dbName = dbName;
+      return this;
+    }
 
-		public Factory name(String name) {
-			meta.name = name;
-			return this;
-		}
+    public Factory nullable(Boolean nullable) {
+      meta.nullable = nullable;
+      return this;
+    }
 
-		public Factory type(Class type) {
-			meta.type = type;
-			return this;
-		}
+    public Factory name(String name) {
+      meta.name = name;
+      return this;
+    }
 
-		public Factory pk(Boolean pk) {
-			meta.pk = pk;
-			return this;
-		}
+    public Factory type(Class type) {
+      meta.type = type;
+      return this;
+    }
 
-		public Factory maxLength(Integer maxLength) {
-			meta.maxLength = maxLength;
-			return this;
-		}
+    public Factory pk(Boolean pk) {
+      meta.pk = pk;
+      return this;
+    }
 
-		public Factory scale(Integer scale) {
-			meta.scale = scale;
-			return this;
-		}
+    public Factory maxLength(Integer maxLength) {
+      meta.maxLength = maxLength;
+      return this;
+    }
 
-		public Factory precision(Integer precision) {
-			meta.precision = precision;
-			return this;
-		}
+    public Factory scale(Integer scale) {
+      meta.scale = scale;
+      return this;
+    }
 
-		public Factory mapper(String mapper) {
-			meta.mapper = mapper;
-			return this;
-		}
+    public Factory precision(Integer precision) {
+      meta.precision = precision;
+      return this;
+    }
 
-    public Factory mapperBy(String mapperBy) {
-      meta.mappedBy = mapperBy;
-			return this;
-		}
+    public Factory columnMapperClazz(Class columnMapperClazz) {
+      meta.columnMapperClazz = columnMapperClazz;
+      return this;
+    }
+
+    public Factory associateColumn(String associateColumn) {
+      meta.associateColumn = associateColumn;
+      return this;
+    }
 
     public Factory order(String order) {
-			meta.order = order;
-			return this;
-		}
+      meta.order = order;
+      return this;
+    }
 
+    public Factory notPersist(Boolean notPersist) {
+      meta.notPersist = notPersist;
+      return this;
+    }
 
-		public Factory notPersist(Boolean notPersist) {
-			meta.notPersist = notPersist;
-			return this;
-		}
+    public Factory index(String index) {
+      meta.index = index;
+      return this;
+    }
 
-		public Factory index(String index) {
-			meta.index = index;
-			return this;
-		}
+    public Factory file(Boolean file) {
+      meta.file = file;
+      return this;
+    }
 
-		public Factory file(Boolean file) {
-			meta.file = file;
-			return this;
-		}
+    public Factory defaultStartSeq(long defaultStartSeq) {
+      meta.seqStartNum = defaultStartSeq;
+      return this;
+    }
 
-		public Factory defaultStartSeq(long defaultStartSeq) {
-			meta.seqStartNum = defaultStartSeq;
-			return this;
-		}
+    public Factory clob(Boolean clob) {
+      meta.clob = clob;
+      return this;
+    }
 
-		public Factory clob(Boolean clob) {
-			meta.clob = clob;
-			return this;
-		}
+    public Factory setColumnMapperArgs(String columnMapperArgs) {
+      meta.columnMapperArgs = columnMapperArgs;
+      return this;
+    }
 
-		public Factory updatable(Boolean updatable) {
-			meta.updatable = updatable;
-			return this;
-		}
+    public Factory updatable(Boolean updatable) {
+      meta.updatable = updatable;
+      return this;
+    }
 
-		public FieldMeta build() {
-			return meta;
-		}
-	}
+    public FieldMeta build() {
+      return meta;
+    }
+  }
+
 }

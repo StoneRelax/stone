@@ -629,9 +629,14 @@ public class DoGenerator {
     if (DoGeneratorUtils.booleanValueForBoolean(fieldMeta.getNotPersist())) {
       annotations.add("@javax.persistence.Transient");
     }
-    if (!StringUtils.isEmpty(fieldMeta.getMappedBy()) && !StringUtils.isEmpty(fieldMeta.getMapper())) {
+    if (!StringUtils.isEmpty(fieldMeta.getColumnMapperDsl())) {
+      String[] info = StringUtils.split(fieldMeta.getColumnMapperDsl(), ":");
+      String mapper = info[0];
+      String associateColumn = info.length > 1 ? info[1] : (fieldMeta.getFieldProperty() + "Id");
+      String args = info.length > 2 ? info[2] : "";
       annotations.add(
-          "@FieldMapper(mapper = \"" + fieldMeta.getMapper() + "\", mappedBy = \"" + fieldMeta.getMappedBy() + "\")");
+          "@stone.dal.common.models.annotation.ColumnMapper(mapper = \"" + mapper + "\", " +
+              "associateColumn = \"" + associateColumn + "\", args = \"" + args + "\")");
     }
     if (!boolValue(fieldMeta.getNotPersist())) {
       annotations.add("@javax.persistence.Column(" + getColumnAnnotation(fieldMeta) + ")");
@@ -643,6 +648,9 @@ public class DoGenerator {
       }
       if (!StringUtils.isEmpty(fieldMeta.getSeqType())) {
         annotation += "generator = \"" + fieldMeta.getSeqType() + "\"";
+      }
+      if (fieldMeta.getSeqStartNum() > 0) {
+        annotation += ", defaultStartSeq = " + fieldMeta.getSeqStartNum();
       }
       annotation += ")";
       annotations.add(annotation);
@@ -723,13 +731,14 @@ public class DoGenerator {
         fieldMeta.setMaxLength(128);
       }
     }
-    String seq = fieldMeta.getSeqDesc();
+    String seq = fieldMeta.getSeqDsl();
     if (!isStrEmpty(seq)) {
       if (seq.contains(":")) {
         fieldMeta.setSeqType(str2Arr(seq, ":")[0]);
         fieldMeta.setSeqStartNum(Integer.parseInt(str2Arr(seq, ":")[1]));
       } else {
         fieldMeta.setSeqType(seq);
+        fieldMeta.setSeqStartNum(0);
       }
     } else if (fieldMeta.getPk()) {
       if ("string".equalsIgnoreCase(fieldMeta.getTypeName())) {
@@ -755,13 +764,6 @@ public class DoGenerator {
     if ("string".equals(fieldMeta.getTypeName())) {
       if (fieldMeta.getMaxLength() == null) {
         fieldMeta.setMaxLength(150);
-      }
-    }
-    String mapperDesc = fieldMeta.getMapperDesc();
-    if (!StringUtils.isEmpty(mapperDesc)) {
-      if (mapperDesc.contains(":")) {
-        fieldMeta.setMapper(str2Arr(seq, ":")[0]);
-        fieldMeta.setMapperBy(str2Arr(seq, ":")[1]);
       }
     }
     validFieldMeta(entityName, fieldMeta);
