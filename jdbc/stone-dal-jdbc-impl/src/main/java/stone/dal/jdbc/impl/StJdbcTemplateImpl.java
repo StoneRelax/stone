@@ -138,7 +138,7 @@ public class StJdbcTemplateImpl implements StJdbcTemplate {
         .pageSize(pageSize).pageNo(pageNo)
         .sql(_sql).join(queryMeta).build();
     if (s_logger.isInfoEnabled()) {
-      s_logger.info(String.format("Page Query Sql:%s", queryMeta.getPageQuerySql()));
+      s_logger.info(String.format("Page Query Sql:%s", queryMeta.getSql()));
       s_logger.info(String.format("Page Query Params:%s", StringUtils.combineString(queryMeta.getParameters(), ",")));
       //todo translate
     }

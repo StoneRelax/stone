@@ -7,7 +7,7 @@ package ${packageName};
 {<#list gen.uniqueIndices(entity) as idxName>
 @stone.dal.common.models.annotation.UniqueIndex(name="${gen.dbIdxName(idxName)}",columnNames = {<#list gen.getUniqueColumns(entity,idxName) as keyField>"${keyField}"<#if keyField_has_next>,</#if></#list>})
 <#if idxName_has_next>,</#if>
-</#list>})</#if><#if gen.hasListener(entity)>@javax.persistence.EntityListeners({
+</#list>})</#if><#if gen.hasListenerIntf(entity)>@javax.persistence.EntityListeners({
 <#list entity.entityListeners as entityListener>
     ${entityListener.className}.class
 </#list>})</#if>

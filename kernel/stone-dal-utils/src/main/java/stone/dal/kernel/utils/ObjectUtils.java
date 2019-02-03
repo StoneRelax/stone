@@ -22,6 +22,8 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.sql.Timestamp;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -541,6 +543,8 @@ public abstract class ObjectUtils {
                 propertyValue = (Integer) propertyValue == 1;
               } else if (propertyValue instanceof Integer && pType.isEnum()) {
                 propertyValue = pType.getEnumConstants()[(Integer) propertyValue];
+              } else if (propertyValue instanceof Date && pType == Timestamp.class) {
+                propertyValue = new Timestamp(((Date) propertyValue).getTime());
               }
             }
             writeMethod.invoke(obj, getDefaultPrimitiveValue(writeMethod.getParameterTypes()[0], propertyValue));
