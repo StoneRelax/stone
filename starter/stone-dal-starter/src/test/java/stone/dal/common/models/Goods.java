@@ -6,7 +6,10 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
+import stone.dal.adaptor.spring.jdbc.aop.example.SampleColumnMapper;
+import stone.dal.common.models.annotation.ColumnMapper;
 import stone.dal.common.models.annotation.Sequence;
 import stone.dal.common.models.data.BaseDo;
 
@@ -19,6 +22,29 @@ public class Goods extends BaseDo {
   private String name;
 
   private Date createDate;
+
+  private String label;
+
+  private Long labelId;
+
+  @Transient
+  @ColumnMapper(mapper = SampleColumnMapper.class, associateColumn = "labelId")
+  public String getLabel() {
+    return label;
+  }
+
+  public void setLabel(String label) {
+    this.label = label;
+  }
+
+  @Column(name = "label_id", precision = 18, scale = 0)
+  public Long getLabelId() {
+    return labelId;
+  }
+
+  public void setLabelId(Long labelId) {
+    this.labelId = labelId;
+  }
 
   @Id
   @Column(name = "uuid", precision = 18, scale = 0)

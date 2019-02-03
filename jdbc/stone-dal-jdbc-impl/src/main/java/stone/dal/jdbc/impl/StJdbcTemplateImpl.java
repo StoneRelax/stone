@@ -6,6 +6,10 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import stone.dal.common.models.data.BaseDo;
 import stone.dal.common.models.data.Page;
 import stone.dal.common.spi.ResultSetClobHandler;
 import stone.dal.jdbc.api.StJdbcTemplate;
@@ -17,6 +21,7 @@ import stone.dal.jdbc.impl.utils.RelationQueryBuilder;
 import stone.dal.jdbc.spi.DBDialectSpi;
 import stone.dal.jdbc.spi.JdbcTemplateSpi;
 import stone.dal.kernel.utils.KernelRuntimeException;
+import stone.dal.kernel.utils.KernelUtils;
 import stone.dal.kernel.utils.StringUtils;
 
 import static stone.dal.kernel.utils.KernelUtils.isCollectionEmpty;
@@ -38,6 +43,8 @@ public class StJdbcTemplateImpl implements StJdbcTemplate {
 
   private RdbmsEntityManager entityMetaManager;
 
+  private static Logger s_logger = LoggerFactory.getLogger(StJdbcTemplateImpl.class);
+
   public StJdbcTemplateImpl(JdbcTemplateSpi jdbcTemplateSpi, DBDialectSpi dbDialectSpi,
       RelationQueryBuilder relationQueryBuilder,
       RdbmsEntityManager entityMetaManager, ResultSetClobHandler resultSetClobHandler) {
@@ -51,12 +58,36 @@ public class StJdbcTemplateImpl implements StJdbcTemplate {
   @Override
   @SuppressWarnings("unchecked")
   public <T> List<T> query(SqlQueryMeta queryMeta) {
+    if (s_logger.isInfoEnabled()) {
+      s_logger.info(String.format("Query Sql:%s", queryMeta.getPageQuerySql()));
+      s_logger.info(String.format("Query Params:%s", StringUtils.combineString(queryMeta.getParameters(), ",")));
+      //todo translate
+    }
     List<T> res = jdbcTemplateSpi.query(queryMeta, this.rowMapper);
-    handleClob(res, queryMeta);
+    resolveClob(res, queryMeta);
+    resolveColumnMapper(res, queryMeta);
     return res;
   }
 
-  private void handleClob(List res, SqlQueryMeta queryMeta) {
+  @SuppressWarnings("unchecked")
+  private <T> void resolveColumnMapper(List<T> res, SqlQueryMeta queryMeta) {
+    if (queryMeta.getMappingClazz() != null) {
+      RdbmsEntity entity = entityMetaManager.getEntity(queryMeta.getMappingClazz());
+      if (entity != null) {
+        Set<String> fields = entity.getColumnsHavingMapper();
+        fields.forEach(field -> {
+          RdbmsEntity.ColumnMapper columnMapper = entity.getColumnMapper(field);
+          res.forEach(row -> {
+            Object val = columnMapper.getDalColumnMapper()
+                .map((BaseDo) row, field, columnMapper.getAssociateColumn(), columnMapper.getArgs());
+            KernelUtils.setPropVal(row, field, val);
+          });
+        });
+      }
+    }
+  }
+
+  private void resolveClob(List res, SqlQueryMeta queryMeta) {
     if (queryMeta.getMappingClazz() != null) {
       RdbmsEntity entity = entityMetaManager.getEntity(queryMeta.getMappingClazz());
       if (entity != null) {
@@ -106,6 +137,11 @@ public class StJdbcTemplateImpl implements StJdbcTemplate {
         .mappingClazz(queryMeta.getMappingClazz())
         .pageSize(pageSize).pageNo(pageNo)
         .sql(_sql).join(queryMeta).build();
+    if (s_logger.isInfoEnabled()) {
+      s_logger.info(String.format("Page Query Sql:%s", queryMeta.getPageQuerySql()));
+      s_logger.info(String.format("Page Query Params:%s", StringUtils.combineString(queryMeta.getParameters(), ",")));
+      //todo translate
+    }
     return pageQuery(_queryMeta);
   }
 
@@ -119,7 +155,9 @@ public class StJdbcTemplateImpl implements StJdbcTemplate {
     String pageQuerySql = dbDialectSpi.getPaginationSql(_sql, pageNo, pageSize);
     String pageTotalCountQuerySql = dbDialectSpi.getPaginationCtnSql(_sql);
     SqlQueryMeta pageQueryMeta = SqlQueryMeta.bindPageSql(queryMeta, pageQuerySql, pageTotalCountQuerySql);
-    return jdbcTemplateSpi.queryPage(pageQueryMeta, this.rowMapper);
+    Page<T> page = jdbcTemplateSpi.queryPage(pageQueryMeta, this.rowMapper);
+    resolveColumnMapper(page.getRows(), queryMeta);
+    return page;
   }
 
   @Override

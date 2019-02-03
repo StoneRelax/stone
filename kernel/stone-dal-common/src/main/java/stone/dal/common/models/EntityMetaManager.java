@@ -25,6 +25,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import stone.dal.common.ex.DoParseException;
 import stone.dal.common.models.annotation.Clob;
+import stone.dal.common.models.annotation.ColumnMapper;
 import stone.dal.common.models.annotation.FileField;
 import stone.dal.common.models.annotation.Sequence;
 import stone.dal.common.models.annotation.UniqueIndex;
@@ -137,6 +138,10 @@ public class EntityMetaManager {
           if (readMethod.isAnnotationPresent(OrderBy.class)) {
             OrderBy orderBy = readMethod.getAnnotation(OrderBy.class);
             fieldFactory.order(orderBy.value());
+          }
+          if (readMethod.isAnnotationPresent(ColumnMapper.class)) {
+            ColumnMapper columnMapper = readMethod.getAnnotation(ColumnMapper.class);
+            fieldFactory.columnMapperClazz(columnMapper.mapper()).associateColumn(columnMapper.associateColumn());
           }
           parseSequence(readMethod, fieldFactory, clazz.getSimpleName(), propertyName);
           entityFactory.addField(fieldFactory.build());
