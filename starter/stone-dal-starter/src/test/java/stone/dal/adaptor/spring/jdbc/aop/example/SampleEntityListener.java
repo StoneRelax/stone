@@ -1,18 +1,14 @@
 package stone.dal.adaptor.spring.jdbc.aop.example;
 
+import java.sql.Timestamp;
+import java.util.Date;
 import javax.persistence.PostPersist;
 import javax.persistence.PostRemove;
 import javax.persistence.PostUpdate;
 import javax.persistence.PrePersist;
 import javax.persistence.PreRemove;
 import javax.persistence.PreUpdate;
-
-import org.springframework.beans.factory.annotation.Configurable;
-import org.springframework.stereotype.Component;
 import stone.dal.common.models.Person;
-
-import java.sql.Timestamp;
-import java.util.Date;
 
 public class SampleEntityListener {
 

@@ -24,7 +24,6 @@ import stone.dal.common.models.data.BaseDo;
 @Entity
 @Table(name = "person", uniqueConstraints = @UniqueConstraint(columnNames = { "uuid" }))
 @EntityListeners(value = SampleEntityListener.class)
-
 public class Person extends BaseDo {
   private Long uuid;
 

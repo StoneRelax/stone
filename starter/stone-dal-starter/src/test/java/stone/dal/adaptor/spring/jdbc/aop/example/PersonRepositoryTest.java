@@ -103,11 +103,12 @@ public class PersonRepositoryTest {
     Person person = new Person();
     person.setName("go");
     personService.create(person);
-    long uuid = person.getUuid();
+    Assert.assertNotNull(person.getCreatedDate());
 
     person.setName("no go");
     person.set_state(BaseDo.States.Updated);
     personService.update(person);
+    Assert.assertNotNull(person.getLastUpdateDate());
   }
 
 }

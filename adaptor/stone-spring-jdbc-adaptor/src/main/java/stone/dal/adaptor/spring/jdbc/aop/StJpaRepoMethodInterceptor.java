@@ -1,9 +1,7 @@
 package stone.dal.adaptor.spring.jdbc.aop;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.lang.reflect.Proxy;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,8 +20,6 @@ import stone.dal.jdbc.impl.StJpaRepositoryImpl;
 import stone.dal.kernel.utils.KernelRuntimeException;
 
 import static stone.dal.kernel.utils.KernelUtils.setPropVal;
-
-import javax.persistence.EntityListeners;
 
 public class StJpaRepoMethodInterceptor implements MethodInterceptor {
 
