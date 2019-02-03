@@ -59,7 +59,7 @@ public class StJdbcTemplateImpl implements StJdbcTemplate {
   @SuppressWarnings("unchecked")
   public <T> List<T> query(SqlQueryMeta queryMeta) {
     if (s_logger.isInfoEnabled()) {
-      s_logger.info(String.format("Query Sql:%s", queryMeta.getPageQuerySql()));
+      s_logger.info(String.format("Query Sql:%s", queryMeta.getSql()));
       s_logger.info(String.format("Query Params:%s", StringUtils.combineString(queryMeta.getParameters(), ",")));
       //todo translate
     }

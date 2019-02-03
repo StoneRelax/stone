@@ -33,6 +33,8 @@ public class RawFieldMeta extends FieldMeta {
 
   private String remarks;
 
+  private ColumnMapperDslMeta columnMapperDslMeta;
+
   public String getRemarks() {
     return remarks;
   }
@@ -77,12 +79,14 @@ public class RawFieldMeta extends FieldMeta {
     this.fieldProperty = fieldProperty;
   }
 
-  public String getColumnMapperDsl() {
-    return columnMapperDsl;
+  public ColumnMapperDslMeta getColumnMapperDslMeta() {
+    return columnMapperDslMeta;
   }
 
   public void setColumnMapperDsl(String columnMapperDsl) {
-    this.columnMapperDsl = columnMapperDsl;
+    if (!StringUtils.isEmpty(columnMapperDsl)) {
+      this.columnMapperDslMeta = new ColumnMapperDslMeta(this.name, columnMapperDsl);
+    }
   }
 
   public String getUnique() {
@@ -165,4 +169,38 @@ public class RawFieldMeta extends FieldMeta {
     this.updatable = updatable;
   }
 
+  public static class ColumnMapperDslMeta {
+
+    private String mapper;
+
+    private String associateColumn;
+
+    private String args;
+
+    private String associateColumnType;
+
+    public ColumnMapperDslMeta(String fieldName, String dsl) {
+      String[] info = org.apache.commons.lang.StringUtils.split(dsl, ":");
+      this.mapper = info[0];
+      this.associateColumn = info.length > 1 ? info[1] : (fieldName + "Id");
+      this.args = info.length > 2 ? info[2] : "";
+      this.associateColumnType = info.length > 3 ? info[3] : "long";
+    }
+
+    public String getAssociateColumnType() {
+      return associateColumnType;
+    }
+
+    public String getMapper() {
+      return mapper;
+    }
+
+    public String getAssociateColumn() {
+      return associateColumn;
+    }
+
+    public String getArgs() {
+      return args;
+    }
+  }
 }

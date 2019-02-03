@@ -95,7 +95,7 @@ public class DoGenerator {
   }
 
   public void build(String xlsxPath, String targetSource,
-      String rootPackage, String basePath, String extensionRulePath) throws Exception {
+      String rootPackage, String baseApiPath, String extensionRulePath) throws Exception {
     xlsxPath = StringUtils.isEmpty(xlsxPath) ? "entities.xlsx" : xlsxPath;
     String rootPath = targetSource != null ? targetSource : "gen-src";
     String jpaPackage = rootPackage == null ? "stone.dal.jpa" : rootPackage + ".jpa";
@@ -106,10 +106,10 @@ public class DoGenerator {
     Map<String, ExtensionRuleReader.RuleSet.Rule> turnOnMap = ExtensionRuleReader.read(extensionRulePath)
         .getTurnOnMap();
     Set<String> hdrEntities = getHdrEntityNames(entityMetas);
-    basePath = basePath == null ? "/api" : basePath;
+    baseApiPath = baseApiPath == null ? "/api" : baseApiPath;
     writeDoFiles(entityMetas, rootPath, jpaPackage, turnOnMap, hdrEntities);
     writeRepositoryFiles(entityMetas, rootPath, repoPackage, jpaPackage);
-    writeControllerFiles(entityMetas, basePath, rootPath, controllerPackage, jpaPackage, repoPackage);
+    writeControllerFiles(entityMetas, baseApiPath, rootPath, controllerPackage, jpaPackage, repoPackage);
   }
 
   private Set<String> getHdrEntityNames(List<RawEntityMeta> entityMetas) {
@@ -258,6 +258,7 @@ public class DoGenerator {
         row++;
       }
       resolveFileFields(meta);
+      resolveColumnMapperAssociateColumns(meta);
       entities.add(buildUniqueIndices(meta));
       i++;
     }
@@ -410,6 +411,22 @@ public class DoGenerator {
       javaContents.add(new String(bos.toByteArray(), StandardCharsets.UTF_8));
     }
     return javaContents;
+  }
+
+  private void resolveColumnMapperAssociateColumns(RawEntityMeta entityMeta) {
+    //todo: consider if fields exist
+    List<RawFieldMeta> addOnFields = entityMeta.getRawFields().stream()
+        .filter(field -> field.getColumnMapperDslMeta() != null).map(fieldMeta -> {
+          RawFieldMeta rawFieldMeta = new RawFieldMeta();
+          String associateColumn = fieldMeta.getColumnMapperDslMeta().getAssociateColumn();
+          rawFieldMeta.setName(fieldMeta.getColumnMapperDslMeta().getAssociateColumn());
+          rawFieldMeta.setTypeName(fieldMeta.getColumnMapperDslMeta().getAssociateColumnType());
+          String dbName = stone.dal.kernel.utils.StringUtils.canonicalPropertyName2DBField(associateColumn);
+          rawFieldMeta.setDbName(dbName);
+          resolveDefaultFieldProperty(rawFieldMeta);
+          return rawFieldMeta;
+        }).collect(Collectors.toList());
+    entityMeta.getRawFields().addAll(addOnFields);
   }
 
   private void addEntityListeners(RawEntityMeta entityMeta, Map<String, RuleSet.Rule> turnOnMap,
@@ -618,6 +635,10 @@ public class DoGenerator {
     return classTypeMap.get(classType).getName();
   }
 
+  public boolean isFieldPersist(RawFieldMeta fieldMeta) {
+    return fieldMeta.getNotPersist() || fieldMeta.getColumnMapperDslMeta() != null;
+  }
+
   public String getAnnotation(RawFieldMeta fieldMeta) {
     List<String> annotations = new ArrayList<>();
     if (DoGeneratorUtils.booleanValueForBoolean(fieldMeta.getPk())) {
@@ -626,20 +647,18 @@ public class DoGenerator {
     if (DoGeneratorUtils.booleanValueForBoolean(fieldMeta.getClob())) {
       annotations.add("@stone.dal.common.models.annotation.Clob");
     }
-    if (DoGeneratorUtils.booleanValueForBoolean(fieldMeta.getNotPersist())) {
+    boolean notPersist = isFieldPersist(fieldMeta);
+    if (notPersist) {
       annotations.add("@javax.persistence.Transient");
-    }
-    if (!StringUtils.isEmpty(fieldMeta.getColumnMapperDsl())) {
-      String[] info = StringUtils.split(fieldMeta.getColumnMapperDsl(), ":");
-      String mapper = info[0];
-      String associateColumn = info.length > 1 ? info[1] : (fieldMeta.getFieldProperty() + "Id");
-      String args = info.length > 2 ? info[2] : "";
-      annotations.add(
-          "@stone.dal.common.models.annotation.ColumnMapper(mapper = \"" + mapper + "\", " +
-              "associateColumn = \"" + associateColumn + "\", args = \"" + args + "\")");
-    }
-    if (!boolValue(fieldMeta.getNotPersist())) {
+    } else {
       annotations.add("@javax.persistence.Column(" + getColumnAnnotation(fieldMeta) + ")");
+    }
+    if (fieldMeta.getColumnMapperDslMeta() != null) {
+      RawFieldMeta.ColumnMapperDslMeta columnMapperDslMeta = fieldMeta.getColumnMapperDslMeta();
+      annotations.add(
+          "@stone.dal.common.models.annotation.ColumnMapper(mapper = " + columnMapperDslMeta.getMapper() + ".class, " +
+              "associateColumn = \"" + columnMapperDslMeta.getAssociateColumn() + "\", args = \"" +
+              columnMapperDslMeta.getArgs() + "\")");
     }
     if (!StringUtils.isEmpty(fieldMeta.getSeqType())) {
       String annotation = "@stone.dal.common.models.annotation.Sequence(";
@@ -675,12 +694,12 @@ public class DoGenerator {
       if ("time".equals(dataFieldMeta.getTypeName())) {
         dataFieldMeta.setMaxLength(5);
       }
-      if (dataFieldMeta.getMaxLength() != null) {
+      if (dataFieldMeta.getMaxLength() > 0) {
         annotation += ", length=" + dataFieldMeta.getMaxLength();
       }
     }
     if ("string".equalsIgnoreCase(typeName)) {
-      if (dataFieldMeta.getMaxLength() == null) {
+      if (dataFieldMeta.getMaxLength() == 0) {
         annotation += ", length=100";
       }
     }
@@ -723,13 +742,7 @@ public class DoGenerator {
         fieldMeta.setMaxLength(new Integer(str2Arr(property, ".")[0]));
       }
     } else {
-      if (fieldMeta.getTypeName().equalsIgnoreCase("long")) {
-        fieldMeta.setPrecision(18);
-      } else if (fieldMeta.getTypeName().equalsIgnoreCase("int")) {
-        fieldMeta.setPrecision(7);
-      } else if (fieldMeta.getTypeName().equalsIgnoreCase("string")) {
-        fieldMeta.setMaxLength(128);
-      }
+      resolveDefaultFieldProperty(fieldMeta);
     }
     String seq = fieldMeta.getSeqDsl();
     if (!isStrEmpty(seq)) {
@@ -768,6 +781,16 @@ public class DoGenerator {
     }
     validFieldMeta(entityName, fieldMeta);
     return fieldMeta;
+  }
+
+  private void resolveDefaultFieldProperty(RawFieldMeta fieldMeta) {
+    if (fieldMeta.getTypeName().equalsIgnoreCase("long")) {
+      fieldMeta.setPrecision(18);
+    } else if (fieldMeta.getTypeName().equalsIgnoreCase("int")) {
+      fieldMeta.setPrecision(7);
+    } else if (fieldMeta.getTypeName().equalsIgnoreCase("string")) {
+      fieldMeta.setMaxLength(128);
+    }
   }
 
   private RawFieldMeta readFromExcel(Row sfRow) throws InvocationTargetException, IllegalAccessException {
