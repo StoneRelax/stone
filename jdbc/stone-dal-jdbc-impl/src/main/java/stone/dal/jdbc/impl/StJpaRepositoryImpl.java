@@ -1,5 +1,8 @@
 package stone.dal.jdbc.impl;
 
+import java.lang.annotation.Annotation;
+import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -19,12 +22,16 @@ import stone.dal.jdbc.api.StJpaRepository;
 import stone.dal.jdbc.api.meta.SqlBaseMeta;
 import stone.dal.jdbc.api.meta.SqlQueryMeta;
 import stone.dal.jdbc.impl.utils.RelationQueryBuilder;
+import stone.dal.kernel.utils.ClassUtils;
 import stone.dal.kernel.utils.KernelRuntimeException;
 import stone.dal.kernel.utils.LogUtils;
 
 import static stone.dal.kernel.utils.KernelUtils.getPropVal;
 import static stone.dal.kernel.utils.KernelUtils.isCollectionEmpty;
 import static stone.dal.kernel.utils.KernelUtils.setPropVal;
+
+import javax.persistence.PrePersist;
+import javax.persistence.PreUpdate;
 
 /**
  * @author fengxie
@@ -59,6 +66,7 @@ public class StJpaRepositoryImpl<T extends BaseDo, K>
   @SuppressWarnings("unchecked")
   public K create(T obj) {
     RdbmsEntity entity = entityMetaManager.getEntity(obj.getClass());
+    invokeEntityListener(obj,entity,PrePersist.class);
     runCreate(obj);
     Collection<String> pks = entity.getPks();
     if (pks.size() == 1) {
@@ -82,6 +90,7 @@ public class StJpaRepositoryImpl<T extends BaseDo, K>
   @Override
   public void update(T obj) {
     if (BaseDo.States.Updated == obj.get_state()) {
+      invokeEntityListener(obj,entityMetaManager.getEntity(obj.getClass()),PreUpdate.class);
       runUpdate(obj);
     }
   }
@@ -324,6 +333,24 @@ public class StJpaRepositoryImpl<T extends BaseDo, K>
         }
       }
     }
+  }
+
+  private void invokeEntityListener(BaseDo obj,RdbmsEntity entity,Class annotationClass){
+    EntityMeta meta = entity.getMeta();
+    Collection<Class> listeners = meta.getEntityListenersClasses();
+      listeners.forEach(listener -> {
+        for(Method m : listener.getDeclaredMethods()) {
+          Annotation prePersist = m.getAnnotation(annotationClass);
+          if(prePersist != null){
+            try {
+              m.invoke(listener.newInstance(),obj);
+            }catch (Exception e){
+              LogUtils.error(logger, e);
+              throw new KernelRuntimeException(e);
+            }
+          }
+        }
+      });
   }
 
 }
