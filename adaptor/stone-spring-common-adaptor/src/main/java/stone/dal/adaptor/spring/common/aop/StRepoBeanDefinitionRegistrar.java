@@ -34,7 +34,6 @@ import org.springframework.core.type.classreading.SimpleMetadataReaderFactory;
 import org.springframework.core.type.filter.TypeFilter;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
-import stone.dal.adaptor.spring.common.annotation.StRepositoryScan;
 import stone.dal.common.utils.DalClassUtils;
 import stone.dal.kernel.utils.CGLibUtils;
 import stone.dal.kernel.utils.KernelRuntimeException;
@@ -42,7 +41,7 @@ import stone.dal.kernel.utils.LogUtils;
 
 import static org.springframework.core.io.support.ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX;
 
-public class StRepoBeanDefinitionRegistrar implements ImportBeanDefinitionRegistrar {
+public abstract class StRepoBeanDefinitionRegistrar implements ImportBeanDefinitionRegistrar {
 
   private static Logger logger = LoggerFactory.getLogger(StRepoBeanDefinitionRegistrar.class);
 
@@ -62,7 +61,7 @@ public class StRepoBeanDefinitionRegistrar implements ImportBeanDefinitionRegist
   public StRepoBeanDefinitionRegistrar() {
     try {
       Enumeration<URL> urls = StRepoBeanDefinitionRegistrar.class.getClassLoader()
-          .getResources("META-INF/dal-support.properties");
+          .getResources(getSupportPropsPath());
       while (urls.hasMoreElements()) {
         URL url = urls.nextElement();
         Properties properties = new Properties();
@@ -76,11 +75,15 @@ public class StRepoBeanDefinitionRegistrar implements ImportBeanDefinitionRegist
     }
   }
 
+  protected abstract String getSupportPropsPath();
+
+  protected abstract Class getScanAnnotation();
+
   @Override
   @SuppressWarnings("unchecked")
   public void registerBeanDefinitions(AnnotationMetadata importingClassMetadata, BeanDefinitionRegistry registry) {
     AnnotationAttributes annAttr = AnnotationAttributes.fromMap(importingClassMetadata.getAnnotationAttributes(
-        StRepositoryScan.class.getName()));
+        getScanAnnotation().getName()));
     String[] basePackages = annAttr.getStringArray("value");
     List<Class<?>> intfRepoClasses = scanPackages(basePackages, interfaceFilter, excludeFilter);
     Set<Class> filterOutIntfClasses = new HashSet<>();

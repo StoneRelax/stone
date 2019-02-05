@@ -2,6 +2,8 @@ package stone.dal.common.models.data;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * @author fengxie
@@ -17,6 +19,11 @@ public class Page<T> {
   public Page(PageInfo pageInfo, List<T> rows) {
     this.pageInfo = pageInfo;
     this.rows = rows;
+  }
+
+  public Page apply(Function<T, T> fn) {
+    this.rows = rows.stream().map(fn).collect(Collectors.toList());
+    return this;
   }
 
   public PageInfo getPageInfo() {

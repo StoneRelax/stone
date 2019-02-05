@@ -159,6 +159,11 @@
                 <version>${spring.version}</version>
             </dependency>
             <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter-data-elasticsearch</artifactId>
+                <version>${spring.boot.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>org.springframework</groupId>
                 <artifactId>spring-messaging</artifactId>
                 <version>${spring.version}</version>
@@ -407,17 +412,7 @@
             </dependency>
             <dependency>
                 <groupId>stone</groupId>
-                <artifactId>stone-sequence-gen-autoconfigure</artifactId>
-                <version>${stone.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>stone</groupId>
                 <artifactId>stone-sequence-gen-api</artifactId>
-                <version>${stone.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>stone</groupId>
-                <artifactId>stone-sequence-gen-spi</artifactId>
                 <version>${stone.version}</version>
             </dependency>
             <dependency>
@@ -470,13 +465,16 @@
                 <artifactId>stone-rdbms-sync</artifactId>
                 <version>${stone.version}</version>
             </dependency>
-
             <dependency>
                 <groupId>stone</groupId>
                 <artifactId>stone-dal-ext-filer</artifactId>
                 <version>${stone.version}</version>
             </dependency>
-
+            <dependency>
+                <groupId>stone</groupId>
+                <artifactId>stone-dal-ext-es</artifactId>
+                <version>${stone.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -512,20 +510,17 @@
         <module>kernel/stone-dal-utils</module>
         <module>kernel/stone-dal-common</module>
         <module>kernel/stone-dal-common-spi</module>
-        <module>starter/stone-dal-starter</module>
         <module>tools/stone-do-generator</module>
         <module>tools/stone-rdbms-sync</module>
-        <module>sequence-generator/stone-sequence-gen-autoconfigure</module>
         <module>sequence-generator/stone-sequence-gen-api</module>
-        <module>sequence-generator/stone-sequence-gen-spi</module>
         <module>sequence-generator/stone-sequence-gen-impl</module>
-        <module>jdbc/stone-dal-jdbc-autoconfigure</module>
         <module>jdbc/stone-dal-jdbc-api</module>
         <module>jdbc/stone-dal-jdbc-spi</module>
         <module>jdbc/stone-dal-jdbc-impl</module>
         <module>adaptor/stone-spring-jdbc-adaptor</module>
         <module>adaptor/stone-spring-common-adaptor</module>
         <module>ext/stone-dal-ext-filer</module>
+        <module>ext/stone-dal-ext-es</module>
     </modules>
 
 </project>

@@ -10,6 +10,7 @@ import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.util.ClassUtils;
 import stone.dal.common.models.data.BaseDo;
 import stone.dal.common.models.data.Page;
 import stone.dal.common.models.meta.EntityMeta;
@@ -137,11 +138,11 @@ public class StJpaRepositoryImpl<T extends BaseDo, K>
   }
 
   @Override
-  public Page<T> pageQuery(T obj, int pageSize, int pageNo) {
+  public Page<T> pageQuery(T obj, int pageNo, int pageSize) {
     RdbmsEntity entity = entityMetaManager.getEntity(obj.getClass());
     SqlQueryMeta queryMeta = entity.getFindMeta(obj, false);
     SqlQueryMeta pageQueryMeta = SqlQueryMeta.factory()
-        .mappingClazz(entity.getMeta().getClazz())
+        .mappingClazz(ClassUtils.getUserClass(obj.getClass()))
         .sql(queryMeta.getSql()).params(queryMeta.getParameters())
         .pageNo(pageNo).pageSize(pageSize).build();
     return jdbcTemplate.pageQuery(pageQueryMeta);
