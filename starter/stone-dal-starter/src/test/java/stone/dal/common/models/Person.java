@@ -13,6 +13,8 @@ import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
+
+import org.springframework.data.elasticsearch.annotations.Document;
 import stone.dal.adaptor.spring.jdbc.aop.example.SampleEntityListener;
 import stone.dal.common.models.annotation.Clob;
 import stone.dal.common.models.annotation.Sequence;
@@ -22,6 +24,7 @@ import stone.dal.common.models.data.BaseDo;
  * Created by on 5/9/2017.
  */
 @Entity
+@Document(indexName = "testgoods",type = "goods")
 @Table(name = "person", uniqueConstraints = @UniqueConstraint(columnNames = { "uuid" }))
 @EntityListeners(value = SampleEntityListener.class)
 public class Person extends BaseDo {

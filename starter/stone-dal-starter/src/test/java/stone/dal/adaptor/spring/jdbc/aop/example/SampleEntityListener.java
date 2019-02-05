@@ -8,13 +8,20 @@ import javax.persistence.PostUpdate;
 import javax.persistence.PrePersist;
 import javax.persistence.PreRemove;
 import javax.persistence.PreUpdate;
+
+import stone.dal.adaptor.es.ElasticSearchUtil;
+import stone.dal.adaptor.spring.common.SpringContextHolder;
 import stone.dal.common.models.Person;
 
 public class SampleEntityListener {
 
+   private static final ElasticSearchUtil esUtil = SpringContextHolder.getBean(ElasticSearchUtil.class);
+
+
   @PrePersist
   public void beforeCreate(Person person) {
     person.setCreatedDate(new Timestamp(new Date().getTime()));
+   // esUtil.insert(person);
   }
 
   @PostPersist

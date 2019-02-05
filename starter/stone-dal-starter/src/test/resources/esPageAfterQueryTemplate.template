@@ -1,0 +1,13 @@
+{
+    "size": {{size}},
+    "query": {
+        "{{table}}" : {
+            {{field}} : {{value}}
+        }
+    },
+    "search_after": [1463538857, "tweet#654323"],
+    "sort": [
+        {"date": "asc"},
+        {"_uid": "desc"}
+    ]
+}

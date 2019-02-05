@@ -17,7 +17,7 @@ import stone.dal.adaptor.spring.common.annotation.StRepositoryScan;
 @EnableTransactionManagement
 @ComponentScan(basePackages = { "stone.dal.adaptor.spring.jdbc.autoconfigure", "stone.dal.adaptor.spring.jdbc.impl",
     "stone.dal.starter.impl", "stone.dal.impl", "stone.dal.jdbc.spring.adaptor.init",
-    "stone.dal.adaptor.spring.jdbc.autoconfigure", "stone.dal.adaptor.spring.jdbc.aop.example" })
+    "stone.dal.adaptor.spring.jdbc.autoconfigure", "stone.dal.adaptor.spring.jdbc.aop.example","stone.dal.adaptor.es"})
 @StRepositoryScan("stone.dal.adaptor.spring.jdbc.aop.example.repo")
 @EntityScan("stone.dal.common.models")
 @EnableSequence()
