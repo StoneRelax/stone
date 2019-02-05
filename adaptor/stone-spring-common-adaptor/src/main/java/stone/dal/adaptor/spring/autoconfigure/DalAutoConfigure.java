@@ -7,6 +7,7 @@ import java.util.Set;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.domain.EntityScanPackages;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import stone.dal.adaptor.spring.common.SequenceSpiImpl;
@@ -29,24 +30,21 @@ public class DalAutoConfigure {
   private SequenceManager sequenceManager;
 
   public DalAutoConfigure(@Autowired EntityScanPackages entityScanPackages,
-      @Autowired StSequenceConfig sequenceConfig) throws DoParseException {
+      @Autowired StSequenceConfig sequenceConfig,
+      @Autowired ApplicationContext context) throws DoParseException {
     this.entityMetaManager = new EntityMetaManager(entityScanPackages.getPackageNames().toArray(new String[0]));
     sequenceManager = new SequenceManagerImpl(sequenceConfig.getStorePath(), getSequenceMeta());
+    SpringContextHolder.setApplicationContext(context);
   }
 
   @Bean
-  public EntityMetaManager getEntStJdbcTemplateTestityMetaManager() throws DoParseException {
+  public EntityMetaManager getEntityMetaManager() {
     return this.entityMetaManager;
   }
 
   @Bean
   public SequenceSpi getSequence() {
     return new SequenceSpiImpl(sequenceManager);
-  }
-
-  @Bean
-  public SpringContextHolder getSpringCtxHolder() {
-    return new SpringContextHolder();
   }
 
   @Bean

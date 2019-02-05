@@ -1,7 +1,6 @@
 package stone.dal.adaptor.spring.jdbc.autoconfigure;
 
 import java.util.HashMap;
-import javax.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -15,7 +14,6 @@ import stone.dal.common.spi.ClobResolverSpi;
 import stone.dal.common.spi.ResultSetClobHandler;
 import stone.dal.common.spi.SequenceSpi;
 import stone.dal.jdbc.api.StJdbcTemplate;
-import stone.dal.jdbc.api.StJpaRepository;
 import stone.dal.jdbc.impl.DefaultClobResolverImpl;
 import stone.dal.jdbc.impl.DefaultResultSetClobHandler;
 import stone.dal.jdbc.impl.RdbmsEntityManager;
@@ -26,29 +24,11 @@ import stone.dal.jdbc.impl.dialect.OracleDialect;
 import stone.dal.jdbc.impl.utils.RelationQueryBuilder;
 import stone.dal.jdbc.spi.DBDialectSpi;
 
-@Import(DalAutoConfigure.class)
 @Configuration
+@Import(DalAutoConfigure.class)
 public class SpringJdbcAdaptorAutoConfigure {
 
-  @Autowired
-  private EntityMetaManager entityMetaManager;
-
-  @Autowired
-  private SequenceSpi sequenceSpi;
-
-  @Value("${stone.dal.dialect}")
-  private String dialectType;
-
-  @Autowired(required = false)
-  private DBDialectSpi dialectSpi;
-
-  @Autowired(required = false)
-  private ClobResolverSpi clobResolverSpi;
-
-  @Autowired
-  private JdbcTemplate jdbcTemplate;
-
-  private StJpaRepository stJpaRepository;
+  private StJpaRepositoryImpl stJpaRepository;
 
   private StJdbcTemplate stJdbcTemplate;
 
@@ -57,10 +37,15 @@ public class SpringJdbcAdaptorAutoConfigure {
   @Autowired(required = false)
   private ResultSetClobHandler resultSetClobHandler;
 
-  @PostConstruct
-  public void init() {
+  public SpringJdbcAdaptorAutoConfigure(
+      @Autowired(required = false) DBDialectSpi dialectSpi,
+      @Autowired EntityMetaManager entityMetaManager,
+      @Autowired SequenceSpi sequenceSpi,
+      @Value("${stone.dal.dialect}") String dialectType,
+      @Autowired(required = false) ClobResolverSpi clobResolverSpi,
+      @Autowired JdbcTemplate jdbcTemplate) {
     if (dialectSpi == null) {
-      dialectSpi = initDialect();
+      dialectSpi = initDialect(dialectType);
     }
     rdbmsEntityManager = new RdbmsEntityManager(entityMetaManager);
     RelationQueryBuilder relationQueryBuilder = new RelationQueryBuilder(rdbmsEntityManager);
@@ -76,8 +61,8 @@ public class SpringJdbcAdaptorAutoConfigure {
         clobResolverSpi);
   }
 
-  @Bean
-  public StJpaRepository getStJpaRepository() {
+  @Bean("jpaRepository")
+  public StJpaRepositoryImpl getStJpaRepository() {
     return stJpaRepository;
   }
 
@@ -91,7 +76,7 @@ public class SpringJdbcAdaptorAutoConfigure {
     return rdbmsEntityManager;
   }
 
-  private DBDialectSpi initDialect() {
+  private DBDialectSpi initDialect(String dialectType) {
     if ("mysql".equalsIgnoreCase(dialectType)) {
       //todo:configure mysql errors
       return new MysqlDialect(new HashMap<>());

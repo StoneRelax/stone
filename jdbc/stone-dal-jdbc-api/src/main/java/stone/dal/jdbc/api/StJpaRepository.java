@@ -74,6 +74,6 @@ public interface StJpaRepository<T extends BaseDo, K> extends StRepository {
    * @param pageNo   Page No
    * @return Page object
    */
-  Page<T> pageQuery(T obj, int pageSize, int pageNo);
+  Page<T> pageQuery(T obj, int pageNo, int pageSize);
 
 }

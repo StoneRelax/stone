@@ -28,7 +28,7 @@ public class ${className} {
       return repository.findByPk(id);
     }
 
-    @RequestMapping(value="/get-all/",method=RequestMethod.GET)
+    @RequestMapping(value="/get-all",method=RequestMethod.GET)
     @ApiOperation(httpMethod="GET",value="Query ${doName}")
     public @ResponseBody java.util.Collection<${doName}> findAll(){
         return repository.findAll();

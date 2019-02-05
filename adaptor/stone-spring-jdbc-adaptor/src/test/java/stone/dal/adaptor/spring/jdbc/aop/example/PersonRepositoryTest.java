@@ -56,15 +56,6 @@ public class PersonRepositoryTest {
   }
 
   @Test
-  public void testFindAll() {
-    Person user = new Person();
-    user.setUuid(1002l);
-    user.setName("Xie Feng");
-    personRepository.create(user);
-    Assert.assertEquals("Xie Feng", personRepository.findAll().iterator().next().getName());
-  }
-
-  @Test
   public void testFindUserByManager() {
     Person user = new Person();
     user.setUuid(1002l);
@@ -99,7 +90,7 @@ public class PersonRepositoryTest {
   }
 
   @Test
-  public void testEntityListener(){
+  public void testEntityListener() {
     Person person = new Person();
     person.setName("go");
     personService.create(person);

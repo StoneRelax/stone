@@ -14,6 +14,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.util.ClassUtils;
 import stone.dal.common.models.DalColumnMapper;
 import stone.dal.common.models.data.BaseDo;
 import stone.dal.common.models.data.BaseEntity;
@@ -207,7 +208,7 @@ public class RdbmsEntity extends BaseEntity {
 
   public SqlQueryMeta getFindMeta(BaseDo obj, boolean pkOnly) {
     SqlQueryMeta.Factory factory = SqlQueryMeta.factory()
-        .one2oneCascadeFetching(true).mappingClazz(meta.getClazz());
+        .one2oneCascadeFetching(true).mappingClazz(ClassUtils.getUserClass(obj.getClass()));
     if (pkOnly) {
       factory.sql(findSql);
       factory.params(getPkValues(obj));
