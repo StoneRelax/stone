@@ -22,7 +22,7 @@
         </dependency>
         <dependency>
             <groupId>stone</groupId>
-            <artifactId>stone-sequence-gen-autoconfigure</artifactId>
+            <artifactId>stone-sequence-gen-impl</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>

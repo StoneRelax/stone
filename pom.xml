@@ -407,17 +407,7 @@
             </dependency>
             <dependency>
                 <groupId>stone</groupId>
-                <artifactId>stone-sequence-gen-autoconfigure</artifactId>
-                <version>${stone.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>stone</groupId>
                 <artifactId>stone-sequence-gen-api</artifactId>
-                <version>${stone.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>stone</groupId>
-                <artifactId>stone-sequence-gen-spi</artifactId>
                 <version>${stone.version}</version>
             </dependency>
             <dependency>
@@ -470,7 +460,6 @@
                 <artifactId>stone-rdbms-sync</artifactId>
                 <version>${stone.version}</version>
             </dependency>
-
             <dependency>
                 <groupId>stone</groupId>
                 <artifactId>stone-dal-ext-filer</artifactId>
@@ -511,14 +500,10 @@
         <module>kernel/stone-dal-utils</module>
         <module>kernel/stone-dal-common</module>
         <module>kernel/stone-dal-common-spi</module>
-        <module>starter/stone-dal-starter</module>
         <module>tools/stone-do-generator</module>
         <module>tools/stone-rdbms-sync</module>
-        <module>sequence-generator/stone-sequence-gen-autoconfigure</module>
         <module>sequence-generator/stone-sequence-gen-api</module>
-        <module>sequence-generator/stone-sequence-gen-spi</module>
         <module>sequence-generator/stone-sequence-gen-impl</module>
-        <module>jdbc/stone-dal-jdbc-autoconfigure</module>
         <module>jdbc/stone-dal-jdbc-api</module>
         <module>jdbc/stone-dal-jdbc-spi</module>
         <module>jdbc/stone-dal-jdbc-impl</module>

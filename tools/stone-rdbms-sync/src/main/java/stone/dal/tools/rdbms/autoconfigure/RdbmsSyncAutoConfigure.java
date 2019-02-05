@@ -6,11 +6,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.core.env.Environment;
 import org.springframework.jdbc.core.JdbcTemplate;
+import stone.dal.adaptor.spring.jdbc.autoconfigure.SpringJdbcAdaptorAutoConfigure;
 import stone.dal.tools.rdbms.impl.DBSync;
 
 @Configuration
+@Import(SpringJdbcAdaptorAutoConfigure.class)
 public class RdbmsSyncAutoConfigure {
 
   @Autowired
