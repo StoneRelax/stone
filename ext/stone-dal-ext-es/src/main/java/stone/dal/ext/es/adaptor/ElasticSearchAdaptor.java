@@ -54,7 +54,11 @@ public class ElasticSearchAdaptor<T> {
       searchType = SearchType.DEFAULT;
     }
     ElasticsearchPersistentEntity persistentEntity = elasticsearchTemplate.getPersistentEntityFor(clazz);
-    NativeSearchQueryBuilder searchQueryBuilder = new NativeSearchQueryBuilder().withQuery(queryBuilder).withIndices(
+    NativeSearchQueryBuilder searchQueryBuilder = new NativeSearchQueryBuilder();
+    if (queryBuilder != null) {
+      searchQueryBuilder = searchQueryBuilder.withQuery(queryBuilder);
+    }
+    searchQueryBuilder = searchQueryBuilder.withIndices(
         persistentEntity.getIndexName()
     ).withSearchType(searchType);
     for (AbstractAggregationBuilder aggregationBuilder : aggregationBuilders) {

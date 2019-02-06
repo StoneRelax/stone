@@ -2,8 +2,6 @@ package stone.dal.ext.es.adaptor;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.elasticsearch.index.query.BoolQueryBuilder;
-import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.aggregations.AbstractAggregationBuilder;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.Aggregations;
@@ -50,34 +48,13 @@ public class ElasticSearchAdaptorTest {
     BankTransaction xfResult = elasticSearchAdaptor.queryById("1", BankTransaction.class);
     Assert.assertEquals("xf", xfResult.getUser());
 
-//    BankTransaction queryStone = new BankTransaction();
-//    BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
-//    boolQueryBuilder.must(QueryBuilders.termQuery("user", "stone"));
-//    List<BankTransaction> stoneResult = ElasticSearchUtil.getInstance()
-//        .queryForList(queryStone, BankTransaction.class, null, boolQueryBuilder);
-//    BankTransaction getStone = stoneResult.get(0);
-//    Assert.assertEquals(200, getStone.getAmount());
-
-//    BankTransaction bankTransaction3 = new BankTransaction();
-//    bankTransaction3.setUuid(3L);
-//    bankTransaction3.setUser("xf");
-//    bankTransaction3.setType(1);
-//    bankTransaction3.setAmount(300);
-//    bankTransaction3.setScore(30);
-//    bankTransactionRepository.create(bankTransaction3);
-//
-//    Thread.sleep(1000);
-//    System.out.println("Sleep 1000ms for ES to sync");
-
-    BoolQueryBuilder aggBoolQueryBuilder = QueryBuilders.boolQuery();
-    aggBoolQueryBuilder.must(QueryBuilders.termQuery("user", "xf"));
     List<AbstractAggregationBuilder> aggregationBuilders = new ArrayList<>();
     SumBuilder sb = AggregationBuilders.sum("totalAmount").field("amount");
     aggregationBuilders.add(sb);
     Aggregations aggregations = elasticSearchAdaptor
-        .aggregationQuery(BankTransaction.class, null, aggBoolQueryBuilder, aggregationBuilders);
+        .aggregationQuery(BankTransaction.class, null, null, aggregationBuilders);
     Sum sum = aggregations.get("totalAmount");
-    Assert.assertEquals(400, sum.getValue(), 0.001);
+    Assert.assertEquals(300, sum.getValue(), 0.001);
 
 //    long count = ElasticSearchUtil.getInstance().count(emptyTransaction, null, null);
 //    Assert.assertEquals(3, count);
