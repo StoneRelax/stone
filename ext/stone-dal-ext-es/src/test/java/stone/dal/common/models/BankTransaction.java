@@ -13,7 +13,7 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 @Entity
-@Document(indexName = "bank_transaction")
+@org.springframework.data.elasticsearch.annotations.Document(indexName = "bank_transaction")
 @Table(name = "bank_transaction", uniqueConstraints = @UniqueConstraint(columnNames = { "uuid" }))
 @EntityListeners(value = SampleEntityListener.class)
 public class BankTransaction  extends BaseDo {

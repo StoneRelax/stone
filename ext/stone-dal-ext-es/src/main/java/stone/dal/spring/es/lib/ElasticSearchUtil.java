@@ -7,11 +7,11 @@ import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.aggregations.AbstractAggregationBuilder;
 import org.elasticsearch.search.aggregations.Aggregations;
-import org.elasticsearch.search.aggregations.metrics.sum.SumBuilder;
 import org.springframework.data.elasticsearch.core.ElasticsearchTemplate;
 import org.springframework.data.elasticsearch.core.ResultsExtractor;
+import org.springframework.data.elasticsearch.core.query.DeleteQuery;
+import org.springframework.data.elasticsearch.core.query.GetQuery;
 import org.springframework.data.elasticsearch.core.query.IndexQuery;
-import org.springframework.data.elasticsearch.core.query.NativeSearchQuery;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
 import org.springframework.data.elasticsearch.core.query.SearchQuery;
 import stone.dal.adaptor.spring.common.SpringContextHolder;
@@ -19,11 +19,7 @@ import stone.dal.common.models.EntityMetaManager;
 import stone.dal.common.models.data.BaseDo;
 import stone.dal.common.models.meta.EntityMeta;
 import stone.dal.common.models.meta.FieldMeta;
-import stone.dal.kernel.utils.KernelRuntimeException;
 import stone.dal.kernel.utils.ObjectUtils;
-
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 
@@ -52,9 +48,17 @@ public class ElasticSearchUtil {
         elasticsearchTemplate.index(indexQuery);
     }
 
-    public <T> List<T> query(BaseDo obj,Class<T> clazz, SearchType searchType, QueryBuilder queryBuilder){
+    public <T> T queryById(BaseDo obj, Class<T> clazz){
         EntityMeta entityMeta = entityMetaManager.getEntity(obj.getClass());
+        String pkFiled = getPkFiled(entityMeta);
+        String id = ObjectUtils.getPropertyValue(obj,pkFiled).toString();
+        GetQuery getQuery = new GetQuery();
+        getQuery.setId(id);
+        return elasticsearchTemplate.queryForObject(getQuery,clazz);
+    }
 
+    public <T> List<T> queryForList(BaseDo obj, Class<T> clazz, SearchType searchType, QueryBuilder queryBuilder){
+        EntityMeta entityMeta = entityMetaManager.getEntity(obj.getClass());
         String index = entityMeta.getTableName();
         if(searchType == null){
             searchType = SearchType.DEFAULT;
@@ -101,7 +105,39 @@ public class ElasticSearchUtil {
         });
     }
 
+    public void remove(BaseDo obj){
+        EntityMeta entityMeta = entityMetaManager.getEntity(obj.getClass());
+        String pkField = getPkFiled(entityMeta);
+        String id = ObjectUtils.getPropertyValue(obj,pkField).toString();
+        elasticsearchTemplate.delete(obj.getClass(),id);
+    }
 
+    public void removeByQuery(DeleteQuery deleteQuery){
+        elasticsearchTemplate.delete(deleteQuery);
+    }
+
+    public long count(BaseDo obj,SearchType searchType, QueryBuilder queryBuilder ){
+        EntityMeta entityMeta = entityMetaManager.getEntity(obj.getClass());
+
+        String index = entityMeta.getTableName();
+        if(searchType == null){
+            searchType = SearchType.DEFAULT;
+        }
+        NativeSearchQueryBuilder searchQueryBuilder;
+        if(queryBuilder == null){
+            BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
+            searchQueryBuilder = new NativeSearchQueryBuilder().withQuery(boolQueryBuilder).withIndices(index).withSearchType(searchType);
+        }else {
+            searchQueryBuilder = new NativeSearchQueryBuilder().withQuery(queryBuilder).withIndices(index).withSearchType(searchType);
+        }
+        SearchQuery searchQuery = searchQueryBuilder.build();
+        long count = elasticsearchTemplate.count(searchQuery);
+        return count;
+    }
+
+    public void removeIndex(String indexName){
+        elasticsearchTemplate.deleteIndex(indexName);
+    }
 
     private String getPkFiled(EntityMeta entityMeta){
         String pkFieldName = "";

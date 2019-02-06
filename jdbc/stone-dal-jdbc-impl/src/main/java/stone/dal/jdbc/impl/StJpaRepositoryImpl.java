@@ -6,7 +6,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
+import javax.persistence.PostPersist;
+import javax.persistence.PostRemove;
+import javax.persistence.PostUpdate;
 import javax.persistence.PrePersist;
+import javax.persistence.PreRemove;
 import javax.persistence.PreUpdate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -66,6 +70,7 @@ public class StJpaRepositoryImpl<T extends BaseDo, K>
     RdbmsEntity entity = entityMetaManager.getEntity(obj.getClass());
     invokeEntityListener(obj, entity, PrePersist.class);
     runCreate(obj);
+    invokeEntityListener(obj,entity,PostPersist.class);
     Collection<String> pks = entity.getPks();
     if (pks.size() == 1) {
       return getPropVal(obj, pks.iterator().next());
@@ -82,6 +87,7 @@ public class StJpaRepositoryImpl<T extends BaseDo, K>
         }
       }
     }
+
     return null;
   }
 
@@ -90,12 +96,15 @@ public class StJpaRepositoryImpl<T extends BaseDo, K>
     if (BaseDo.States.Updated == obj.get_state()) {
       invokeEntityListener(obj, entityMetaManager.getEntity(obj.getClass()), PreUpdate.class);
       runUpdate(obj);
+      invokeEntityListener(obj,entityMetaManager.getEntity(obj.getClass()),PostUpdate.class);
     }
   }
 
   @Override
   public void del(T obj) {
+    invokeEntityListener(obj,entityMetaManager.getEntity(obj.getClass()),PreRemove.class);
     runDel(obj);
+    invokeEntityListener(obj,entityMetaManager.getEntity(obj.getClass()),PostRemove.class);
   }
 
   @Override

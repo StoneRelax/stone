@@ -9,7 +9,7 @@ package ${packageName};
 <#if idxName_has_next>,</#if>
 </#list>})</#if><#if gen.hasListenerIntf(entity)>@javax.persistence.EntityListeners({
 <#list entity.entityListeners as entityListener>
-    ${entityListener.className}.class
+    ${entityListener.className}.class<#if entityListener_has_next>,</#if>
 </#list>})</#if>
 public class ${className} extends stone.dal.common.models.data.BaseDo <#if gen.hasListenerIntf(entity)>implements <#list entity.entityListeners as entityListener>${entityListener.interfaceName}<#if entityListener_has_next>,</#if></#list></#if> {
 

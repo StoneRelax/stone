@@ -1,7 +1,6 @@
 package stone.dal.adaptor.es.example;
 
 import org.elasticsearch.index.query.BoolQueryBuilder;
-import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.aggregations.AbstractAggregationBuilder;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
@@ -15,7 +14,6 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.transaction.annotation.EnableTransactionManagement;
 import stone.dal.adaptor.es.app.SpringEsAdaptorTestApplication;
 import stone.dal.adaptor.es.example.repo.BankTransactionRepository;
 import stone.dal.common.models.BankTransaction;
@@ -43,8 +41,10 @@ public class BankTransactionRepositoryTest {
 
 
   @Test
-  public void testES() {
-  
+  public void testES() throws Exception {
+
+    ElasticSearchUtil.getInstance().removeIndex("bank_transaction");
+
     BankTransaction bankTransaction1 = new BankTransaction();
     bankTransaction1.setUuid(1L);
     bankTransaction1.setUser("xf");
@@ -61,16 +61,18 @@ public class BankTransactionRepositoryTest {
     bankTransaction2.setScore(0);
     bankTransactionRepository.create(bankTransaction2);
 
+    Thread.sleep(1000);
+    System.out.println("Sleep 1000ms for ES to sync");
+
     BankTransaction queryXF = new BankTransaction();
     queryXF.setUuid(1L);
-    List<BankTransaction> xfResult = ElasticSearchUtil.getInstance().query(queryXF,BankTransaction.class,null,null);
-    BankTransaction getXF = xfResult.get(0);
-    Assert.assertEquals("xf",getXF.getUser());
+    BankTransaction xfResult = ElasticSearchUtil.getInstance().queryById(queryXF,BankTransaction.class);
+    Assert.assertEquals("xf",xfResult.getUser());
 
     BankTransaction queryStone = new BankTransaction();
     BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
     boolQueryBuilder.must(QueryBuilders.termQuery("user","stone"));
-    List<BankTransaction> stoneResult = ElasticSearchUtil.getInstance().query(queryStone,BankTransaction.class,null,boolQueryBuilder);
+    List<BankTransaction> stoneResult = ElasticSearchUtil.getInstance().queryForList(queryStone,BankTransaction.class,null,boolQueryBuilder);
     BankTransaction getStone = stoneResult.get(0);
     Assert.assertEquals(200,getStone.getAmount());
 
@@ -82,6 +84,9 @@ public class BankTransactionRepositoryTest {
     bankTransaction3.setScore(30);
     bankTransactionRepository.create(bankTransaction3);
 
+    Thread.sleep(1000);
+    System.out.println("Sleep 1000ms for ES to sync");
+
     BankTransaction emptyTransaction = new BankTransaction();
     BoolQueryBuilder aggBoolQueryBuilder = QueryBuilders.boolQuery();
     aggBoolQueryBuilder.must(QueryBuilders.termQuery("user","xf"));
@@ -91,6 +96,16 @@ public class BankTransactionRepositoryTest {
     Aggregations aggregations = ElasticSearchUtil.getInstance().aggregationQuery(emptyTransaction,null,aggBoolQueryBuilder,aggregationBuilders);
     Sum sum = aggregations.get("totalAmount");
     Assert.assertEquals(400,sum.getValue(),0.001);
+
+    long count = ElasticSearchUtil.getInstance().count(emptyTransaction,null,null);
+    Assert.assertEquals(3,count);
+
+    BankTransaction deleteTransaction = new BankTransaction();
+    deleteTransaction.setUuid(1L);
+    ElasticSearchUtil.getInstance().remove(deleteTransaction);
+    Thread.sleep(1000);
+    System.out.println("Sleep 1000ms for ES to sync");
+    Assert.assertEquals(0,ElasticSearchUtil.getInstance().queryForList(bankTransaction1,BankTransaction.class,null,null).size());
   }
 
 }
