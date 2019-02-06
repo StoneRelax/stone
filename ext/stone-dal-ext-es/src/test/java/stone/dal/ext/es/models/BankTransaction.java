@@ -1,10 +1,12 @@
 package stone.dal.ext.es.models;
 
 import java.util.Date;
+import org.springframework.data.annotation.Id;
 
 @org.springframework.data.elasticsearch.annotations.Document(indexName = "bank_transaction")
 public class BankTransaction {
-    private Long uuid;
+  @Id
+  private Long uuid;
     private String user;
     private int type;
     private long amount;

@@ -32,7 +32,7 @@ public class ElasticSearchAdaptorTest {
     tx.setType(0);
     tx.setAmount(100);
     tx.setScore(10);
-    elasticSearchAdaptor.insert(tx, tx.getUuid().toString());
+    elasticSearchAdaptor.insert(tx);
 
     tx = new BankTransaction();
     tx.setUuid(2L);
@@ -40,7 +40,7 @@ public class ElasticSearchAdaptorTest {
     tx.setType(1);
     tx.setAmount(200);
     tx.setScore(0);
-    elasticSearchAdaptor.insert(tx, tx.getUuid().toString());
+    elasticSearchAdaptor.insert(tx);
 
     Thread.sleep(1000);
     System.out.println("Sleep 1000ms for ES to sync");
@@ -56,14 +56,15 @@ public class ElasticSearchAdaptorTest {
     Sum sum = aggregations.get("totalAmount");
     Assert.assertEquals(300, sum.getValue(), 0.001);
 
-//    long count = ElasticSearchUtil.getInstance().count(emptyTransaction, null, null);
-//    Assert.assertEquals(3, count);
+    long count = elasticSearchAdaptor.count(BankTransaction.class, null, null);
+    Assert.assertEquals(2, count);
 //
 //    BankTransaction deleteTransaction = new BankTransaction();
 //    deleteTransaction.setUuid(1L);
-//    ElasticSearchUtil.getInstance().remove(deleteTransaction);
-//    Thread.sleep(1000);
-//    System.out.println("Sleep 1000ms for ES to sync");
+    elasticSearchAdaptor.remove(BankTransaction.class, "1");
+    Thread.sleep(1000);
+    count = elasticSearchAdaptor.count(BankTransaction.class, null, null);
+    Assert.assertEquals(1, count);
 //    Assert.assertEquals(0, ElasticSearchUtil.getInstance().queryForList(tx, BankTransaction.class, null, null).size());
   }
 }

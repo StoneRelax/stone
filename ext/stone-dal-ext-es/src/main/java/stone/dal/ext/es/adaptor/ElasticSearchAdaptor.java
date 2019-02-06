@@ -22,9 +22,8 @@ public class ElasticSearchAdaptor<T> {
     this.elasticsearchTemplate = elasticsearchTemplate;
   }
 
-  public void insert(T obj, String id) {
+  public void insert(T obj) {
     IndexQuery indexQuery = new IndexQuery();
-    indexQuery.setId(id);
     indexQuery.setObject(obj);
     elasticsearchTemplate.index(indexQuery);
   }
@@ -68,7 +67,7 @@ public class ElasticSearchAdaptor<T> {
     return elasticsearchTemplate.query(searchQuery, SearchResponse::getAggregations);
   }
 
-  public void remove(String id, Class<T> clazz) {
+  public void remove(Class<T> clazz, String id) {
     elasticsearchTemplate.delete(clazz, id);
   }
 
