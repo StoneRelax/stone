@@ -6,6 +6,7 @@ import org.elasticsearch.action.search.SearchType;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.search.aggregations.AbstractAggregationBuilder;
 import org.elasticsearch.search.aggregations.Aggregations;
+import org.elasticsearch.search.sort.SortBuilder;
 import org.springframework.data.elasticsearch.core.ElasticsearchTemplate;
 import org.springframework.data.elasticsearch.core.mapping.ElasticsearchPersistentEntity;
 import org.springframework.data.elasticsearch.core.query.DeleteQuery;
@@ -34,7 +35,7 @@ public class ElasticSearchAdaptor<T> {
     return elasticsearchTemplate.queryForObject(getQuery, clazz);
   }
 
-  public List<T> queryForList(Class<T> clazz, SearchType searchType, QueryBuilder queryBuilder) {
+  public List<T> queryForList(Class<T> clazz, SearchType searchType, QueryBuilder queryBuilder,SortBuilder sortBuilder, QueryBuilder filterBuilder) {
     if (searchType == null) {
       searchType = SearchType.DEFAULT;
     }
@@ -43,11 +44,17 @@ public class ElasticSearchAdaptor<T> {
     searchQueryBuilder = new NativeSearchQueryBuilder().withQuery(queryBuilder)
         .withIndices(persistentEntity.getIndexName())
         .withSearchType(searchType);
+    if(sortBuilder != null){
+      searchQueryBuilder.withSort(sortBuilder);
+    }
+    if(filterBuilder != null){
+      searchQueryBuilder.withFilter(filterBuilder);
+    }
     SearchQuery searchQuery = searchQueryBuilder.build();
     return elasticsearchTemplate.queryForList(searchQuery, clazz);
   }
 
-  public Aggregations aggregationQuery(Class<T> clazz, SearchType searchType, QueryBuilder queryBuilder,
+  public Aggregations aggregationQuery(Class<T> clazz, SearchType searchType, QueryBuilder queryBuilder,SortBuilder sortBuilder,QueryBuilder filterBuilder,
       List<AbstractAggregationBuilder> aggregationBuilders) {
     if (searchType == null) {
       searchType = SearchType.DEFAULT;
@@ -62,6 +69,12 @@ public class ElasticSearchAdaptor<T> {
     ).withSearchType(searchType);
     for (AbstractAggregationBuilder aggregationBuilder : aggregationBuilders) {
       searchQueryBuilder.addAggregation(aggregationBuilder);
+    }
+    if(sortBuilder != null){
+      searchQueryBuilder.withSort(sortBuilder);
+    }
+    if(filterBuilder != null){
+      searchQueryBuilder.withFilter(filterBuilder);
     }
     SearchQuery searchQuery = searchQueryBuilder.build();
     return elasticsearchTemplate.query(searchQuery, SearchResponse::getAggregations);
