@@ -1,0 +1,1 @@
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=stone.dal.ext.es.autoconfigure.ElasticSearchAutoConfigure
