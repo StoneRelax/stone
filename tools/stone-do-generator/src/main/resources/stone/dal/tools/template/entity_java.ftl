@@ -3,7 +3,7 @@ package ${packageName};
 @javax.persistence.Entity<#if gen.nosql(entity)>@stone.dal.common.models.annotation.Nosql</#if>
 @javax.persistence.Table(name = "${entity.tableName}")
 <#if gen.hasIndex(entity)>@stone.dal.common.models.annotation.Indicies(indices = {<#list gen.indicies(entity) as idxName>
-@stone.dal.common.models.annotation.Index(name="${gen.dbIdxName(idxName)}",unique=${gen.isUnique(entity, idxName)} columnNames = {<#list gen.getIndexColumns(entity,idxName) as keyField>"${keyField}"<#if keyField_has_next>,</#if></#list>})<#if idxName_has_next>,</#if></#list>})</#if><#if gen.hasListenerIntf(entity)>
+@stone.dal.common.models.annotation.Index(name="${gen.dbIdxName(entity, idxName)}",unique=${gen.isUnique(entity, idxName)}, columnNames = {<#list gen.getIndexColumns(entity,idxName) as keyField>"${keyField}"<#if keyField_has_next>,</#if></#list>})<#if idxName_has_next>,</#if></#list>})</#if><#if gen.hasListenerIntf(entity)>
 @javax.persistence.EntityListeners({
 <#list entity.entityListeners as entityListener>
     ${entityListener.className}.class<#if entityListener_has_next>,</#if>

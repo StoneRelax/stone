@@ -38,8 +38,6 @@ public abstract class FieldMeta {
 
   protected Boolean notPersist = false;
 
-  protected String index;
-
   protected Boolean file = false;
 
   protected Boolean clob = false;
@@ -123,10 +121,6 @@ public abstract class FieldMeta {
 
   public Boolean getNotPersist() {
     return notPersist || clob || columnMapperClazz != null;
-  }
-
-  public String getIndex() {
-    return index;
   }
 
   public Boolean getFile() {
@@ -218,11 +212,6 @@ public abstract class FieldMeta {
 
     public Factory notPersist(Boolean notPersist) {
       meta.notPersist = notPersist;
-      return this;
-    }
-
-    public Factory index(String index) {
-      meta.index = index;
       return this;
     }
 

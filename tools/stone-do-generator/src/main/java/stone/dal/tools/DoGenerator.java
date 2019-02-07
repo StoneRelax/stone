@@ -188,8 +188,15 @@ public class DoGenerator {
     return optional.map(IndexMeta::getColumnNames).orElse(null);
   }
 
-  public String dbIdxName(String idxName) {
-    return "idx_" + idxName;
+  public String dbIdxName(RawEntityMeta entityMeta, String idxName) {
+    Optional<IndexMeta> optional = entityMeta.getRawIndicies().stream()
+        .filter(index -> idxName.equals(index.getName())).findFirst();
+    return optional.map(indexMeta -> {
+      if (indexMeta.isUnique()) {
+        return ("UNIQUE_" + idxName).toUpperCase();
+      }
+      return ("idx_" + idxName).toUpperCase();
+    }).orElse(null);
   }
 
   private List<RawEntityMeta> parseFile(String packageName, File file) throws Exception {

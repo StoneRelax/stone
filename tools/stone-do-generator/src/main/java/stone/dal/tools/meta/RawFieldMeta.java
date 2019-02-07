@@ -23,11 +23,11 @@ public class RawFieldMeta extends FieldMeta {
 
   private String seqDsl;
 
-  private String columnMapperDsl;
-
   private String fieldProperty;
 
   private String label;
+
+  private String index;
 
   private Boolean notNull = false;
 
@@ -167,6 +167,10 @@ public class RawFieldMeta extends FieldMeta {
 
   public void setUpdatable(Boolean updatable) {
     this.updatable = updatable;
+  }
+
+  public String getIndex() {
+    return index;
   }
 
   public static class ColumnMapperDslMeta {

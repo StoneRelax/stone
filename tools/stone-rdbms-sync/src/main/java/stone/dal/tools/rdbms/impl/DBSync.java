@@ -92,13 +92,19 @@ public class DBSync {
     results = stJdbcTemplate.execSqlScript(StringUtils.combineString(lines, ";\n"));
     if (!delta) {
       if (dbScriptPath != null) {
-        InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream(dbScriptPath);
-        if (is == null) {
-          results.add(ExecResult.factory().error(String.format("Can not find db script %s!", dbScriptPath)).build());
-        } else {
-          results.addAll(stJdbcTemplate.execSqlStream(is));
-        }
+        results.addAll(runScript(dbScriptPath));
       }
+    }
+    return results;
+  }
+
+  public List<ExecResult> runScript(String dbScriptPath) {
+    List<ExecResult> results = new ArrayList<>();
+    InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream(dbScriptPath);
+    if (is == null) {
+      results.add(ExecResult.factory().error(String.format("Can not find db script %s!", dbScriptPath)).build());
+    } else {
+      results.addAll(stJdbcTemplate.execSqlStream(is));
     }
     return results;
   }
@@ -273,7 +279,7 @@ public class DBSync {
     //Handle unique indices
     Collection<IndexMeta> uniqueIndices = entity.getMeta().getUniqueIndices();
     for (IndexMeta index : uniqueIndices) {
-      String indexName = ("idx_" + index.getName()).toUpperCase();
+      String indexName = index.getName().toUpperCase();
       if (delta) {
         String dml = "ALTER TABLE " + entity.getMeta().getTableName() + " DROP INDEX " + indexName;
         lines.add(dml);
@@ -283,29 +289,16 @@ public class DBSync {
       lines.add(dml);
     }
     //Handle indices
-    Collection<FieldMeta> fields = entity.getMeta().getFields();
-    Map<String, Set<String>> indices = new HashMap<>();
-    fields.forEach(fieldMeta -> {
-      String index = fieldMeta.getIndex();
-      if (!StringUtils.isEmpty(index)) {
-        Set<String> columns = indices.get(index);
-        if (columns == null) {
-          columns = new HashSet<>();
-          indices.putIfAbsent(index, columns);
-        }
-        columns.add(fieldMeta.getDbName());
-      }
-    });
-    for (String index : indices.keySet()) {
-      Set<String> indicesFields = indices.get(index);
-      String indexName = ("idx_" + index).toUpperCase();
+    Collection<IndexMeta> normalIndices = entity.getMeta().getIndices();
+    for (IndexMeta index : normalIndices) {
+      String indexName = index.getName().toUpperCase();
       if (delta) {
         String dml = "ALTER TABLE " + entity.getMeta().getTableName() + " DROP INDEX " + indexName;
         lines.add(dml);
       }
-      String _dml = "CREATE INDEX " + " ON "
-          + entity.getMeta().getTableName() + " (" + StringUtils.combineString(indicesFields, ",") + ")";
-      lines.add(_dml);
+      String dml = "create index " + indexName + " on " + entity.getMeta().getTableName() + "("
+          + StringUtils.combineString(index.getColumnNames(), ",") + ")";
+      lines.add(dml);
     }
     return lines;
   }
