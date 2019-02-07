@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import stone.dal.common.models.meta.EntityMeta;
 import stone.dal.common.models.meta.FieldMeta;
-import stone.dal.common.models.meta.UniqueIndexMeta;
+import stone.dal.common.models.meta.IndexMeta;
 
 public class RawEntityMeta extends EntityMeta {
 
@@ -25,7 +25,7 @@ public class RawEntityMeta extends EntityMeta {
 
   protected List<RawRelationMeta> rawRelations = new ArrayList<>();
 
-  protected Collection<UniqueIndexMeta> uniqueIndices = new ArrayList<>();
+  protected Collection<IndexMeta> rawIndicies = new ArrayList<>();
 
   public List<RawRelationMeta> getRawRelations() {
     return rawRelations;
@@ -88,9 +88,8 @@ public class RawEntityMeta extends EntityMeta {
     this.clazzName = clazzName;
   }
 
-  @Override
-  public Collection<UniqueIndexMeta> getUniqueIndices() {
-    return uniqueIndices;
+  public Collection<IndexMeta> getRawIndicies() {
+    return rawIndicies;
   }
 
   public List<EntityListener> getEntityListeners() {

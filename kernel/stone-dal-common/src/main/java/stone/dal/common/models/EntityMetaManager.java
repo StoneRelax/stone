@@ -27,14 +27,14 @@ import stone.dal.common.ex.DoParseException;
 import stone.dal.common.models.annotation.Clob;
 import stone.dal.common.models.annotation.ColumnMapper;
 import stone.dal.common.models.annotation.FileField;
+import stone.dal.common.models.annotation.Index;
+import stone.dal.common.models.annotation.Indicies;
 import stone.dal.common.models.annotation.Sequence;
-import stone.dal.common.models.annotation.UniqueIndex;
-import stone.dal.common.models.annotation.UniqueIndices;
 import stone.dal.common.models.meta.EntityMeta;
 import stone.dal.common.models.meta.FieldMeta;
+import stone.dal.common.models.meta.IndexMeta;
 import stone.dal.common.models.meta.RelationMeta;
 import stone.dal.common.models.meta.RelationTypes;
-import stone.dal.common.models.meta.UniqueIndexMeta;
 import stone.dal.kernel.utils.ClassUtils;
 import stone.dal.kernel.utils.LogUtils;
 import stone.dal.kernel.utils.StringUtils;
@@ -92,13 +92,13 @@ public class EntityMetaManager {
         EntityListeners listeners = (EntityListeners) dalClazz.getAnnotation(EntityListeners.class);
         entityFactory.addEntityListeners(listeners);
       }
-      if (clazz.isAnnotationPresent(UniqueIndices.class)) {
-        UniqueIndices uniqueIndices = (UniqueIndices) dalClazz.getAnnotation(UniqueIndices.class);
-        UniqueIndex[] indices = uniqueIndices.indices();
+      if (clazz.isAnnotationPresent(Indicies.class)) {
+        Indicies indicies = (Indicies) dalClazz.getAnnotation(Indicies.class);
+        Index[] indices = indicies.indices();
         if (!isArrayEmpty(indices)) {
-          for (UniqueIndex index : indices) {
-            UniqueIndexMeta indexMeta = new UniqueIndexMeta(index.columnNames(), index.name());
-            entityFactory.addUniqueMeta(indexMeta);
+          for (Index index : indices) {
+            IndexMeta indexMeta = new IndexMeta(index.columnNames(), index.name(), index.unique());
+            entityFactory.addIndex(indexMeta);
           }
         }
       }

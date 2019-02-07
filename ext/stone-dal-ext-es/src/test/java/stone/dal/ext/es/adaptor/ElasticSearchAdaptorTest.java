@@ -3,13 +3,10 @@ package stone.dal.ext.es.adaptor;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-
 import org.elasticsearch.index.query.BoolQueryBuilder;
-import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.RangeQueryBuilder;
 import org.elasticsearch.search.aggregations.AbstractAggregationBuilder;
-import org.elasticsearch.search.aggregations.Aggregation;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.Aggregations;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms;
@@ -23,13 +20,10 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.elasticsearch.core.ElasticsearchTemplate;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import stone.dal.ext.es.app.SpringEsAdaptorTestApplication;
 import stone.dal.ext.es.models.BankTransaction;
 import stone.dal.ext.es.models.TxAggregationRecord;
-
-import javax.management.Query;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest(classes = SpringEsAdaptorTestApplication.class)
@@ -99,8 +93,6 @@ public class ElasticSearchAdaptorTest {
     tx.setCreationDate(currentLater);
     elasticSearchAdaptor.insert(tx);
 
-
-
     Thread.sleep(1000);
     System.out.println("Sleep 1000ms for ES to sync");
 
@@ -118,17 +110,12 @@ public class ElasticSearchAdaptorTest {
 
     long count = elasticSearchAdaptor.count(BankTransaction.class, null, null);
     Assert.assertEquals(6, count);
-//
-//    BankTransaction deleteTransaction = new BankTransaction();
-//    deleteTransaction.setUuid(1L);
+
     elasticSearchAdaptor.remove(BankTransaction.class, "1");
     Thread.sleep(1000);
     count = elasticSearchAdaptor.count(BankTransaction.class, null, null);
     Assert.assertEquals(5, count);
-//    Assert.assertEquals(0, ElasticSearchUtil.getInstance().queryForList(tx, BankTransaction.class, null, null).size());
-    /*
-    Report
-     */
+    //report
     List<TxAggregationRecord> aggResults = new ArrayList<>();
     BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery();
 

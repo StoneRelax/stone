@@ -37,11 +37,10 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.Assert;
-import stone.dal.common.models.meta.EntityMeta;
 import stone.dal.common.models.meta.FieldMeta;
+import stone.dal.common.models.meta.IndexMeta;
 import stone.dal.common.models.meta.RelationMeta;
 import stone.dal.common.models.meta.RelationTypes;
-import stone.dal.common.models.meta.UniqueIndexMeta;
 import stone.dal.kernel.utils.ClassUtils;
 import stone.dal.kernel.utils.FileUtils;
 import stone.dal.tools.ExtensionRuleReader.RuleSet;
@@ -169,18 +168,24 @@ public class DoGenerator {
     }
   }
 
-  public boolean hasUniqueKeys(RawEntityMeta entityMeta) {
-    return CollectionUtils.isNotEmpty(entityMeta.getUniqueIndices());
+  public boolean hasIndex(RawEntityMeta entityMeta) {
+    return CollectionUtils.isNotEmpty(entityMeta.getRawIndicies());
   }
 
-  public Set<String> uniqueIndices(EntityMeta entityMeta) {
-    return entityMeta.getUniqueIndices().stream().map(UniqueIndexMeta::getName).collect(Collectors.toSet());
-  }
-
-  public String[] getUniqueColumns(EntityMeta entityMeta, String idxName) {
-    Optional<UniqueIndexMeta> optional = entityMeta.getUniqueIndices().stream()
+  public String isUnique(RawEntityMeta entityMeta, String idxName) {
+    Optional<IndexMeta> optional = entityMeta.getRawIndicies().stream()
         .filter(index -> idxName.equals(index.getName())).findFirst();
-    return optional.map(UniqueIndexMeta::getColumnNames).orElse(null);
+    return optional.map(indexMeta -> String.valueOf(indexMeta.isUnique())).orElse("false");
+  }
+
+  public Set<String> indicies(RawEntityMeta entityMeta) {
+    return entityMeta.getRawIndicies().stream().map(IndexMeta::getName).collect(Collectors.toSet());
+  }
+
+  public String[] getIndexColumns(RawEntityMeta entityMeta, String idxName) {
+    Optional<IndexMeta> optional = entityMeta.getRawIndicies().stream()
+        .filter(index -> idxName.equals(index.getName())).findFirst();
+    return optional.map(IndexMeta::getColumnNames).orElse(null);
   }
 
   public String dbIdxName(String idxName) {
@@ -259,7 +264,9 @@ public class DoGenerator {
       }
       resolveFileFields(meta);
       resolveColumnMapperAssociateColumns(meta);
-      entities.add(buildUniqueIndices(meta));
+      buildIndices(meta, true);
+      buildIndices(meta, false);
+      entities.add(meta);
       i++;
     }
     resolveReverseRelation(entities);
@@ -330,23 +337,23 @@ public class DoGenerator {
     meta.getRawFields().addAll(fileUuidFields);
   }
 
-  private RawEntityMeta buildUniqueIndices(RawEntityMeta meta) {
-    Map<String, List<String>> uniqueIndexMetaMap = new HashMap<>();
+  private void buildIndices(RawEntityMeta meta, boolean unique) {
+    Map<String, List<String>> indexMap = new HashMap<>();
     meta.getRawFields().forEach(fieldMeta -> {
-      if (StringUtils.isNotEmpty(fieldMeta.getUnique())) {
-        if (uniqueIndexMetaMap.containsKey(fieldMeta.getUnique())) {
-          uniqueIndexMetaMap.get(fieldMeta.getUnique()).add(fieldMeta.getDbName());
+      String idxName = unique ? fieldMeta.getUnique() : fieldMeta.getIndex();
+      if (StringUtils.isNotEmpty(idxName)) {
+        if (indexMap.containsKey(idxName)) {
+          indexMap.get(idxName).add(fieldMeta.getDbName());
         } else {
           List<String> columns = new ArrayList<>();
           columns.add(fieldMeta.getDbName());
-          uniqueIndexMetaMap.put(fieldMeta.getUnique(), columns);
+          indexMap.put(idxName, columns);
         }
       }
     });
-    uniqueIndexMetaMap.forEach((unique, columns) -> {
-      meta.getUniqueIndices().add(new UniqueIndexMeta(columns.toArray(new String[0]), unique));
+    indexMap.forEach((index, columns) -> {
+      meta.getRawIndicies().add(new IndexMeta(columns.toArray(new String[0]), index, unique));
     });
-    return meta;
   }
 
   public boolean hasEntityListenerListener(RawEntityMeta entityMeta) {

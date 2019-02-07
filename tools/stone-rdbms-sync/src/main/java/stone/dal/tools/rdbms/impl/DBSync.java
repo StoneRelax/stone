@@ -21,10 +21,10 @@ import org.springframework.util.Assert;
 import stone.dal.common.models.meta.ColumnInfo;
 import stone.dal.common.models.meta.EntityMeta;
 import stone.dal.common.models.meta.FieldMeta;
+import stone.dal.common.models.meta.IndexMeta;
 import stone.dal.common.models.meta.JoinColumn;
 import stone.dal.common.models.meta.RelationMeta;
 import stone.dal.common.models.meta.RelationTypes;
-import stone.dal.common.models.meta.UniqueIndexMeta;
 import stone.dal.jdbc.api.StJdbcTemplate;
 import stone.dal.jdbc.api.meta.ExecResult;
 import stone.dal.jdbc.api.meta.SqlQueryMeta;
@@ -271,8 +271,8 @@ public class DBSync {
   private List<String> getIndicesSql(RdbmsEntity entity, boolean delta) {
     List<String> lines = new ArrayList<>();
     //Handle unique indices
-    Collection<UniqueIndexMeta> uniqueIndices = entity.getMeta().getUniqueIndices();
-    for (UniqueIndexMeta index : uniqueIndices) {
+    Collection<IndexMeta> uniqueIndices = entity.getMeta().getUniqueIndices();
+    for (IndexMeta index : uniqueIndices) {
       String indexName = ("idx_" + index.getName()).toUpperCase();
       if (delta) {
         String dml = "ALTER TABLE " + entity.getMeta().getTableName() + " DROP INDEX " + indexName;

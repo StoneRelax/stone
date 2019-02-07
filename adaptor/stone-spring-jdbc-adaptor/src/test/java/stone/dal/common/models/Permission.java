@@ -6,9 +6,9 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
+import stone.dal.common.models.annotation.Index;
+import stone.dal.common.models.annotation.Indicies;
 import stone.dal.common.models.annotation.Nosql;
-import stone.dal.common.models.annotation.UniqueIndex;
-import stone.dal.common.models.annotation.UniqueIndices;
 import stone.dal.common.models.data.BaseDo;
 
 /**
@@ -25,7 +25,7 @@ import stone.dal.common.models.data.BaseDo;
         columnNames = { "permissionName" }
     ) }
 )
-@UniqueIndices(indices = { @UniqueIndex(name = "name", columnNames = { "permissionName" }) })
+@Indicies(indices = { @Index(name = "name", columnNames = { "permissionName" }) })
 public class Permission extends BaseDo {
 
   private String permissionType;

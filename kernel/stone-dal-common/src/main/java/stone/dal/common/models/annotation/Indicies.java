@@ -8,8 +8,8 @@ import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
- * <p>Title: UniqueIndices</p>
- * <p>Description: UniqueIndices</p>
+ * <p>Title: Indicies</p>
+ * <p>Description: Indicies</p>
  * <p>Copyright: Copyright (c) 2015</p>
  * <p>Company: Dr0ne Studio</p>
  *
@@ -18,6 +18,6 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @Target({ TYPE })
 @Retention(RUNTIME)
 @Inherited
-public @interface UniqueIndices {
-  UniqueIndex[] indices();
+public @interface Indicies {
+  Index[] indices();
 }

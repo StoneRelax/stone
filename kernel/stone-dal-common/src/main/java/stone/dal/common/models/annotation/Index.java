@@ -18,7 +18,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @Target({ TYPE })
 @Retention(RUNTIME)
 @Inherited
-public @interface UniqueIndex {
+public @interface Index {
 
   /**
    * (Required) An array of the column names that make up the constraint.
@@ -26,4 +26,6 @@ public @interface UniqueIndex {
   String[] columnNames();
 
   String name();
+
+  boolean unique() default false;
 }

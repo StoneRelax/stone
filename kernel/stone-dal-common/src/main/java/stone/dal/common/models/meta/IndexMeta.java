@@ -3,28 +3,28 @@ package stone.dal.common.models.meta;
 /**
  * @author fengxie
  */
-public class UniqueIndexMeta {
+public class IndexMeta {
 	private String[] columnNames;
 	private String name;
 
-	public UniqueIndexMeta(String[] columnNames, String name) {
+	private boolean unique;
+
+	public IndexMeta(String[] columnNames, String name, boolean unique) {
 		this.columnNames = columnNames;
 		this.name = name;
+		this.unique = unique;
 	}
 
 	public String[] getColumnNames() {
 		return columnNames;
 	}
 
-	public void setColumnNames(String[] columnNames) {
-		this.columnNames = columnNames;
-	}
-
 	public String getName() {
 		return name;
 	}
 
-	public void setName(String name) {
-		this.name = name;
+	public boolean isUnique() {
+		return unique;
 	}
+
 }
