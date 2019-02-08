@@ -4,11 +4,13 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import org.elasticsearch.index.query.BoolQueryBuilder;
+import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.RangeQueryBuilder;
 import org.elasticsearch.search.aggregations.AbstractAggregationBuilder;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.Aggregations;
+import org.elasticsearch.search.aggregations.bucket.filter.FilterAggregationBuilder;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 import org.elasticsearch.search.aggregations.bucket.terms.TermsBuilder;
 import org.elasticsearch.search.aggregations.metrics.sum.Sum;
@@ -20,6 +22,9 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import stone.dal.ext.es.app.SpringEsAdaptorTestApplication;
 import stone.dal.ext.es.models.BankTransaction;
@@ -36,6 +41,7 @@ public class ElasticSearchAdaptorTest {
   public void testES() throws Exception {
     elasticSearchAdaptor.removeIndex("bank_transaction");
     Date current = new Date();
+    Pageable pageable = new PageRequest(1,10);
     BankTransaction tx = new BankTransaction();
     tx.setUuid(1L);
     tx.setUser("xf");
@@ -104,7 +110,7 @@ public class ElasticSearchAdaptorTest {
     SumBuilder sb = AggregationBuilders.sum("totalAmount").field("amount");
     aggregationBuilders.add(sb);
     Aggregations aggregations = elasticSearchAdaptor
-        .aggregationQuery(BankTransaction.class, null, null, null,null,aggregationBuilders);
+        .aggregationQuery(BankTransaction.class, null, null, null,null,null,aggregationBuilders);
     Sum sum = aggregations.get("totalAmount");
     Assert.assertEquals(1200, sum.getValue(), 0.001);
 
@@ -118,7 +124,8 @@ public class ElasticSearchAdaptorTest {
     //report
     List<TxAggregationRecord> aggResults = new ArrayList<>();
     BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery();
-
+    QueryBuilder aggFilter = QueryBuilders.rangeQuery("amount").from(4000).to(4000);
+    FilterAggregationBuilder filterAggregationBuilder = AggregationBuilders.filter("amount").filter(aggFilter);
     TermsBuilder typeAggBuilder = AggregationBuilders.terms("txType").field("type");
     TermsBuilder nameAggBuilder = AggregationBuilders.terms("txUser").field("user");
     aggregationBuilders = new ArrayList<>();
@@ -127,8 +134,9 @@ public class ElasticSearchAdaptorTest {
     typeAggBuilder.subAggregation(amountBuilder);
     typeAggBuilder.subAggregation(scoreBuilder);
     nameAggBuilder.subAggregation(typeAggBuilder);
-    aggregationBuilders.add(nameAggBuilder);
-    aggregations = elasticSearchAdaptor.aggregationQuery(BankTransaction.class,null,queryBuilder,null,null,aggregationBuilders);
+    filterAggregationBuilder.subAggregation(nameAggBuilder);
+    aggregationBuilders.add(filterAggregationBuilder);
+    aggregations = elasticSearchAdaptor.aggregationQuery(BankTransaction.class,null,queryBuilder,null,null,pageable,aggregationBuilders);
     Terms terms = aggregations.get("txUser");
     if(terms.getBuckets().size() > 0){
       for(Terms.Bucket bucket : terms.getBuckets()){
@@ -155,7 +163,7 @@ public class ElasticSearchAdaptorTest {
     RangeQueryBuilder rangeQueryBuilder = QueryBuilders.rangeQuery("creationDate");
     rangeQueryBuilder.from(currentLater.getTime());
     rangeQueryBuilder.to(currentLater.getTime());
-    List<BankTransaction> filterResult = elasticSearchAdaptor.queryForList(BankTransaction.class,null,boolQueryBuilder,sortBuilder,rangeQueryBuilder);
+    List<BankTransaction> filterResult = elasticSearchAdaptor.queryForList(BankTransaction.class,null,boolQueryBuilder,sortBuilder,rangeQueryBuilder,null);
     Assert.assertEquals(2,filterResult.size());
   }
 }
