@@ -1,5 +1,6 @@
 package stone.dal.ext.es.adaptor;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -8,9 +9,12 @@ import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.RangeQueryBuilder;
 import org.elasticsearch.search.aggregations.AbstractAggregationBuilder;
+import org.elasticsearch.search.aggregations.AggregationBuilder;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.Aggregations;
 import org.elasticsearch.search.aggregations.bucket.filter.FilterAggregationBuilder;
+import org.elasticsearch.search.aggregations.bucket.filter.InternalFilter;
+import org.elasticsearch.search.aggregations.bucket.terms.StringTerms;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 import org.elasticsearch.search.aggregations.bucket.terms.TermsBuilder;
 import org.elasticsearch.search.aggregations.metrics.sum.Sum;
@@ -22,8 +26,10 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.elasticsearch.core.aggregation.AggregatedPage;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import stone.dal.ext.es.app.SpringEsAdaptorTestApplication;
@@ -41,7 +47,7 @@ public class ElasticSearchAdaptorTest {
   public void testES() throws Exception {
     elasticSearchAdaptor.removeIndex("bank_transaction");
     Date current = new Date();
-    Pageable pageable = new PageRequest(1,10);
+    Pageable pageable = new PageRequest(0,10);
     BankTransaction tx = new BankTransaction();
     tx.setUuid(1L);
     tx.setUser("xf");
@@ -124,36 +130,43 @@ public class ElasticSearchAdaptorTest {
     //report
     List<TxAggregationRecord> aggResults = new ArrayList<>();
     BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery();
-    QueryBuilder aggFilter = QueryBuilders.rangeQuery("amount").from(4000).to(4000);
-    FilterAggregationBuilder filterAggregationBuilder = AggregationBuilders.filter("amount").filter(aggFilter);
-    TermsBuilder typeAggBuilder = AggregationBuilders.terms("txType").field("type");
+
+    QueryBuilder aggFilter1 = QueryBuilders.rangeQuery("amount").from(-10000).to(10000);
+    QueryBuilder aggFilter2 = QueryBuilders.rangeQuery("score").from(-10000).to(10000);
+
+    AggregationBuilder mainFilter = AggregationBuilders.filter("totalAmount").filter(aggFilter1);
+    AggregationBuilder scoreFilter = AggregationBuilders.filter("totalPoint").filter(aggFilter2);
+    mainFilter.subAggregation(scoreFilter);
     TermsBuilder nameAggBuilder = AggregationBuilders.terms("txUser").field("user");
     aggregationBuilders = new ArrayList<>();
-    SumBuilder amountBuilder = AggregationBuilders.sum("totalAmount").field("amount");
-    SumBuilder scoreBuilder = AggregationBuilders.sum("totalScore").field("score");
-    typeAggBuilder.subAggregation(amountBuilder);
-    typeAggBuilder.subAggregation(scoreBuilder);
-    nameAggBuilder.subAggregation(typeAggBuilder);
-    filterAggregationBuilder.subAggregation(nameAggBuilder);
-    aggregationBuilders.add(filterAggregationBuilder);
-    aggregations = elasticSearchAdaptor.aggregationQuery(BankTransaction.class,null,queryBuilder,null,null,pageable,aggregationBuilders);
-    Terms terms = aggregations.get("txUser");
-    if(terms.getBuckets().size() > 0){
-      for(Terms.Bucket bucket : terms.getBuckets()){
-        String userName = bucket.getKeyAsString();
-        long userTotalCount = bucket.getDocCount();
-        Terms userAgg = bucket.getAggregations().get("txType");
-        for(Terms.Bucket bk : userAgg.getBuckets()){
-          String typeName = bk.getKeyAsString();
-          long typeCount = bk.getDocCount();
-          Sum amountSum = bk.getAggregations().get("totalAmount");
-          Sum scoreSum = bk.getAggregations().get("totalScore");
-          TxAggregationRecord txAggregationRecord = new TxAggregationRecord(userName,userTotalCount,typeName,typeCount,amountSum.getValue(),scoreSum.getValue());
-          aggResults.add(txAggregationRecord);
+    SumBuilder amountBuilder = AggregationBuilders.sum("amountSum").field("amount");
+    SumBuilder scoreBuilder = AggregationBuilders.sum("scoreSum").field("score");
+    nameAggBuilder.subAggregation(amountBuilder);
+    nameAggBuilder.subAggregation(scoreBuilder);
+    scoreFilter.subAggregation(nameAggBuilder);
+    aggregationBuilders.add(mainFilter);
+    aggregations = elasticSearchAdaptor.aggregationQuery(BankTransaction.class,null,null,null,null,pageable,aggregationBuilders);
+    if(aggregations != null){
+      InternalFilter amountFilter = aggregations.get("totalAmount");
+      if(amountFilter != null){
+        InternalFilter pointFilter =  amountFilter.getAggregations().get("totalPoint");
+        int fitUserCount = (int)pointFilter.getDocCount();
+        StringTerms userIdAgg = pointFilter.getAggregations().get("txUser");
+        if(userIdAgg != null){
+          for(Terms.Bucket bucket: userIdAgg.getBuckets()){
+            String userUid = bucket.getKeyAsString();
+            long userTxCount = bucket.getDocCount();
+            Sum amountSum = bucket.getAggregations().get("amountSum");
+            double totalAmount = amountSum.getValue();
+            Sum pointSum = bucket.getAggregations().get("scoreSum");
+            long totalPoint = Math.round(pointSum.getValue());
+            TxAggregationRecord record = new TxAggregationRecord(userUid,userTxCount,"",0,totalAmount,totalPoint);
+            aggResults.add(record);
+          }
         }
       }
     }
-    Assert.assertEquals(4,aggResults.size());
+    Assert.assertEquals(2,aggResults.size());
     /*
     from , to , sort by createDate
      */
@@ -163,7 +176,9 @@ public class ElasticSearchAdaptorTest {
     RangeQueryBuilder rangeQueryBuilder = QueryBuilders.rangeQuery("creationDate");
     rangeQueryBuilder.from(currentLater.getTime());
     rangeQueryBuilder.to(currentLater.getTime());
-    List<BankTransaction> filterResult = elasticSearchAdaptor.queryForList(BankTransaction.class,null,boolQueryBuilder,sortBuilder,rangeQueryBuilder,null);
-    Assert.assertEquals(2,filterResult.size());
+    List<BankTransaction> filterResult = elasticSearchAdaptor.queryForList(BankTransaction.class,null,boolQueryBuilder,sortBuilder,rangeQueryBuilder);
+    Page<BankTransaction> page = elasticSearchAdaptor.queryForPage(BankTransaction.class,null,boolQueryBuilder,sortBuilder,rangeQueryBuilder,pageable);
+
+    Assert.assertEquals(filterResult.size(),page.getTotalElements());
   }
 }

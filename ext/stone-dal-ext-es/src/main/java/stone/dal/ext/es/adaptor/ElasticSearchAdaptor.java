@@ -5,11 +5,13 @@ import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.SearchType;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.search.query.PostFilterParseElement;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.elasticsearch.search.aggregations.AbstractAggregationBuilder;
 import org.elasticsearch.search.aggregations.Aggregations;
 import org.elasticsearch.search.sort.SortBuilder;
 import org.springframework.data.elasticsearch.core.ElasticsearchTemplate;
+import org.springframework.data.elasticsearch.core.aggregation.AggregatedPage;
 import org.springframework.data.elasticsearch.core.mapping.ElasticsearchPersistentEntity;
 import org.springframework.data.elasticsearch.core.query.DeleteQuery;
 import org.springframework.data.elasticsearch.core.query.GetQuery;
@@ -39,7 +41,7 @@ public class ElasticSearchAdaptor<T> {
 
   }
 
-  public List<T> queryForList(Class<T> clazz, SearchType searchType, QueryBuilder queryBuilder,SortBuilder sortBuilder, QueryBuilder filterBuilder,Pageable pageable) {
+  public List<T> queryForList(Class<T> clazz, SearchType searchType, QueryBuilder queryBuilder,SortBuilder sortBuilder, QueryBuilder filterBuilder) {
     if (searchType == null) {
       searchType = SearchType.DEFAULT;
     }
@@ -54,12 +56,32 @@ public class ElasticSearchAdaptor<T> {
     if(filterBuilder != null){
       searchQueryBuilder.withFilter(filterBuilder);
     }
+
+    SearchQuery searchQuery = searchQueryBuilder.build();
+    return elasticsearchTemplate.queryForList(searchQuery, clazz);
+  }
+
+  public Page<T> queryForPage(Class<T> clazz, SearchType searchType, QueryBuilder queryBuilder, SortBuilder sortBuilder, QueryBuilder filterBuilder, Pageable pageable) {
+    if (searchType == null) {
+      searchType = SearchType.DEFAULT;
+    }
+    ElasticsearchPersistentEntity persistentEntity = elasticsearchTemplate.getPersistentEntityFor(clazz);
+    NativeSearchQueryBuilder searchQueryBuilder;
+    searchQueryBuilder = new NativeSearchQueryBuilder().withQuery(queryBuilder)
+            .withIndices(persistentEntity.getIndexName())
+            .withSearchType(searchType);
+    if(sortBuilder != null){
+      searchQueryBuilder.withSort(sortBuilder);
+    }
+    if(filterBuilder != null){
+      searchQueryBuilder.withFilter(filterBuilder);
+    }
     if(pageable != null){
       searchQueryBuilder.withPageable(pageable);
     }
 
     SearchQuery searchQuery = searchQueryBuilder.build();
-    return elasticsearchTemplate.queryForList(searchQuery, clazz);
+    return elasticsearchTemplate.queryForPage(searchQuery, clazz);
   }
 
   public Aggregations aggregationQuery(Class<T> clazz, SearchType searchType, QueryBuilder queryBuilder,SortBuilder sortBuilder,QueryBuilder filterBuilder,Pageable pageable,
