@@ -266,6 +266,7 @@ public class CollectionUtils {
             ctxPropertyValueArray[i] = ObjectUtils.getPropertyValue(context, comparedKeys[i]);
           }
         }
+
         for (int i = 0; i < comparedKeys.length; i++) {
           if (!ObjectUtils.isDifferent(elementPropertyValueArray[i], ctxPropertyValueArray[i])) {
             count += 1;
