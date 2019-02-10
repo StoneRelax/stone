@@ -4,20 +4,17 @@ import java.util.List;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.SearchType;
 import org.elasticsearch.index.query.QueryBuilder;
-import org.elasticsearch.search.query.PostFilterParseElement;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.elasticsearch.search.aggregations.AbstractAggregationBuilder;
 import org.elasticsearch.search.aggregations.Aggregations;
 import org.elasticsearch.search.sort.SortBuilder;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.elasticsearch.core.ElasticsearchTemplate;
-import org.springframework.data.elasticsearch.core.aggregation.AggregatedPage;
 import org.springframework.data.elasticsearch.core.mapping.ElasticsearchPersistentEntity;
 import org.springframework.data.elasticsearch.core.query.DeleteQuery;
 import org.springframework.data.elasticsearch.core.query.GetQuery;
 import org.springframework.data.elasticsearch.core.query.IndexQuery;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
-import org.springframework.data.elasticsearch.core.query.ScriptField;
 import org.springframework.data.elasticsearch.core.query.SearchQuery;
 
 public class ElasticSearchAdaptor<T> {
@@ -41,7 +38,8 @@ public class ElasticSearchAdaptor<T> {
 
   }
 
-  public List<T> queryForList(Class<T> clazz, SearchType searchType, QueryBuilder queryBuilder,SortBuilder sortBuilder, QueryBuilder filterBuilder) {
+  public List<T> queryForList(Class<T> clazz, SearchType searchType, QueryBuilder queryBuilder,
+      SortBuilder sortBuilder, QueryBuilder filterBuilder) {
     if (searchType == null) {
       searchType = SearchType.DEFAULT;
     }
@@ -61,7 +59,8 @@ public class ElasticSearchAdaptor<T> {
     return elasticsearchTemplate.queryForList(searchQuery, clazz);
   }
 
-  public Page<T> queryForPage(Class<T> clazz, SearchType searchType, QueryBuilder queryBuilder, SortBuilder sortBuilder, QueryBuilder filterBuilder, Pageable pageable) {
+  public Page<T> queryForPage(Class<T> clazz, SearchType searchType, QueryBuilder queryBuilder,
+      SortBuilder sortBuilder, QueryBuilder filterBuilder, Pageable pageable) {
     if (searchType == null) {
       searchType = SearchType.DEFAULT;
     }
@@ -79,12 +78,12 @@ public class ElasticSearchAdaptor<T> {
     if(pageable != null){
       searchQueryBuilder.withPageable(pageable);
     }
-
     SearchQuery searchQuery = searchQueryBuilder.build();
     return elasticsearchTemplate.queryForPage(searchQuery, clazz);
   }
 
-  public Aggregations aggregationQuery(Class<T> clazz, SearchType searchType, QueryBuilder queryBuilder,SortBuilder sortBuilder,QueryBuilder filterBuilder,Pageable pageable,
+  public Aggregations aggregationQuery(Class<T> clazz, SearchType searchType, QueryBuilder queryBuilder,
+      SortBuilder sortBuilder, QueryBuilder filterBuilder, Pageable pageable,
       List<AbstractAggregationBuilder> aggregationBuilders) {
     if (searchType == null) {
       searchType = SearchType.DEFAULT;

@@ -67,7 +67,7 @@ public abstract class SqlBaseMeta {
 			return this;
 		}
 
-    public Factory params(Object[] params) {
+    public Factory params(Object... params) {
 			meta.parameters = params;
 			return this;
 		}
