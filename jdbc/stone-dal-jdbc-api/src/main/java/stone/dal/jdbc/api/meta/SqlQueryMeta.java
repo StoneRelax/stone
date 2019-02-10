@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import stone.dal.kernel.utils.StringUtils;
 
 /**
  * @author fengxie
@@ -217,7 +218,7 @@ public abstract class SqlQueryMeta {
     }
 
     public Factory join(SqlQueryMeta queryMeta) {
-      String sql = meta.getSql();
+      String sql = StringUtils.replaceNull(meta.getSql());
       sql += queryMeta.sql;
       meta.sql = sql;
       List<Object> parameters = new ArrayList<>();
