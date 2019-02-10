@@ -526,11 +526,17 @@ public class DateUtils {
     Calendar calendar = Calendar.getInstance();
     calendar.set(Calendar.YEAR,year);
     calendar.set(Calendar.WEEK_OF_YEAR, weekNo);
+
+    String month = String.valueOf(calendar.get(Calendar.MONTH) + 1);
+    if(month.length() <= 1){
+      month = "0"+month;
+    }
+
     String day = String.valueOf(calendar.get(Calendar.DAY_OF_MONTH));
     if(day.length()<=1){
       day = "0"+day;
     }
-    String firstDayOfWeek = String.valueOf(calendar.get(Calendar.YEAR)) + String.valueOf(calendar.get(Calendar.MONTH) + 1)  + day;
+    String firstDayOfWeek = String.valueOf(calendar.get(Calendar.YEAR)) + month  + day;
     return firstDayOfWeek;
   }
 }
