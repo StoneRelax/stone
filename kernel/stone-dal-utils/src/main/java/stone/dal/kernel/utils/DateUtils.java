@@ -527,7 +527,7 @@ public class DateUtils {
     calendar.set(Calendar.YEAR, year);
     calendar.set(Calendar.WEEK_OF_YEAR, weekNo);
 
-    String month = String.valueOf(calendar.get(Calendar.MONTH));
+    String month = String.valueOf(calendar.get(Calendar.MONTH) + 1);
     if (month.length() <= 1) {
       month = "0" + month;
     }
