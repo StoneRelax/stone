@@ -522,21 +522,24 @@ public class DateUtils {
     return calendar.getTime();
   }
 
-  public static String getFirstDayOfWeek(int year, int weekNo) {
+  public static String getFirstDayOfWeek(Date time) {
     Calendar calendar = Calendar.getInstance();
-    calendar.set(Calendar.YEAR, year);
-    calendar.set(Calendar.WEEK_OF_YEAR, weekNo);
+    calendar.setTime(time);
 
-    String month = String.valueOf(calendar.get(Calendar.MONTH) + 1);
-    if (month.length() <= 1) {
-      month = "0" + month;
+    int dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK) - 1;
+
+    calendar.add(Calendar.DAY_OF_YEAR, -dayOfWeek);
+
+    String monthStr = String.valueOf(calendar.get(Calendar.MONTH) + 1);
+    if (monthStr.length() <= 1) {
+      monthStr = "0" + monthStr;
     }
 
-    String day = String.valueOf(calendar.get(Calendar.DAY_OF_MONTH));
+    String day = String.valueOf(calendar.get(Calendar.DATE));
     if (day.length() <= 1) {
       day = "0" + day;
     }
-    return String.valueOf(calendar.get(Calendar.YEAR)) + month + day;
+    return String.valueOf(calendar.get(Calendar.YEAR)) + monthStr + day;
   }
 }
 
