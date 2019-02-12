@@ -3,7 +3,9 @@ package stone.dal.adaptor.spring.jdbc.impl;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.util.Date;
 import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -24,7 +26,15 @@ public class JdbcTemplateSpiImpl implements JdbcTemplateSpi {
 
   @Override
   public int exec(SqlBaseMeta meta) {
-    return jdbcTemplate.update(meta.getSql(), meta.getParameters());
+
+    return jdbcTemplate.update(meta.getSql(), ps -> {
+      Object[] params = meta.getParameters();
+      if (params != null) {
+        for (int i = 0; i < params.length; i++) {
+          setStatementParams(ps, params[i], i);
+        }
+      }
+    });
   }
 
   @Override
