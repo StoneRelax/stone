@@ -1,5 +1,7 @@
 package stone.dal.kernel.utils;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.UndeclaredThrowableException;
 import org.slf4j.Logger;
 
 /**
@@ -14,14 +16,19 @@ public class LogUtils {
    * @return Exception stack
    */
   public static String printEx(Throwable e) {
+    while ((e instanceof UndeclaredThrowableException || e instanceof InvocationTargetException)) {
+      e = e.getCause();
+    }
     StringBuilder sb = new StringBuilder();
-    Throwable throwable = e;
-    while (throwable != null) {
-      sb.append(throwable.getClass().getName());
-      sb.append(":");
-      sb.append(throwable.getMessage());
-      sb.append("\n");
-      throwable = throwable.getCause();
+    if (e != null) {
+      Throwable throwable = e;
+      while (throwable != null) {
+        sb.append(throwable.getClass().getName());
+        sb.append(":");
+        sb.append(throwable.getMessage());
+        sb.append("\n");
+        throwable = throwable.getCause();
+      }
     }
     return sb.toString();
   }
