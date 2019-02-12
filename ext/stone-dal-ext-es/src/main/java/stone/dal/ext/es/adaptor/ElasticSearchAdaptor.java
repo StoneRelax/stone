@@ -25,6 +25,14 @@ public class ElasticSearchAdaptor<T> {
     this.elasticsearchTemplate = elasticsearchTemplate;
   }
 
+  public ElasticsearchTemplate getElasticsearchTemplate(){
+    return this.elasticsearchTemplate;
+  }
+
+  public boolean indexExist(String indexName){
+    return elasticsearchTemplate.indexExists(indexName);
+  }
+
   public void insert(T obj) {
     IndexQuery indexQuery = new IndexQuery();
     indexQuery.setObject(obj);
