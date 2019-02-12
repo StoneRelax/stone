@@ -15,6 +15,8 @@ public class SqlCondition {
 
   private List<String> operators = new ArrayList<>();
 
+  private String appendSql;
+
   public SqlCondition(Class clazz) {
     this.clazz = clazz;
   }
@@ -53,7 +55,7 @@ public class SqlCondition {
     return this;
   }
 
-  public SqlCondition lsAndeq(String field, Object value) {
+  public SqlCondition lsAndEq(String field, Object value) {
     params.add(value);
     operators.add(field + "<=?");
     return this;
@@ -88,12 +90,20 @@ public class SqlCondition {
     return this;
   }
 
+  public SqlCondition appendSql(String sql) {
+    this.appendSql = sql;
+    return this;
+  }
+
   public SqlQueryMeta build() {
     StringBuilder sb = new StringBuilder();
     operators.forEach(operator -> {
       sb.append(operator);
       sb.append(" ");
     });
+    if (appendSql != null) {
+      sb.append(" ").append(appendSql);
+    }
     return SqlQueryMeta.factory().mappingClazz(clazz)
         .sql(sb.toString()).params(params.toArray(new Object[0])).build();
   }
@@ -104,6 +114,9 @@ public class SqlCondition {
       sb.append(operator);
       sb.append(" ");
     });
+    if (appendSql != null) {
+      sb.append(" ").append(appendSql);
+    }
     return SqlQueryMeta.factory().mappingClazz(clazz)
         .sql(sb.toString()).pageNo(pageNo).pageSize(pageSize)
         .params(params.toArray(new Object[0])).build();
