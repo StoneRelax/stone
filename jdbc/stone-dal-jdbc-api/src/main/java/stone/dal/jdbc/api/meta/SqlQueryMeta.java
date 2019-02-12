@@ -212,6 +212,11 @@ public abstract class SqlQueryMeta {
       return this;
     }
 
+    public Factory pageTotalCountQuerySql(String pageTotalCountQuerySql) {
+      meta.pageTotalCountQuerySql = pageTotalCountQuerySql;
+      return this;
+    }
+
     public SqlQueryMeta build() {
       meta.callbacks = Collections.unmodifiableList(callbacks);
       return meta;

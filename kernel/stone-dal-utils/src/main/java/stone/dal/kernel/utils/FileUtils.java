@@ -80,9 +80,6 @@ public class FileUtils {
         fos.write(content);
         fos.flush();
         fos.close();
-        if (logger.isInfoEnabled()) {
-          logger.info("Write file to " + filePath);
-        }
       } catch (IOException e) {
         LogUtils.error(logger, e);
       }

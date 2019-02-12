@@ -153,7 +153,12 @@ public class StJdbcTemplateImpl implements StJdbcTemplate {
     int pageSize = queryMeta.getPageSize();
     String _sql = replace(sql, "\n", " ");
     String pageQuerySql = dbDialectSpi.getPaginationSql(_sql, pageNo, pageSize);
-    String pageTotalCountQuerySql = dbDialectSpi.getPaginationCtnSql(_sql);
+    String pageTotalCountQuerySql = queryMeta.getPageTotalCountQuerySql();
+    if (StringUtils.isEmpty(pageTotalCountQuerySql)) {
+      pageTotalCountQuerySql = dbDialectSpi.getPaginationCtnSql(_sql);
+    } else {
+      pageTotalCountQuerySql = dbDialectSpi.getPaginationCtnSql(pageTotalCountQuerySql);
+    }
     if (s_logger.isInfoEnabled()) {
       s_logger.info(String.format("Query Sql:%s", pageQuerySql));
       s_logger.info(String.format("Query Params:%s", StringUtils.combineString(queryMeta.getParameters(), ",")));
