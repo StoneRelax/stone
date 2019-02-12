@@ -135,5 +135,8 @@ public class ElasticSearchAdaptor<T> {
   public void removeIndex(String indexName) {
     elasticsearchTemplate.deleteIndex(indexName);
   }
+  public void createIndex(String indexName) {
+    elasticsearchTemplate.createIndex(indexName);
+  }
 
 }
