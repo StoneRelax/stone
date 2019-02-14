@@ -109,6 +109,17 @@ public class DBSync {
     return results;
   }
 
+  public List<String> getDbInitScript() {
+    List<String> lines = new ArrayList<>();
+    String sql = String
+        .format("CREATE DATABASE IF NOT EXISTS %s DEFAULT CHARSET UTF8 COLLATE UTF8_GENERAL_CI", getDbName());
+    lines.add(sql);
+    sql = String
+        .format("USE %s", getDbName());
+    lines.add(sql);
+    return lines;
+  }
+
   public List<String> getDbScript(boolean delta) {
     List<String> lines = new ArrayList<>();
     DBDialectSpi dialectSpi = getDialect(dialectType);
@@ -296,7 +307,7 @@ public class DBSync {
         String dml = "ALTER TABLE " + entity.getMeta().getTableName() + " DROP INDEX " + indexName;
         lines.add(dml);
       }
-      String dml = "create index " + indexName + " on " + entity.getMeta().getTableName() + "("
+      String dml = "CREATE INDEX " + indexName + " ON " + entity.getMeta().getTableName() + "("
           + StringUtils.combineString(index.getColumnNames(), ",") + ")";
       lines.add(dml);
     }

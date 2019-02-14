@@ -714,7 +714,7 @@ public class DoGenerator {
     }
     if ("string".equalsIgnoreCase(typeName)) {
       if (dataFieldMeta.getMaxLength() == 0) {
-        annotation += ", length=100";
+        annotation += ", length=128";
       }
     }
     if (!boolValue(dataFieldMeta.getNullable())) {

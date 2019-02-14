@@ -182,11 +182,19 @@ public class StJdbcTemplateImpl implements StJdbcTemplate {
 
   @Override
   public int exec(SqlBaseMeta meta) {
+    if (s_logger.isInfoEnabled()) {
+      s_logger.info(String.format("Exec Sql:%s", meta.getSql()));
+      s_logger.info(String.format("Exec Params:%s", StringUtils.combineString(meta.getParameters(), ",")));
+      //todo translate
+    }
     return jdbcTemplateSpi.exec(meta);
   }
 
   @Override
   public int exec(String sql) {
+    if (s_logger.isInfoEnabled()) {
+      s_logger.info(String.format("Exec Sql:%s", sql));
+    }
     return jdbcTemplateSpi.exec(SqlBaseMeta.factory().sql(sql).build());
   }
 
@@ -232,7 +240,6 @@ public class StJdbcTemplateImpl implements StJdbcTemplate {
   @Override
   @SuppressWarnings("unchecked")
   public <T> List<T> queryClobKey(SqlQueryMeta queryMeta) {
-    List<T> res = jdbcTemplateSpi.query(queryMeta, this.rowMapper);
-    return res;
+    return (List<T>) jdbcTemplateSpi.query(queryMeta, this.rowMapper);
   }
 }
