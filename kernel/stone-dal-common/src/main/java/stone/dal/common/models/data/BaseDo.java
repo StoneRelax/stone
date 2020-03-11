@@ -3,13 +3,16 @@ package stone.dal.common.models.data;
 import java.util.HashSet;
 import java.util.Set;
 import org.springframework.util.ClassUtils;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
  * @author fengxie
  */
 public class BaseDo {
 
+	@Schema(hidden = true)
   private States _state;
+	@Schema(hidden = true)
 	private Set<String> _changes = new HashSet<>();
 
   private transient boolean _attached;
