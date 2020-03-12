@@ -42,7 +42,7 @@
             <artifactId>stone-dal-utils</artifactId>
         </dependency>
         <dependency>
-            <groupId>io.swagger.core.v3</groupId>
+            <groupId>io.swagger</groupId>
             <artifactId>swagger-annotations</artifactId>
         </dependency>
     </dependencies>
