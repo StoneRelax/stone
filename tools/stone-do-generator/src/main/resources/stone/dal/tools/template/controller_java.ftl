@@ -22,7 +22,7 @@ public class ${className} {
 
     @RequestMapping(value="/{id}",method=RequestMethod.GET)
     @Operation(method="GET",description="Query ${doName}")
-    public @ResponseBody ${doName} findByPk(@Parameter(description = "id") @PathVariable("id") ${pkType} id){
+    public @ResponseBody ${doName} findByPk(@ApiParam(description = "id") @PathVariable("id") ${pkType} id){
       return repository.findByPk(id);
     }
 
@@ -49,7 +49,7 @@ public class ${className} {
     @Transactional
     @RequestMapping(value="/{id}",method=RequestMethod.DELETE)
     @Operation(method="DELETE",description="Delete ${doName}")
-    public void delete(@Parameter(description = "id") @PathVariable("id") ${pkType} id){
+    public void delete(@ApiParam(description = "id") @PathVariable("id") ${pkType} id){
       repository.delByPk(id);
     }
 
