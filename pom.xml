@@ -35,7 +35,7 @@
         <ehcache.version>2.9.0</ehcache.version>
         <guava.version>20.0</guava.version>
         <javax.persistence.version>1.0</javax.persistence.version>
-        <mysql.connector.java.version>8.0.13</mysql.connector.java.version>
+        <mysql.connector.java.version>8.0.16</mysql.connector.java.version>
         <commons.dbcp2.version>2.1.1</commons.dbcp2.version>
         <kafka.version>1.1.0.RELEASE</kafka.version>
         <jersey.test.version>2.25.1</jersey.test.version>
