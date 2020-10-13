@@ -47,7 +47,7 @@
         <mysql.jdbc.version>8.0.13</mysql.jdbc.version>
         <poi.version>3.17</poi.version>
         <freemaker.version>2.3.20</freemaker.version>
-        <junit.version>4.12</junit.version>
+        <junit.version>4.13.1</junit.version>
         <spring.data.commons.version>1.13.18.RELEASE</spring.data.commons.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <java.version>1.8</java.version>
