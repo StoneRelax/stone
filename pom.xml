@@ -14,7 +14,7 @@
         <logback.version>1.2.3</logback.version>
         <aspectj.version>1.8.4</aspectj.version>
         <spring.version>4.3.13.RELEASE</spring.version>
-        <spring.boot.version>1.5.9.RELEASE</spring.boot.version>
+        <spring.boot.version>2.5.12</spring.boot.version>
         <common.lang.version>2.6</common.lang.version>
         <asm.version>4.2</asm.version>
         <common.collection.version>3.2.2</common.collection.version>
