@@ -51,7 +51,7 @@
         <spring.data.commons.version>1.13.18.RELEASE</spring.data.commons.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <java.version>1.8</java.version>
-        <jolokia.core.version>1.3.6</jolokia.core.version>
+        <jolokia.core.version>1.6.1</jolokia.core.version>
     </properties>
 
     <parent>
