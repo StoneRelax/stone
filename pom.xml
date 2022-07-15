@@ -23,7 +23,7 @@
         <spring.session.version>1.0.2.RELEASE</spring.session.version>
         <jackson.annotations.version>2.8.4</jackson.annotations.version>
         <jackson.core.version>2.8.4</jackson.core.version>
-        <jackson.databind.version>2.8.4</jackson.databind.version>
+        <jackson.databind.version>2.12.6.1</jackson.databind.version>
         <swagger.version>1.5.21</swagger.version>
         <classmate.version>1.3.1</classmate.version>
         <jboss.logging.version>3.3.0.Final</jboss.logging.version>
