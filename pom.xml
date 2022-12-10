@@ -13,7 +13,7 @@
         <oro.version>2.0.8</oro.version>
         <logback.version>1.2.3</logback.version>
         <aspectj.version>1.8.4</aspectj.version>
-        <spring.version>4.3.13.RELEASE</spring.version>
+        <spring.version>6.0.0</spring.version>
         <spring.boot.version>1.5.9.RELEASE</spring.boot.version>
         <common.lang.version>2.6</common.lang.version>
         <asm.version>4.2</asm.version>
